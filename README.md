@@ -19,15 +19,15 @@ så kører den.
 Elevens fremskridt gemmes i browserens lokale lager (`localStorage`) på den
 enkelte computer.
 
-## Læg den online med GitHub Pages
+## Online med GitHub Pages
 
-1. Gå til **Settings → Pages** i dette repository.
-2. Under **Build and deployment** vælg **Source: Deploy from a branch**.
-3. Vælg den branch der indeholder `index.html` og mappen **/ (root)**, og
-   tryk **Save**.
+Siden ligger på
+<https://madschristianw-bot.github.io/Kemi-l-ringsunivers/>.
 
-Efter et minut eller to ligger siden på
-`https://madschristianw-bot.github.io/Kemi-l-ringsunivers/`.
+Workflowet [`.github/workflows/pages.yml`](.github/workflows/pages.yml)
+udgiver siden, hver gang der pushes. Det kræver, at **Settings → Pages →
+Source** står på **GitHub Actions**. Under fanen **Actions** kan du se, om
+udgivelsen lykkedes.
 
 GitHub Pages på et privat repository kræver GitHub Pro (eller et Team- eller
 Enterprise-abonnement). Med en gratis konto skal repositoriet være offentligt.
@@ -35,4 +35,4 @@ Enterprise-abonnement). Med en gratis konto skal repositoriet være offentligt.
 ## Opdater læringsuniverset
 
 Erstat `index.html` med den nye version, og commit og push ændringen.
-GitHub Pages udgiver automatisk den nye version.
+Workflowet udgiver automatisk den nye version efter et minut eller to.
