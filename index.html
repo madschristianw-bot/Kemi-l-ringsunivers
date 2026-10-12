@@ -48,6 +48,12 @@
   /* Atom stage */
   .stage{position:relative;width:100%;aspect-ratio:1/1;max-height:420px;margin:0 auto;display:block}
   .badge{position:absolute;top:10px;left:12px;font-size:12px;color:var(--muted)}
+  /* ustabil kerne: den ryster, og en rød ring pulserer om den */
+  .stage .kerne.ustabil{animation:kerne-ryst .35s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+  .stage .kerne-ring{fill:none;stroke:var(--proton);stroke-width:2;stroke-dasharray:4 5;animation:kerne-puls 1.6s ease-in-out infinite}
+  @keyframes kerne-ryst{0%,100%{transform:translate(0,0)}25%{transform:translate(-1.2px,.8px)}50%{transform:translate(1px,-1px)}75%{transform:translate(-.6px,-.8px)}}
+  @keyframes kerne-puls{0%,100%{opacity:.35}50%{opacity:.9}}
+  @media (prefers-reduced-motion: reduce){.stage .kerne.ustabil,.stage .kerne-ring{animation:none}}
   .badge b{color:var(--ink)}
 
   /* particle bins */
@@ -84,9 +90,9 @@
   .verdict{margin-top:12px;padding:12px 14px;border-radius:11px;font-size:14px;border:1px solid}
   .verdict.neutral{background:rgba(63,169,245,.08);border-color:rgba(63,169,245,.35)}
   .verdict.ion{background:rgba(241,199,94,.08);border-color:rgba(241,199,94,.4)}
-  .verdict.ion.ok{background:rgba(90,209,154,.1);border-color:rgba(90,209,154,.5)}
-  .verdict.ion.bad{background:rgba(232,83,63,.1);border-color:rgba(232,83,63,.5)}
-  .verdict.ion.warn{background:rgba(241,199,94,.1);border-color:rgba(241,199,94,.45)}
+  .verdict.ion.ok,.verdict.kerne.ok{background:rgba(90,209,154,.1);border-color:rgba(90,209,154,.5)}
+  .verdict.ion.bad,.verdict.kerne.bad{background:rgba(232,83,63,.1);border-color:rgba(232,83,63,.5)}
+  .verdict.ion.warn,.verdict.kerne.warn{background:rgba(241,199,94,.1);border-color:rgba(241,199,94,.45)}
   .verdict.noble{background:rgba(123,224,196,.1);border-color:rgba(123,224,196,.45)}
   .verdict b{color:var(--ink)}
   .verdict .tag{display:inline-block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
@@ -2619,7 +2625,7 @@
 
   <!-- ===================== BYG-FANE ===================== -->
   <section id="view-build" style="display:none">
-  <p class="sub">Tilføj <b style="color:var(--proton)">protoner</b>, <b style="color:var(--neutron)">neutroner</b> og <b style="color:var(--electron)">elektroner</b>, og se hvilket grundstof du danner. Værktøjet bruger begreberne fra kompendiet: skaller, atom-nummer, atom-masse, ioner og ædelgas-reglen. Klik på et felt i det periodiske system for at starte fra et bestemt grundstof.</p>
+  <p class="sub">Tilføj <b style="color:var(--proton)">protoner</b>, <b style="color:var(--neutron)">neutroner</b> og <b style="color:var(--electron)">elektroner</b>, og se hvilket grundstof du danner, og om kernen er stabil. Værktøjet bruger begreberne fra kompendiet: skaller, atom-nummer, atom-masse, ioner og ædelgas-reglen. Klik på et felt i det periodiske system for at starte fra et bestemt grundstof.</p>
 
   <div class="grid">
     <!-- LEFT: atom + controls -->
@@ -2690,7 +2696,7 @@
           Begynd ved at tilføje en proton — så har du brint (H).
         </div>
 
-        <div class="hint" id="isoHint"></div>
+        <div class="verdict kerne" id="isoDom" hidden></div>
       </div>
 
       <div class="card" style="margin-top:18px">
@@ -4685,6 +4691,59 @@ const MEST_ALM_A = {17:35,28:58,29:63,30:64,31:69,32:74,34:80,35:79,37:85,40:90,
   70:174,72:180,75:187,76:192,77:193,80:202,81:205,82:208};
 const A_typ = z => MEST_ALM_A[z] || Math.round(byZ(z)[3]);
 
+/* Massetal for de isotoper, der findes i naturen og er stabile — eller henfalder så langsomt,
+   at de i praksis er det (fx tellur-130 og bismut-209). Technetium (43), promethium (61) og
+   alle grundstoffer fra polonium (84) og op har ingen stabile isotoper. */
+const STABILE_A = {
+ 1:[1,2], 2:[3,4], 3:[6,7], 4:[9], 5:[10,11], 6:[12,13], 7:[14,15], 8:[16,17,18], 9:[19],
+ 10:[20,21,22], 11:[23], 12:[24,25,26], 13:[27], 14:[28,29,30], 15:[31], 16:[32,33,34,36],
+ 17:[35,37], 18:[36,38,40], 19:[39,41], 20:[40,42,43,44,46,48], 21:[45], 22:[46,47,48,49,50],
+ 23:[50,51], 24:[50,52,53,54], 25:[55], 26:[54,56,57,58], 27:[59], 28:[58,60,61,62,64],
+ 29:[63,65], 30:[64,66,67,68,70], 31:[69,71], 32:[70,72,73,74,76], 33:[75],
+ 34:[74,76,77,78,80,82], 35:[79,81], 36:[78,80,82,83,84,86], 37:[85,87], 38:[84,86,87,88],
+ 39:[89], 40:[90,91,92,94,96], 41:[93], 42:[92,94,95,96,97,98,100],
+ 44:[96,98,99,100,101,102,104], 45:[103], 46:[102,104,105,106,108,110], 47:[107,109],
+ 48:[106,108,110,111,112,113,114,116], 49:[113,115],
+ 50:[112,114,115,116,117,118,119,120,122,124], 51:[121,123],
+ 52:[120,122,123,124,125,126,128,130], 53:[127], 54:[124,126,128,129,130,131,132,134,136],
+ 55:[133], 56:[130,132,134,135,136,137,138], 57:[138,139], 58:[136,138,140,142], 59:[141],
+ 60:[142,143,144,145,146,148,150], 62:[144,147,148,149,150,152,154], 63:[151,153],
+ 64:[152,154,155,156,157,158,160], 65:[159], 66:[156,158,160,161,162,163,164], 67:[165],
+ 68:[162,164,166,167,168,170], 69:[169], 70:[168,170,171,172,173,174,176], 71:[175,176],
+ 72:[174,176,177,178,179,180], 73:[180,181], 74:[180,182,183,184,186], 75:[185,187],
+ 76:[184,186,187,188,189,190,192], 77:[191,193], 78:[190,192,194,195,196,198], 79:[197],
+ 80:[196,198,199,200,201,202,204], 81:[203,205], 82:[204,206,207,208], 83:[209]
+};
+
+/* Ekstra viden om kendte isotoper, nøglet "Z-A". */
+const ISOTOP_NOTE = {
+ '1-1':  'Almindelig brint er det eneste atom helt uden neutroner — kernen er bare én proton.',
+ '1-2':  'Den kaldes <b>deuterium</b> eller tungt brint. Cirka 1 ud af 6.400 brintatomer er deuterium.',
+ '1-3':  'Den kaldes <b>tritium</b> og har en halveringstid på cirka 12 år.',
+ '6-13': 'Cirka 1 % af alt carbon er carbon-13.',
+ '6-14': 'Halveringstiden er cirka 5.700 år, og den bruges til <b>kulstof-14-datering</b> af gamle fund.',
+ '17-35':'Klors atommasse er 35,5 u, fordi naturligt klor er en blanding: cirka 76 % klor-35 og 24 % klor-37.',
+ '17-37':'Cirka 24 % af alt klor er klor-37. Blandingen med klor-35 er grunden til, at klors atommasse er 35,5 u.',
+ '19-40':'Den findes alligevel i naturen, fordi den henfalder meget langsomt (halveringstid 1,3 mia. år). Cirka 0,01 % af alt kalium er kalium-40 — også det i din krop.',
+ '27-60':'Halveringstiden er cirka 5 år. Den bruges til strålebehandling og til at sterilisere udstyr.',
+ '38-90':'Den dannes i atomreaktorer og ved atombomber og har en halveringstid på cirka 29 år.',
+ '53-131':'Halveringstiden er 8 dage. Den bruges i medicin og blev spredt ved Tjernobyl-ulykken.',
+ '55-137':'Halveringstiden er cirka 30 år. Den er en af de vigtigste kilder til stråling efter Tjernobyl-ulykken.',
+ '86-222':'Radon er en radioaktiv gas, der siver op fra undergrunden og kan samle sig i kældre. Halveringstiden er cirka 4 dage.',
+ '90-232':'Næsten alt thorium i naturen er thorium-232. Halveringstiden er 14 mia. år.',
+ '92-235':'Den udgør kun cirka 0,7 % af naturligt uran, men det er den isotop, der kan spaltes i et atomkraftværk.',
+ '92-238':'Over 99 % af naturligt uran er uran-238. Den henfalder meget langsomt (halveringstid 4,5 mia. år).',
+ '94-239':'Den bruges som brændsel i atomkraft og i atomvåben. Halveringstiden er cirka 24.000 år.'
+};
+
+/* Hvordan passer antallet af neutroner til grundstoffet?
+   typisk: den mest almindelige isotop · stabil: findes stabilt i naturen · ellers radioaktiv. */
+function isotopInfo(Z, N){
+  const A = Z + N, At = A_typ(Z);
+  const stabile = STABILE_A[Z] || [];
+  return {A, At, Nt: At - Z, stabile, typisk: A===At, stabil: stabile.includes(A)};
+}
+
 /* Elektronegativitet (Pauling) — som i kompendiets periodiske system.
    Ædelgasser har ingen værdi (indgår ikke i bindinger). */
 const ENEG = {
@@ -4801,6 +4860,13 @@ function drawAtom(){
   for(let i=0;i<nuc.length;i++){ mixed.push(i%2===0 && pi<state.p ? (pi++,'p') : (ni<state.n?(ni++,'n'):(pi++,'p'))); }
   const total = state.p+state.n;
   const nr = total<=1?9: 8 + Math.min(20, Math.sqrt(total)*4);
+  // en radioaktiv kerne ryster og får en rød ring; isotopens navn står i hjørnet
+  const iso = state.p ? isotopInfo(state.p, state.n) : null;
+  const ustabil = iso && !iso.stabil;
+  if(ustabil){
+    html += `<circle class="kerne-ring" cx="${cx}" cy="${cy}" r="${(nr*0.9 + 15).toFixed(1)}"/>`;
+  }
+  html += `<g class="kerne${ustabil?' ustabil':''}">`;
   mixed.forEach((t,i)=>{
     let nx=cx, ny=cy;
     if(total>1){
@@ -4812,6 +4878,13 @@ function drawAtom(){
     const fill = t==='p' ? 'url(#gP)' : 'url(#gN)';
     html += `<circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="8" fill="${fill}" stroke="#0d1b2a" stroke-width="0.8"/>`;
   });
+  html += `</g>`;
+  if(iso){
+    const [tekst, farve] = !iso.stabil ? ['radioaktiv', '#e8533f']
+                         : iso.typisk ? ['mest almindelig', '#5ad19a'] : ['anden isotop', '#f1c75e'];
+    html += `<text x="14" y="28" fill="#eaf2ff" font-size="17" font-weight="600" font-family="sans-serif">${byZ(state.p)[1]}-${iso.A}</text>`
+          + `<text x="14" y="46" fill="${farve}" font-size="12" font-family="sans-serif">${tekst}</text>`;
+  }
 
   const defs = `<defs>
     <radialGradient id="gP" cx="35%" cy="30%"><stop offset="0" stop-color="#ff8a76"/><stop offset="1" stop-color="#e8533f"/></radialGradient>
@@ -4875,7 +4948,7 @@ function render(){
   const elName = document.getElementById('elName');
   const elLine = document.getElementById('elLine');
   const verdict = document.getElementById('verdict');
-  const isoHint = document.getElementById('isoHint');
+  const isoDom = document.getElementById('isoDom');
 
   if(Z===0){
     symEl.firstChild.textContent='?';
@@ -4884,7 +4957,7 @@ function render(){
     elLine.textContent='Tilføj en proton for at danne brint (H)';
     verdict.className='verdict neutral';
     verdict.innerHTML='Atom-nummeret bestemmes af <b>antallet af protoner</b>. Tilføj én for at starte.';
-    isoHint.textContent='';
+    isoDom.hidden = true;
     drawAtom(); return;
   }
 
@@ -4973,15 +5046,70 @@ function render(){
     verdict.innerHTML = `<span class="tag neutral">Neutralt atom</span> Lige mange protoner og elektroner. Yderste skal har <b>${outer} e⁻</b> — mangler <b>${mangler}</b> i at nå ${maal===2?'heliums fyldte skal på 2':'oktet'}, så atomet vil gerne binde sig (valens ≈ ${Math.min(mangler, outer)}).`;
   }
 
-  // isotop-hint
-  const typiskN = A_typ(Z) - Z;
-  if(state.n !== typiskN && Q===0){
-    isoHint.innerHTML = `Mest udbredt isotop har <b>${typiskN}</b> neutroner (massetal ${A_typ(Z)}). Du har bygget en isotop med ${state.n}.`;
-  } else {
-    isoHint.textContent='';
-  }
+  // passer neutronerne? — kernen vurderes for sig, uanset ladningen
+  const dom = isotopDom(Z, el);
+  isoDom.className = 'verdict kerne ' + dom.cls;
+  isoDom.innerHTML = dom.msg;
+  isoDom.hidden = false;
 
   drawAtom();
+}
+
+/* Vurdering af kernen: er det den mest almindelige isotop, en anden stabil isotop,
+   eller en radioaktiv kerne med for mange eller for få neutroner? */
+function isotopDom(Z, el){
+  const N = state.n;
+  const {A, At, Nt, stabile, typisk, stabil} = isotopInfo(Z, N);
+  const stof = el[2].toLowerCase();                 // grundstofnavn inde i en sætning
+  const navn = a => `${stof}-${a}`;
+  const neutr = k => k===0 ? 'ingen neutroner' : k===1 ? 'én neutron' : `${k} neutroner`;
+  const og = liste => liste.length<2 ? liste.join('') : liste.slice(0,-1).join(', ') + ' og ' + liste[liste.length-1];
+  const note = ISOTOP_NOTE[Z+'-'+A] ? ' ' + ISOTOP_NOTE[Z+'-'+A] : '';
+  const overskrift = `<b>${el[2]}-${A}</b> (<sup>${A}</sup>${el[1]}) har ${neutr(N)} i kernen.`;
+  const k = Math.abs(N - Nt);
+  const forskel = N > Nt ? (k===1 ? 'én neutron for meget' : `${k} neutroner for mange`)
+                         : (k===1 ? 'én neutron for lidt' : `${k} neutroner for få`);
+  const medNt = Nt===0 ? 'uden neutroner' : `med ${neutr(Nt)}`;
+  const sammenlign = stabile.length
+    ? ` Den mest almindelige er <b>${navn(At)}</b> ${medNt} — du har ${forskel}.`
+    : ` En af de mest langlivede er <b>${navn(At)}</b> ${medNt} — du har ${forskel}.`;
+
+  if(!stabile.length){
+    // technetium, promethium og alt fra polonium og op
+    const kunstig = Z>=93 ? ` ${el[2]} er et kunstigt grundstof, der fremstilles i laboratorier og atomreaktorer.` : '';
+    if(typisk) return {cls:'warn', msg:
+      `<span class="tag warn">Radioaktivt grundstof</span> ${overskrift} Det er en af de mest langlivede isotoper, men <b>alle</b> isotoper af ${stof} er radioaktive.${kunstig}${note}`};
+    return {cls:'bad', msg:
+      `<span class="tag bad">Radioaktiv isotop</span> ${overskrift} <b>Alle</b> isotoper af ${stof} er radioaktive.${kunstig}${note}${sammenlign}`};
+  }
+
+  if(typisk){
+    const andre = stabile.filter(a => a!==A);
+    const resten = !andre.length ? ` ${el[2]} har kun denne ene stabile isotop.`
+                 : andre.length<=3 ? ` ${el[2]} findes også stabilt som ${og(andre.map(navn))}.`
+                 : ` ${el[2]} har i alt ${stabile.length} stabile isotoper.`;
+    return {cls:'ok', msg:
+      `<span class="tag ok">Mest almindelige isotop ✓</span> ${overskrift} Det er den isotop af ${stof}, der er mest af i naturen.${resten}${note}`};
+  }
+
+  if(stabil) return {cls:'warn', msg:
+    `<span class="tag warn">Anden isotop</span> ${overskrift} Det er en <b>stabil</b> isotop, der findes i naturen, men det er ikke den mest almindelige.${note}${sammenlign}`};
+
+  // radioaktiv: hvorfor holder kernen ikke?
+  let hvorfor;
+  if(note){
+    hvorfor = note;
+  } else if(N===0){
+    hvorfor = ` Uden neutroner kan kernen ikke hænge sammen. Neutronerne virker som lim mellem protonerne, der ellers frastøder hinanden, fordi de alle er positive.`;
+  } else if(A > stabile[stabile.length-1]){
+    hvorfor = ` Kernen har <b>for mange neutroner</b> til at være stabil. Den henfalder ved, at en neutron omdannes til en proton.`;
+  } else if(A < stabile[0]){
+    hvorfor = ` Kernen har <b>for få neutroner</b> til at være stabil. Neutronerne virker som lim mellem protonerne, der ellers frastøder hinanden — med for få bliver kernen ustabil og henfalder.`;
+  } else {
+    hvorfor = ` Antallet af neutroner ligger mellem to stabile isotoper, men netop denne kombination er ustabil, så kernen henfalder.`;
+  }
+  return {cls:'bad', msg:
+    `<span class="tag bad">Ustabil kerne ✗</span> ${overskrift} Det er en <b>radioaktiv</b> isotop.${hvorfor}${sammenlign}`};
 }
 
 /* ---------- Periodisk system layout ---------- */
