@@ -2670,6 +2670,14 @@
           <button class="btn primary" onclick="fillNeutral()">Gør neutralt</button>
         </div>
       </div>
+
+      <div class="card" style="margin-top:18px">
+        <h2><span class="opg-mrk" id="opgmrk-atom">OPGAVER</span>Byg-opgaver</h2>
+        <p class="sub" style="margin:0 0 14px">Fjorten opgaver fra brint til radioaktivt henfald: byg atomer, isotoper
+          og ioner, og find ud af, hvad protonerne, neutronerne og elektronerne hver især bestemmer.</p>
+        <div class="mb-tasks" id="atTasks"></div>
+        <div class="mb-taskbox" id="atTaskBox">Vælg en opgave — så tjekker jeg løbende, om det du bygger passer.</div>
+      </div>
     </div>
 
     <!-- RIGHT: readout -->
@@ -4958,6 +4966,7 @@ function render(){
     verdict.className='verdict neutral';
     verdict.innerHTML='Atom-nummeret bestemmes af <b>antallet af protoner</b>. Tilføj én for at starte.';
     isoDom.hidden = true;
+    atCheckTask();
     drawAtom(); return;
   }
 
@@ -5053,6 +5062,7 @@ function render(){
   isoDom.hidden = false;
 
   drawAtom();
+  atCheckTask();   // passer det, eleven har bygget, til den valgte byg-opgave?
 }
 
 /* Vurdering af kernen: er det den mest almindelige isotop, en anden stabil isotop,
@@ -5110,6 +5120,187 @@ function isotopDom(Z, el){
   }
   return {cls:'bad', msg:
     `<span class="tag bad">Ustabil kerne ✗</span> ${overskrift} Det er en <b>radioaktiv</b> isotop.${hvorfor}${sammenlign}`};
+}
+
+/* ---------- Byg-opgaver ----------
+   Fjorten opgaver i rækkefølge: atomer og isotoper, så ædelgas-reglen, og til sidst ioner og
+   et henfald. En opgave med p/n/e skal bygges præcis; en opgave med ok() er en regel, som flere
+   atomer kan opfylde. vis er målet, som det må stå i opgaveboksen — mangler det, skal eleven selv
+   regne ud, hvad der skal bygges, og nud() giver i stedet et skub. mis() fanger de typiske fejl.
+   Det hele skal stå før det første render() nedenfor, for render() kalder atCheckTask(). */
+const AT_KTIP = 'men kernen holder ikke. Klik på grundstoffet i det periodiske system for at få en kerne, der holder.';
+const AT_ION  = 'Det er en ion — byg et <b>neutralt</b> atom.';
+const atYdre  = s => { const f = shellFill(s.e, s.p); return f.length ? f[f.length-1] : 0; };
+const atKerne = s => { const i = isotopInfo(s.p, s.n); return i.stabil || i.typisk; };   // en kerne, der findes
+const atStof  = s => byZ(s.p)[2].toLowerCase();
+
+const AT_TASKS = [
+  {id:"a1", lbl:"Brint (H)", p:1, n:0, e:1, vis:"brint-1",
+   opg:"Byg et neutralt brintatom — det letteste og enkleste atom, der findes. Brint sidder i propan (R290), ammoniak (R717) og vand (R718).",
+   hint:"Brint har atomnummer 1, og atomnummeret er antallet af protoner. Neutralt betyder lige så mange elektroner som protoner, og almindelig brint har ingen neutroner.",
+   loest:"Én <b>proton</b> gør atomet til brint — det er protonerne, der bestemmer grundstoffet — og én elektron gør det <b>neutralt</b>. Med 1 e⁻ mangler brint kun 1 i at fylde sin skal på 2, og derfor laver brint netop <b>én binding</b> i Byg molekyler."},
+  {id:"a2", lbl:"Helium (R704)", p:2, n:2, e:2, vis:"helium-4",
+   opg:"Byg et neutralt helium-4-atom. Helium har R-nummeret R704 og bruges som sporgas, når du leder efter utætheder.",
+   hint:"Helium har atomnummer 2. Massetallet 4 er protoner og neutroner lagt sammen.",
+   loest:"2 protoner + 2 neutroner giver <b>massetal 4</b> — elektronerne tæller ikke med, for de vejer næsten ingenting. Det passer med 4-tallet i <b>R704</b>: i 700-serien er de to sidste cifre molmassen i g/mol, afrundet — og helium består af enkelte atomer."},
+  {id:"a3", lbl:"Carbon-12", p:6, n:6, e:6, vis:"carbon-12",
+   opg:"Byg et neutralt carbon-12-atom. Carbon er rygraden i propan (R290) og i alle HFC-kølemidler.",
+   hint:"Carbon har atomnummer 6. Se bagefter på feltet <b>Yderste skal</b>: hvor mange elektroner ender der?",
+   loest:"De 6 elektroner fordeler sig <b>2-4</b>: den inderste skal har kun plads til 2, og resten kommer i den næste. Med 4 i yderste skal mangler carbon 4 i en oktet — derfor har carbon <b>valens 4</b> og kan binde 4 naboer i Byg molekyler."},
+  {id:"a4", lbl:"Fluor-19", p:9, n:10, e:9, vis:"fluor-19",
+   opg:"Byg et neutralt fluor-19-atom. Fluor er F'et i F-gasser som R32 og R134a.",
+   hint:"Neutroner = massetal − atomnummer. Denne gang er der ikke lige mange protoner og neutroner.",
+   loest:"Fluor har 9 protoner og 19 − 9 = <b>10 neutroner</b> — protoner og neutroner er ikke altid lige mange. Fluor-19 er fluors <b>eneste stabile isotop</b>, så alt fluor i dine F-gasser har netop 10 neutroner."},
+  {id:"a5", lbl:"Klor-37", p:17, n:20, e:17, vis:"klor-37",
+   opg:"Byg et neutralt klor-37-atom, den tunge klor-isotop. Klor er det atom i R22 og R12, der nedbryder ozon.",
+   hint:"Klik på Cl — så har du klor-35. Massetallet skal 2 op, men protonerne må ikke ændres. Undervejs passerer du klor-36, som er radioaktiv.",
+   loest:"Klor-37 har 17 protoner som al anden klor, men <b>20 neutroner</b>: en anden, stabil <b>isotop</b> af samme grundstof. Naturligt klor er cirka 76 % klor-35 og 24 % klor-37 — derfor står der <b>35,5 u</b> i det periodiske system, selv om intet kloratom vejer 35,5."},
+  {id:"a6", lbl:"Carbon-14", p:6, n:8, e:6, vis:"carbon-14",
+   opg:"Byg et neutralt carbon-14-atom — det radioaktive carbon, man daterer gamle fund med.",
+   hint:"Klik på C, så har du carbon-12. Hvilken partikel kan du lægge til, så massetallet stiger, uden at atomet holder op med at være carbon?",
+   loest:"Stadig carbon og stadig neutralt — <b>neutroner</b> ændrer hverken grundstof eller ladning, kun massetallet. Carbon-12 og carbon-13 er stabile, men med 8 neutroner holder kernen ikke: carbon-14 er <b>radioaktiv</b> og har en halveringstid på cirka 5.700 år.",
+   mis:s => s.p!==6 && s.p+s.n===14
+     ? `Nu står der ${atStof(s)}: massetallet er 14, men du har ændret protonerne — så er det ikke carbon længere. Det er neutronerne, der skal op.` : ''},
+  {id:"a7", lbl:"8 i yderste skal",
+   ok:s => s.p>0 && s.e===s.p && atYdre(s)===8 && atKerne(s),
+   opg:"Byg et neutralt atom, der har 8 elektroner i den yderste skal.",
+   hint:"8 elektroner i alt er ikke det samme som 8 i den yderste skal. Hold øje med feltet <b>Yderste skal</b>.",
+   loest:"Med 8 elektroner yderst har du bygget en <b>ædelgas</b>: oktetten er fuld, så atomet er <b>kemisk stabilt</b> og binder sig næsten aldrig — derfor bruges argon som dækgas ved svejsning. Oxygen har også 8 elektroner, men fordelt <b>2-6</b>, så oxygen binder sig gerne.",
+   nud:s => s.e!==s.p ? AT_ION
+     : atYdre(s)===8 ? 'Yderste skal har 8 ✓ — ' + AT_KTIP
+     : s.p===2 ? 'Helium har fuld skal, men kun 2 elektroner.'
+     : s.e===8 ? `Der er 8 elektroner i alt, men kun ${atYdre(s)} i yderste skal.`
+     : `Yderste skal har ${atYdre(s)} e⁻ — der skal være 8.`},
+  {id:"a8", lbl:"Som fluor (7 yderst)",
+   ok:s => s.p>0 && s.p!==9 && s.e===s.p && atYdre(s)===7 && atKerne(s),
+   opg:"Byg et andet neutralt atom, der har lige så mange elektroner i yderste skal som fluor.",
+   hint:"Fluor har 7 elektroner i yderste skal. Grundstofferne i samme lodrette søjle i det periodiske system har lige så mange.",
+   loest:"Grundstoffer i samme <b>hovedgruppe</b> har lige mange elektroner i yderste skal og minder derfor om hinanden kemisk — her <b>halogenerne</b>, der alle mangler én elektron. Det er klor fra CFC og HCFC og brom fra de gamle haloner, der nedbryder ozonlaget.",
+   nud:s => s.p===9 ? 'Det er fluor selv — find et <b>andet</b> grundstof.'
+     : s.e!==s.p ? AT_ION
+     : atYdre(s)===7 ? 'Yderste skal har 7 ✓ — ' + AT_KTIP
+     : `Yderste skal har ${atYdre(s)} e⁻ — fluor har 7.`},
+  {id:"a9", lbl:"Na⁺ (brine)", p:11, n:12, e:10, vis:"Na⁺",
+   opg:"Byg natrium-ionen Na⁺ — den positive ion i saltlage (brine) af køkkensalt, NaCl.",
+   hint:"Klik på Na, og tag elektroner væk, til ladningen er +1. Protonerne må du ikke røre — de bestemmer grundstoffet.",
+   loest:"Natrium står i hovedgruppe 1 og <b>afgiver</b> sin ene yderste elektron: 11 protoner og 10 elektroner giver ladningen +1 og skallerne <b>2-8</b> ligesom neon. Massetallet er stadig 23, for elektronen vejer næsten ingenting.",
+   mis:s => s.p===10 ? 'Nu står der neon — du har fjernet en proton. En ion får eller mister kun elektroner.' : ''},
+  /* både klor-35 og klor-37 giver en kloridion — p og e er målet, kernen tjekkes for sig */
+  {id:"a10", lbl:"Cl⁻ (brine)", p:17, e:18, vis:"Cl⁻",
+   ok:s => s.p===17 && s.e===18 && isotopInfo(s.p, s.n).stabil,
+   opg:"Byg kloridionen Cl⁻ — den negative ion i både NaCl- og CaCl₂-brine.",
+   hint:"Klik på Cl. Elektronen er den negative partikel, så minus betyder én elektron <b>ekstra</b> — ikke én mindre.",
+   loest:"Klor står i hovedgruppe 7 og <b>optager</b> 1 elektron: 17 protoner og 18 elektroner giver ladningen −1 og argons fordeling <b>2-8-8</b>. Det er kloridionerne, der gør brine korrosiv — de bryder det tynde, beskyttende oxidlag på fx aluminium og rustfrit stål.",
+   mis:s => s.p===17 && s.e===16 ? 'Ladningen er +1 — du har fjernet en elektron. Minus betyder én elektron <b>ekstra</b>.'
+     : s.p===18 ? 'Nu står der argon — du har lagt en proton til i stedet for en elektron.' : '',
+   kerne:s => isotopInfo(s.p, s.n).stabil ? ''
+     : `Grundstoffet passer, men klor-${s.p+s.n} er radioaktiv — ændr neutronerne. Klor-35 og klor-37 er begge stabile.`},
+  {id:"a11", lbl:"H⁺ (syre)", p:1, n:0, e:0, vis:"H⁺",
+   opg:"Byg brintionen H⁺ — den ion, alle syrer afgiver. Efter en burnout kan der dannes syre i anlægget.",
+   hint:"Byg et almindeligt brintatom, og tag så elektronen væk. Ja, 0 elektroner er tilladt.",
+   loest:"Uden sin eneste elektron er brint bare <b>én bar proton</b> med ladningen +1 — og det er netop den, en syre afgiver. Derfor syretester man olien efter en burnout: ellers æder syreresterne den nye kompressor op."},
+  {id:"a12", lbl:"Al-ion (lameller)", p:13, n:14, e:10,
+   opg:"Når aluminiumslamellerne på en fordamper tæres, bliver aluminium til ioner. Byg den ion, aluminium danner.",
+   hint:"Aluminium har 3 elektroner i yderste skal. Er det lettere at komme af med 3 eller at få 5 til?",
+   loest:"Aluminium <b>afgiver</b> alle 3 yderste elektroner og bliver til <b>Al³⁺</b>: 13 protoner og 10 elektroner giver ladningen +3. Hele den yderste skal forsvinder, så <b>2-8</b> står tilbage ligesom i neon.",
+   nud:s => s.p!==13 ? 'Det er ikke aluminium — protonerne bestemmer grundstoffet.'
+     : s.n!==14 ? 'Aluminium passer — men kernen holder ikke. Klik på Al i det periodiske system.'
+     : s.e===s.p ? 'Det er et neutralt atom — aluminium skal være en ion.'
+     : s.e>s.p ? 'Du har lagt elektroner til. Er det lettere at få 5 til eller at komme af med 3?'
+     : s.p-s.e>=4 ? 'Nu har du taget elektroner fra den fyldte skal — aluminium afgiver kun sine 3 yderste.'
+     : `Ladningen er +${s.p-s.e} — der skal flere elektroner af.`},
+  {id:"a13", lbl:"Som argon (2-8-8)",
+   ok:s => s.p>0 && s.e===18 && s.p!==17 && s.p!==18 && expectedIon(s.p)!==null && s.p-s.e===expectedIon(s.p) && atKerne(s),
+   opg:"Kloridionen Cl⁻ har samme elektronfordeling som argon: 2-8-8. Byg en fornuftig ion af et andet grundstof, der også har 2-8-8.",
+   hint:"Argon har 18 elektroner. Klor kender du allerede — vælg et andet grundstof tæt på argon i det periodiske system, og lad det afgive eller optage elektroner efter ædelgas-reglen, til der er 18.",
+   loest:"P³⁻, S²⁻, Cl⁻, K⁺ og Ca²⁺ har alle argons <b>2-8-8</b> — men ingen af dem er blevet til argon, for det er <b>protonerne</b>, der bestemmer grundstoffet. Ca²⁺ kender du fra CaCl₂-brine: hver Ca²⁺ skal bruge to Cl⁻, før ladningerne går op i nul.",
+   nud:s => { const x = expectedIon(s.p);
+     return s.p===18 ? 'Det er argon selv — byg en ion af et andet grundstof.'
+       : s.p===17 && s.e===18 ? 'Det er Cl⁻ — find et andet grundstof med samme fordeling.'
+       : s.e===s.p ? 'Det er et neutralt atom — byg en ion.'
+       : x===null ? 'Overgangsmetaller følger ikke ædelgas-reglen — vælg et grundstof fra hovedgrupperne.'
+       : x===0 ? (mainGroup(s.p)===8 ? 'Ædelgasser danner ikke ioner — vælg et andet grundstof.'
+                                    : `${byZ(s.p)[2]} danner sjældent ioner — det deler elektroner i stedet. Vælg et andet grundstof.`)
+       : s.e!==18 ? `Du har ${s.e} elektroner — argon har 18.`
+       : s.p-s.e!==x ? `18 elektroner ✓ — men det er ikke den ion, ${atStof(s)} danner efter ædelgas-reglen.`
+       : '18 elektroner ✓ — ' + AT_KTIP; }},
+  {id:"a14", lbl:"Carbon-14 henfalder", p:7, n:7, e:7,
+   opg:"Når carbon-14 henfalder, bliver én neutron i kernen til en proton. Byg det atom, der dannes — som neutralt atom.",
+   hint:"Start fra carbon-14: én neutron væk og én proton på. Tryk så på <b>Gør neutralt</b>, og se, hvilket grundstof du står med.",
+   loest:"Det er <b>nitrogen-14</b> — almindeligt, stabilt nitrogen, det samme grundstof som i den N₂, du trykprøver med. Massetallet er stadig 14, men med 7 protoner er det et <b>nyt grundstof</b>, for det er protonerne, der bestemmer, hvad atomet er.",
+   nud:s => s.p===6 ? 'Det er stadig carbon — en neutron skal blive til en <b>proton</b>.'
+     : s.p+s.n!==14 ? `Massetallet er ${s.p+s.n} — ved henfaldet ændrer massetallet sig ikke.`
+     : s.p!==7 ? 'Kun én neutron bliver til en proton — protontallet går kun 1 op.'
+     : 'Kernen passer — tryk på <b>Gør neutralt</b>.'}
+];
+
+let atTask = null;
+const atDone = new Set();
+
+/* Ion med hævet ladning: Na⁺, Al³⁺, P³⁻ — også ud over ±3, så fx Al⁵⁻ ikke bliver til vrøvl */
+function atIon(sym, q){
+  if(q===0) return sym;
+  const k = Math.abs(q);
+  return sym + (k===1 ? '' : String(k).replace(/\d/g, d => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d])) + (q>0 ? '⁺' : '⁻');
+}
+const atQ = q => q>0 ? '+'+q : q===0 ? '0' : '−'+(-q);   // ladning med fortegn: +1, 0, −1
+
+/* Det, eleven har bygget: "klor-35", "Na⁺" — og isotopen i parentes, når den ikke er den mest
+   almindelige, fx "Cl⁻ (klor-37)". Med stort=true får et neutralt atom stort forbogstav: "Neon-20". */
+function atNavn(s, stort){
+  const el = byZ(s.p), A = s.p + s.n, Q = s.p - s.e;
+  const navn = el[2].toLowerCase() + '-' + A;
+  if(Q===0) return stort ? el[2] + '-' + A : navn;
+  return atIon(el[1], Q) + (isotopInfo(s.p, s.n).typisk ? '' : ' (' + navn + ')');
+}
+
+/* Statuslinjen, så længe opgaven ikke er løst */
+function atStatus(t, s){
+  if(!s.p) return s.n || s.e ? 'Der er ingen protoner endnu — uden protoner er det ikke noget grundstof.'
+                             : 'Atomet er tomt.';
+  const nu = `Lige nu har du <b>${atNavn(s)}</b>`;
+  if(!t.vis) return `${nu}. ${t.nud(s)}`;
+  // målet står i opgaven: sig, hvilken slags partikel der er galt — grundstof, kerne eller ladning
+  const kerne = t.kerne ? t.kerne(s)
+              : s.n!==t.n ? `Grundstoffet passer, men massetallet er ${s.p+s.n} — ændr neutronerne.` : '';
+  const hvorfor = (t.mis && t.mis(s))
+              || (s.p!==t.p ? 'Forkert grundstof — det er protonerne, der bestemmer det.'
+                 : kerne || `Kernen passer — ret nu elektronerne: ladningen er ${atQ(s.p-s.e)}, men skal være ${atQ(t.p-t.e)}.`);
+  return `${nu} — der skal stå <b>${t.vis}</b>. ${hvorfor}`;
+}
+
+function atRenderTasks(){
+  document.getElementById('atTasks').innerHTML = AT_TASKS.map(t=>
+    `<button class="mb-task opg${atTask===t.id?' on':''}${atDone.has(t.id)?' done':''}" data-t="${t.id}"
+      onclick="atPickTask('${t.id}')">${atDone.has(t.id)?'✓ ':''}${t.lbl}</button>`).join('');
+  opgMrk('atom', AT_TASKS.length, AT_TASKS.filter(t=>atDone.has(t.id)).length);
+}
+function atPickTask(id){
+  atTask = (atTask===id) ? null : id;
+  atRenderTasks();
+  atCheckTask();
+}
+/* Kaldes fra render(), hver gang atomet ændrer sig — kun den valgte opgave tjekkes */
+function atCheckTask(){
+  const box=document.getElementById('atTaskBox');
+  if(!box) return;
+  if(!atTask){
+    box.className='mb-taskbox';
+    box.innerHTML='Vælg en opgave — så tjekker jeg løbende, om det du bygger passer.';
+    return;
+  }
+  const t=AT_TASKS.find(x=>x.id===atTask), s=state;
+  const ok = t.ok ? t.ok(s) : s.p===t.p && s.n===t.n && s.e===t.e;
+  if(ok){
+    if(!atDone.has(atTask)){ atDone.add(atTask); atRenderTasks(); }
+    box.className='mb-taskbox ok';
+    // en regel-opgave kan løses på flere måder — så står det, eleven byggede, forrest
+    box.innerHTML=`<b>${t.ok ? atNavn(s, true) : t.lbl}</b> — løst ✓ ${t.loest}`;
+  } else {
+    box.className='mb-taskbox';
+    box.innerHTML=`<b>Opgave:</b> ${t.opg}<br>${atStatus(t, s)}<br>
+      <span style="color:var(--muted)">Tip: ${t.hint}</span>`;
+  }
 }
 
 /* ---------- Periodisk system layout ---------- */
@@ -5217,6 +5408,7 @@ function buildBigPT(){
 }
 
 buildPT();
+atRenderTasks();
 render();
 
 /* ============================================================
@@ -26740,6 +26932,11 @@ const LR_MB = {            // Byg molekyler
   t7:"org-kulbrinter", t14:"org-kulbrinter", t8:"org-egenskaber",
   t9:"koel-identitet", t10:"koel-identitet", t11:"koel-identitet"
 };
+const LR_ATOM = {          // Byg et atom
+  a1:"atom-opbygning", a3:"atom-opbygning", a7:"atom-opbygning", a8:"atom-opbygning",
+  a2:"atom-tal", a4:"atom-tal", a5:"atom-tal", a6:"atom-tal", a14:"atom-tal",
+  a9:"atom-ion", a10:"atom-ion", a11:"atom-ion", a12:"atom-ion", a13:"atom-ion"
+};
 
 Object.keys(LR_OMR).forEach(o => { PAK_OMRNAVN[o] = LR_OMR[o].navn; });
 
@@ -27391,8 +27588,8 @@ function fejlbank(){
 ============================================================ */
 const MAERKER = [
   {id:'byg',   ikon:'⚛️', navn:'Atombygger',
-   txt:'Byg 10 molekyler eller salte, der går op.', maal:10,
-   tael:h => h.filter(e => e.ok && /^(mb|salt):/.test(e.a)).length},
+   txt:'Byg 10 atomer, molekyler eller salte, der går op.', maal:10,
+   tael:h => h.filter(e => e.ok && /^(mb|salt|atom):/.test(e.a)).length},
   {id:'ion',   ikon:'⚡', navn:'Ionmester',
    txt:'Bestem 10 ioner rigtigt i første forsøg.', maal:10,
    tael:h => h.filter(e => e.ok && e.f === 1 && e.a.startsWith('ion:')).length},
@@ -27554,7 +27751,12 @@ function pakInd(){
   function faerdig(navn, id, komp){
     const u = ur[navn];
     const s = u && u.id === id ? (NU()-u.t0)/1000 : null;
-    log(navn+':'+id, komp, true, {f: u && u.id === id ? Math.max(1, Math.min(9, Math.ceil(u.rettelser/6))) : 1, s:s});
+    /* Byg et atom tæller kun egentlige rettelser (se indpakningen af step), og ét fejlklik må
+       gerne gå. De andre byggere tæller hvert tjek, så dér skal der seks til et nyt forsøg. */
+    const f = !(u && u.id === id) ? 1
+            : navn === 'atom' ? 1 + Math.floor(u.rettelser/2)
+            : Math.ceil(u.rettelser/6);
+    log(navn+':'+id, komp, true, {f: Math.max(1, Math.min(9, f)), s:s});
     if(u && u.id === id) delete ur[navn];
   }
 
@@ -27574,6 +27776,36 @@ function pakInd(){
   if(typeof window.mbCheckTask === 'function'){
     const org = window.mbCheckTask;
     window.mbCheckTask = function(){ tik('mb'); return org.apply(this, arguments); };
+  }
+  /* Byg et atom tjekker ved hvert klik, og hvert klik lægger én partikel til — klikkene er
+     altså ikke rettelser. Her tæller kun det, der er: et klik, der fortryder det forrige på
+     samme tæller (+ lige efter −), og at starte forfra med Nulstil eller et nyt grundstof,
+     når eleven allerede er i gang. At starte forfra vejer som to. */
+  let atForrige = '', atIgang = false;
+  if(typeof window.atPickTask === 'function'){
+    const org = window.atPickTask;
+    window.atPickTask = function(id){ start('atom', id); atForrige = ''; atIgang = false; return org.apply(this, arguments); };
+  }
+  if(typeof window.step === 'function'){
+    const org = window.step;
+    window.step = function(type, d){
+      if(atForrige === type + (-d)) tik('atom');
+      atForrige = type + d; atIgang = true;
+      return org.apply(this, arguments);
+    };
+  }
+  ['reset', 'setFromZ'].forEach(f => {
+    if(typeof window[f] !== 'function') return;
+    const org = window[f];
+    window[f] = function(){
+      if(atIgang){ tik('atom'); tik('atom'); }
+      atForrige = ''; atIgang = true;
+      return org.apply(this, arguments);
+    };
+  });
+  if(typeof window.fillNeutral === 'function'){
+    const org = window.fillNeutral;
+    window.fillNeutral = function(){ atForrige = ''; return org.apply(this, arguments); };
   }
   if(typeof window.rxVaelg === 'function'){
     const org = window.rxVaelg;
@@ -27628,6 +27860,7 @@ function pakInd(){
     const saet = {};
     const tag = (navn, s) => { if(s && typeof s.add === 'function') saet[navn] = s; };
     try{ tag('mb',   mbDone);     }catch(e){}
+    try{ tag('atom', atDone);     }catch(e){}
     try{ tag('rx',   rxLoest);    }catch(e){}
     try{ tag('salt', saltLoest);  }catch(e){}
     try{ tag('sb',   sbOpgLoest); }catch(e){}
@@ -27653,7 +27886,7 @@ function pakInd(){
     /* Er noget allerede tegnet, skal det tegnes om med den nye tilstand.
        Det meste bygges først, når eleven åbner fanen, men paletten i
        Ioner og salte er der fra start. */
-    ['mbRenderTasks','rxChips','saltOpgaver','sbOpgBrikker','rnrOpgBrikker',
+    ['mbRenderTasks','atRenderTasks','rxChips','saltOpgaver','sbOpgBrikker','rnrOpgBrikker',
      'sikTegnStofBrikker','sikTegnSdsBrikker','sikTegnUheldBrikker',
      'saltPalette','saltIonListe'].forEach(f => {
       try{ if(typeof window[f] === 'function') window[f](); }catch(err){}
@@ -27661,6 +27894,7 @@ function pakInd(){
   })();
 
   try{ overvaag(mbDone,    'mb',   id => LR_MB[id] || 'mol-formel'); }catch(e){}
+  try{ overvaag(atDone,    'atom', id => LR_ATOM[id] || 'atom-opbygning'); }catch(e){}
   try{ overvaag(rxLoest,   'rx',   () => 'rx-afstem'); }catch(e){}
   try{ overvaag(saltLoest, 'salt', () => 'bind-saltformel'); }catch(e){}
   try{ overvaag(sbOpgLoest, 'sb',   () => 'syre-begreb'); }catch(e){}
@@ -27926,6 +28160,7 @@ function fejlkort(){
 function beskrivAktivitet(a){
   if(a.startsWith('ion:'))  return 'Hvilken ion danner ' + a.slice(4) + '?';
   if(a.startsWith('mb:'))   return 'Byg-opgave i Byg molekyler';
+  if(a.startsWith('atom:')) return 'Byg-opgave i Byg et atom';
   if(a.startsWith('rx:'))   return 'Afstemning: ' + a.slice(3);
   if(a.startsWith('salt:')) return 'Salt-opgave i Ioner og salte';
   return a;
