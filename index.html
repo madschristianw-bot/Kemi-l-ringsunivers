@@ -5154,7 +5154,7 @@ const AT_TASKS = [
   {id:"a5", lbl:"Klor-37", p:17, n:20, e:17, vis:"klor-37",
    opg:"Byg et neutralt klor-37-atom, den tunge klor-isotop. Klor er det atom i R22 og R12, der nedbryder ozon.",
    hint:"Klik på Cl — så har du klor-35. Massetallet skal 2 op, men protonerne må ikke ændres. Undervejs passerer du klor-36, som er radioaktiv.",
-   loest:"Klor-37 har 17 protoner som al anden klor, men <b>20 neutroner</b>: en anden, stabil <b>isotop</b> af samme grundstof. Naturligt klor er cirka 76 % klor-35 og 24 % klor-37 — derfor står der <b>35,5 u</b> i det periodiske system, selv om intet kloratom vejer 35,5."},
+   loest:"Klor-37 har 17 protoner som alt andet klor, men <b>20 neutroner</b>: en anden, stabil <b>isotop</b> af samme grundstof. Naturligt klor er cirka 76 % klor-35 og 24 % klor-37 — derfor står der <b>35,5 u</b> i det periodiske system, selv om intet kloratom vejer 35,5 u."},
   {id:"a6", lbl:"Carbon-14", p:6, n:8, e:6, vis:"carbon-14",
    opg:"Byg et neutralt carbon-14-atom — det radioaktive carbon, man daterer gamle fund med.",
    hint:"Klik på C, så har du carbon-12. Hvilken partikel kan du lægge til, så massetallet stiger, uden at atomet holder op med at være carbon?",
@@ -5181,7 +5181,7 @@ const AT_TASKS = [
      : atYdre(s)===7 ? 'Yderste skal har 7 ✓ — ' + AT_KTIP
      : `Yderste skal har ${atYdre(s)} e⁻ — fluor har 7.`},
   {id:"a9", lbl:"Na⁺ (brine)", p:11, n:12, e:10, vis:"Na⁺",
-   opg:"Byg natrium-ionen Na⁺ — den positive ion i saltlage (brine) af køkkensalt, NaCl.",
+   opg:"Byg natriumionen Na⁺ — den positive ion i saltlage (brine) af køkkensalt, NaCl.",
    hint:"Klik på Na, og tag elektroner væk, til ladningen er +1. Protonerne må du ikke røre — de bestemmer grundstoffet.",
    loest:"Natrium står i hovedgruppe 1 og <b>afgiver</b> sin ene yderste elektron: 11 protoner og 10 elektroner giver ladningen +1 og skallerne <b>2-8</b> ligesom neon. Massetallet er stadig 23, for elektronen vejer næsten ingenting.",
    mis:s => s.p===10 ? 'Nu står der neon — du har fjernet en proton. En ion får eller mister kun elektroner.' : ''},
@@ -5198,7 +5198,7 @@ const AT_TASKS = [
   {id:"a11", lbl:"H⁺ (syre)", p:1, n:0, e:0, vis:"H⁺",
    opg:"Byg brintionen H⁺ — den ion, alle syrer afgiver. Efter en burnout kan der dannes syre i anlægget.",
    hint:"Byg et almindeligt brintatom, og tag så elektronen væk. Ja, 0 elektroner er tilladt.",
-   loest:"Uden sin eneste elektron er brint bare <b>én bar proton</b> med ladningen +1 — og det er netop den, en syre afgiver. Derfor syretester man olien efter en burnout: ellers æder syreresterne den nye kompressor op."},
+   loest:"Uden sin eneste elektron er brint kun <b>én bar proton</b> med ladningen +1 — og det er netop den, en syre afgiver. Derfor syretester man olien efter en burnout: ellers æder syreresterne den nye kompressor op."},
   {id:"a12", lbl:"Al-ion (lameller)", p:13, n:14, e:10,
    opg:"Når aluminiumslamellerne på en fordamper tæres, bliver aluminium til ioner. Byg den ion, aluminium danner.",
    hint:"Aluminium har 3 elektroner i yderste skal. Er det lettere at komme af med 3 eller at få 5 til?",
@@ -5211,14 +5211,14 @@ const AT_TASKS = [
      : `Ladningen er +${s.p-s.e} — der skal flere elektroner af.`},
   {id:"a13", lbl:"Som argon (2-8-8)",
    ok:s => s.p>0 && s.e===18 && s.p!==17 && s.p!==18 && expectedIon(s.p)!==null && s.p-s.e===expectedIon(s.p) && atKerne(s),
-   opg:"Kloridionen Cl⁻ har samme elektronfordeling som argon: 2-8-8. Byg en fornuftig ion af et andet grundstof, der også har 2-8-8.",
+   opg:"Kloridionen Cl⁻ har samme elektronfordeling som argon: 2-8-8. Find et andet grundstof, hvis fornuftige ion også har 2-8-8, og byg ionen.",
    hint:"Argon har 18 elektroner. Klor kender du allerede — vælg et andet grundstof tæt på argon i det periodiske system, og lad det afgive eller optage elektroner efter ædelgas-reglen, til der er 18.",
    loest:"P³⁻, S²⁻, Cl⁻, K⁺ og Ca²⁺ har alle argons <b>2-8-8</b> — men ingen af dem er blevet til argon, for det er <b>protonerne</b>, der bestemmer grundstoffet. Ca²⁺ kender du fra CaCl₂-brine: hver Ca²⁺ skal bruge to Cl⁻, før ladningerne går op i nul.",
    nud:s => { const x = expectedIon(s.p);
      return s.p===18 ? 'Det er argon selv — byg en ion af et andet grundstof.'
        : s.p===17 && s.e===18 ? 'Det er Cl⁻ — find et andet grundstof med samme fordeling.'
        : s.e===s.p ? 'Det er et neutralt atom — byg en ion.'
-       : x===null ? 'Overgangsmetaller følger ikke ædelgas-reglen — vælg et grundstof fra hovedgrupperne.'
+       : x===null ? 'Ædelgas-reglen bruger vi kun på hovedgrupperne, så overgangsmetaller tæller ikke her — vælg et grundstof fra hovedgrupperne.'
        : x===0 ? (mainGroup(s.p)===8 ? 'Ædelgasser danner ikke ioner — vælg et andet grundstof.'
                                     : `${byZ(s.p)[2]} danner sjældent ioner — det deler elektroner i stedet. Vælg et andet grundstof.`)
        : s.e!==18 ? `Du har ${s.e} elektroner — argon har 18.`
@@ -5280,6 +5280,8 @@ function atPickTask(id){
   atRenderTasks();
   atCheckTask();
 }
+/* isotopnavne som klor-37 må ikke deles ved bindestregen på smalle skærme */
+const atNoBrk = h => h.replace(/([A-Za-zæøåÆØÅ]+-\d+)/g, '<span style="white-space:nowrap">$1</span>');
 /* Kaldes fra render(), hver gang atomet ændrer sig — kun den valgte opgave tjekkes */
 function atCheckTask(){
   const box=document.getElementById('atTaskBox');
@@ -5295,11 +5297,11 @@ function atCheckTask(){
     if(!atDone.has(atTask)){ atDone.add(atTask); atRenderTasks(); }
     box.className='mb-taskbox ok';
     // en regel-opgave kan løses på flere måder — så står det, eleven byggede, forrest
-    box.innerHTML=`<b>${t.ok ? atNavn(s, true) : t.lbl}</b> — løst ✓ ${t.loest}`;
+    box.innerHTML=atNoBrk(`<b>${t.ok ? atNavn(s, true) : t.lbl}</b> — løst ✓ ${t.loest}`);
   } else {
     box.className='mb-taskbox';
-    box.innerHTML=`<b>Opgave:</b> ${t.opg}<br>${atStatus(t, s)}<br>
-      <span style="color:var(--muted)">Tip: ${t.hint}</span>`;
+    box.innerHTML=atNoBrk(`<b>Opgave:</b> ${t.opg}<br>${atStatus(t, s)}<br>
+      <span style="color:var(--muted)">Tip: ${t.hint}</span>`);
   }
 }
 
@@ -27588,7 +27590,7 @@ function fejlbank(){
 ============================================================ */
 const MAERKER = [
   {id:'byg',   ikon:'⚛️', navn:'Atombygger',
-   txt:'Byg 10 atomer, molekyler eller salte, der går op.', maal:10,
+   txt:'Løs 10 byg-opgaver med atomer, molekyler eller salte.', maal:10,
    tael:h => h.filter(e => e.ok && /^(mb|salt|atom):/.test(e.a)).length},
   {id:'ion',   ikon:'⚡', navn:'Ionmester',
    txt:'Bestem 10 ioner rigtigt i første forsøg.', maal:10,
@@ -27778,34 +27780,55 @@ function pakInd(){
     window.mbCheckTask = function(){ tik('mb'); return org.apply(this, arguments); };
   }
   /* Byg et atom tjekker ved hvert klik, og hvert klik lægger én partikel til — klikkene er
-     altså ikke rettelser. Her tæller kun det, der er: et klik, der fortryder det forrige på
-     samme tæller (+ lige efter −), og at starte forfra med Nulstil eller et nyt grundstof,
-     når eleven allerede er i gang. At starte forfra vejer som to. */
-  let atForrige = '', atIgang = false;
+     altså ikke rettelser. Her tæller kun det, der er: at vende retningen på en tæller, også
+     med andre klik imellem (p− e− efter ét par for meget er én rettelse), men aldrig et klik,
+     der ikke ændrer noget (− ved 0), og aldrig den elektron, der gør et færdigt, neutralt atom
+     til en ion. Nulstil eller et andet grundstof er at starte forfra og vejer som to, men kun
+     når der er bygget noget, og atomet faktisk ændrer sig; samme grundstof igen (en ny kerne,
+     som opgaveboksen beder om) vejer som én. Nulstil efterlader et tomt atom: en ny start. */
+  let atRet = {}, atVendt = 0, atSidst = '', atIgang = false;
+  const atTom = () => !(state.p || state.n || state.e);
   if(typeof window.atPickTask === 'function'){
     const org = window.atPickTask;
-    window.atPickTask = function(id){ start('atom', id); atForrige = ''; atIgang = false; return org.apply(this, arguments); };
+    window.atPickTask = function(id){ start('atom', id); atRet = {}; atVendt = 0; atSidst = ''; atIgang = false; return org.apply(this, arguments); };
   }
   if(typeof window.step === 'function'){
     const org = window.step;
     window.step = function(type, d){
-      if(atForrige === type + (-d)) tik('atom');
-      atForrige = type + d; atIgang = true;
+      const v = state[type], ny = Math.min(type === 'p' ? 118 : Infinity, Math.max(0, v + d));
+      if(ny !== v){                                   // et klik, der ikke ændrer noget (− ved 0), tæller ikke
+        const igen = atSidst === type;                // lige efter et klik på samme tæller
+        const vend = atRet[type] === -d;              // vender retningen på tælleren, også med andre klik imellem
+        const ion  = !igen && type === 'e' && state.e === state.p;  // elektron af/på et færdigt, neutralt atom = at lave ionen
+        if(vend && !ion && (igen || atVendt !== d)) tik('atom');    // p− e− efter et par for meget = én rettelse
+        atVendt = vend ? (ion ? atVendt : d) : 0;
+        atRet[type] = d; atSidst = type; atIgang = true;
+      }
       return org.apply(this, arguments);
     };
   }
-  ['reset', 'setFromZ'].forEach(f => {
-    if(typeof window[f] !== 'function') return;
-    const org = window[f];
-    window[f] = function(){
-      if(atIgang){ tik('atom'); tik('atom'); }
-      atForrige = ''; atIgang = true;
+  if(typeof window.reset === 'function'){
+    const org = window.reset;
+    window.reset = function(){
+      if(atIgang && !atTom()){ tik('atom'); tik('atom'); }
+      atRet = {}; atVendt = 0; atSidst = ''; atIgang = false;   // et tomt atom er en ny start
       return org.apply(this, arguments);
     };
-  });
+  }
+  if(typeof window.setFromZ === 'function'){
+    const org = window.setFromZ;
+    window.setFromZ = function(z){
+      const n = Math.max(0, A_typ(z) - z);
+      if(atIgang && !atTom() && !(state.p === z && state.n === n && state.e === z)){
+        tik('atom'); if(state.p !== z) tik('atom');   // samme grundstof igen vejer som én rettelse
+      }
+      atRet = {}; atVendt = 0; atSidst = ''; atIgang = true;
+      return org.apply(this, arguments);
+    };
+  }
   if(typeof window.fillNeutral === 'function'){
     const org = window.fillNeutral;
-    window.fillNeutral = function(){ atForrige = ''; return org.apply(this, arguments); };
+    window.fillNeutral = function(){ delete atRet.e; atVendt = 0; atSidst = ''; return org.apply(this, arguments); };
   }
   if(typeof window.rxVaelg === 'function'){
     const org = window.rxVaelg;
