@@ -131,6 +131,148 @@
   .ptlegend span{display:inline-flex;align-items:center;gap:5px}
   .ptlegend i{width:9px;height:9px;border-radius:2px;display:inline-block}
 
+  /* ---- Atomspillet (Byg et atom → Atomspillet) ----
+     Infoboksen vendt om: boksen spørger, og eleven svarer i den. Alt er afgrænset til .asp
+     og .asp-…, og spillet låner byggerens, quizzens og opgavernes klasser, så det ligner resten. */
+  .asp-sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .asp :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .asp .btn:disabled{opacity:.45;cursor:not-allowed}
+  .asp .tag{display:inline-block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    padding:2px 8px;border-radius:20px;font-weight:600;vertical-align:middle}
+  .asp .quiz-feedback .tag{margin:0 2px}
+  /* niveauskærmen: samme kort som sporvalget øverst, 4 / 2 / 1 i bredden */
+  .asp-niveauer{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:4px 0 2px}
+  @media(max-width:1100px){.asp-niveauer{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:560px){.asp-niveauer{grid-template-columns:1fr}}
+  .asp-niv{display:flex;flex-direction:column;align-items:flex-start;gap:10px;text-align:left;cursor:pointer;
+    background:linear-gradient(180deg,var(--panel) 0%,#102036 100%);border:1px solid var(--line);
+    border-radius:14px;padding:13px 15px;color:var(--muted);font-family:var(--sans);transition:.15s}
+  .asp-niv:hover,.asp-niv:focus-visible{border-color:var(--gold)}
+  .asp-niv:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .asp-niv-tekst{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .asp-niv-navn{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink);line-height:1.25}
+  .asp-niv-txt{font-size:12px;line-height:1.45;color:var(--muted)}
+  .asp-niv-bedst{font-size:12px;color:var(--ink)}
+  .asp-ikon{display:flex;align-items:center;justify-content:center;gap:3px;width:44px;height:44px;flex:none;pointer-events:none}
+  .asp-ikon .cell{width:40px;cursor:default}
+  .asp-ikon .cell .z{font-size:8px}
+  .asp-ikon .stat{display:block;padding:3px 5px;border-radius:7px;text-align:center}
+  .asp-ikon .stat .k{display:block;font-size:6px;letter-spacing:.06em}
+  .asp-ikon .stat .v,.asp-ikon .symbolbox .sym{display:block;color:var(--gold);font-family:var(--serif);font-weight:700;line-height:1.1}
+  .asp-ikon .stat .v{font-size:17px;margin:0}
+  .asp-ikon .symbolbox{display:block;margin:0;padding:3px 10px;border-radius:8px}
+  .asp-ikon .symbolbox .sym{font-size:26px;min-width:0}
+  .asp-ikon .tag{padding:2px 5px;letter-spacing:0}
+  @media(max-width:560px){.asp-niv{flex-direction:row;min-height:64px}}
+  /* stjernerne fyldes med --f, så én point er en halv stjerne */
+  .asp-stjerner{display:inline-flex;gap:2px;font-size:15px;line-height:1}
+  .asp-stj{position:relative;color:#3a4f6e}
+  .asp-stj::after{content:'★';position:absolute;inset:0 auto 0 0;width:var(--f);overflow:hidden;color:var(--gold)}
+  .asp-stor{font-size:26px;gap:4px}
+  /* opgaven */
+  .asp-top .quiz-bar{flex-wrap:wrap;gap:6px 14px}
+  .asp-top .quiz-bar .btn{padding:6px 12px;font-size:12.5px;min-height:32px}
+  .asp .mb-task{min-height:32px;padding:6px 13px}
+  .asp-top .quiz-track{margin:10px 0 14px}
+  .asp-top .quiz-q{margin:0 0 6px}
+  .asp-top .quiz-q:focus,#aspTitel:focus{outline:none}
+  .asp-ur{font-variant-numeric:tabular-nums}
+  .asp-stage{max-height:360px}
+  /* infoboksens felter: ? er et svarfelt, – er skjult */
+  .stat.asp-svar{border-style:dashed;border-color:rgba(241,199,94,.6)}
+  .stat.asp-skjul .v{color:var(--muted)}
+  .asp .asp-rigtig,.asp .stat.asp-rigtig{border-color:var(--ok)}
+  .asp .asp-forkert,.asp .stat.asp-forkert{border-color:var(--proton)}
+  .asp .stat.asp-rigtig,.asp .stat.asp-forkert{border-style:solid}
+  .asp-mrk{margin-left:4px}
+  .asp-rigtig .asp-mrk{color:var(--ok)}
+  .asp-forkert .asp-mrk{color:var(--proton)}
+  .asp-svar.asp-laast .asp-trin button{visibility:hidden}
+  .asp-dit{display:block;font-size:11px;color:var(--muted);text-decoration:line-through;font-family:var(--sans);font-weight:400}
+  .asp-trin{display:inline-flex;align-items:center;gap:5px}
+  .asp-trin button{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);padding:0;
+    background:#0e1d31;color:var(--ink);font-size:18px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:.12s}
+  .asp-trin button:hover{background:#1b3252;border-color:#3a5f8f}
+  .asp-ind{width:44px;background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;
+    font:600 20px var(--serif);text-align:center;color:var(--ink);padding:2px 0}
+  .asp-ind::placeholder{color:var(--gold);opacity:1}
+  .asp-ind[readonly]{border-bottom-color:transparent}
+  .asp-ind:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .asp-ind[aria-invalid="true"]{outline:2px solid var(--proton)}
+  .asp-sym-q{color:var(--gold)}
+  .asp .symbolbox.asp-rigtig{border-color:var(--ok)}
+  .asp .symbolbox.asp-forkert{border-color:var(--proton)}
+  .asp-boks .verdict + .asp-dit{margin-top:4px}
+  .asp-isotoper{font-size:13px}
+  .asp-facit{margin:6px 0 0;padding-left:18px}
+  /* valgbrikkerne bærer boksens egne mærkater */
+  .asp-valg{border:0;padding:0;margin:12px 0 0;display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+  .asp-chip{position:relative;display:inline-flex;align-items:center;min-height:40px;padding:4px 6px;
+    border:1px solid var(--line);border-radius:22px;cursor:pointer}
+  .asp-chip input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+  .asp-chip:has(:checked){border-color:var(--gold);background:rgba(241,199,94,.1)}
+  .asp-chip:has(:focus-visible){outline:2px solid var(--gold)}
+  .asp-chip.asp-rigtig{border-color:var(--ok)}
+  .asp-chip.asp-forkert{border-color:var(--proton)}
+  .asp-valg:disabled .asp-chip{cursor:default}
+  .asp-valg:disabled .asp-chip:not(:has(:checked)){opacity:.6}
+  /* et udelukket valg efter første forsøg */
+  .asp-chip.asp-ude{opacity:.45;cursor:not-allowed}
+  .asp-chip.asp-ude .tag{text-decoration:line-through}
+  /* spillets periodiske system: grundstof 1–20, 8 × 36 px uden vandret rulning */
+  .asp-pt{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:3px;max-width:420px}
+  .asp-pt .cell{font:inherit;font-size:10px;color:var(--muted);min-height:36px;width:auto}
+  .asp-pt .cell .z{font-size:9px}
+  .asp-pt .cell.asp-valgt{outline:2px solid var(--gold);background:#2a3f5e}
+  .asp-pt .cell.asp-forkert{border-color:var(--proton)}
+  .asp-pt .cell.asp-forkert .s{text-decoration:line-through}
+  .asp-pt .cell:disabled{opacity:.45;cursor:not-allowed;transform:none}
+  .asp-pt .cell.asp-valgt:disabled{opacity:1}
+  .asp-pt-hg{font-size:10px;color:var(--muted);text-align:center;align-self:end}
+  /* tællerne */
+  .asp .counter input.num{width:44px;background:transparent;border:0;border-bottom:1px solid var(--line);
+    text-align:center;font:700 20px var(--sans);font-variant-numeric:tabular-nums;color:var(--ink);padding:2px 0}
+  .asp .counter input.num[readonly]{border-bottom-color:transparent}
+  .asp .counter input.num[aria-invalid="true"]{outline:2px solid var(--proton)}
+  .asp .counter button:disabled{opacity:.35;cursor:not-allowed}
+  .asp-num{display:block;font-size:26px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:4px}
+  .bin .asp-laast{display:block;font-size:11px;color:var(--muted);margin-top:4px}
+  @media(max-width:560px){
+    .asp .bin{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px 10px;padding:8px 12px;text-align:left}
+    .asp .bin .dot{width:22px;height:22px;margin:0}
+    .asp .counter{margin-top:0}
+    .asp .counter button{width:40px;height:40px}
+    .asp .bin .asp-num{margin:0}
+  }
+  /* knaplinjen: Tjek, Prøv igen, Vis svaret og Næste — klæber til bunden på mobil */
+  .asp-handling{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:18px}
+  .asp-handling .hint{margin:0}
+  .asp-ansigt{display:inline-flex}
+  .asp-ansigt:empty,.asp-kort:empty{display:none}
+  .asp-ansigt svg{width:32px;height:32px}
+  .asp-kort{font-weight:700;color:var(--ink)}
+  @media(max-width:900px){
+    .asp-handling{position:sticky;bottom:0;z-index:5;background:var(--panel);border-top:1px solid var(--line);padding:10px 4px}
+    #aspFb{scroll-margin-bottom:112px}
+  }
+  /* resultatet */
+  .asp-slut{position:relative;overflow:hidden}
+  #aspRekord:empty{display:none}
+  .asp-recap{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+  .asp-recap li{display:flex;justify-content:space-between;align-items:center;gap:6px 10px;flex-wrap:wrap;
+    background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:14px}
+  .asp-drillede{margin:0;padding-left:20px;color:var(--muted);font-size:14px;line-height:1.6}
+  .asp-regn{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .asp-regn i{position:absolute;top:-16px;width:12px;height:12px;border-radius:50%;
+    box-shadow:inset 0 -2px 3px rgba(0,0,0,.35);animation:asp-fald 3s ease-in both}
+  .asp-regn i.p{background:radial-gradient(circle at 35% 30%,#ff8a76,var(--proton))}
+  .asp-regn i.n{background:radial-gradient(circle at 35% 30%,#cfd6df,var(--neutron))}
+  .asp-regn i.e{background:radial-gradient(circle at 35% 30%,#8fd0ff,var(--electron))}
+  @keyframes asp-fald{0%{transform:translateY(0) rotate(0);opacity:1}85%{opacity:1}
+    100%{transform:translateY(760px) rotate(540deg);opacity:0}}
+  @media (prefers-reduced-motion: reduce){.asp-regn{display:none}}
+
   /* stort periodisk system (kompendie-stil) */
   .ptbig-wrap{overflow-x:auto;padding-bottom:8px;margin-top:6px}
   .ptbig{display:grid;grid-template-columns:repeat(18,minmax(58px,1fr));gap:3px;min-width:1080px}
@@ -2625,7 +2767,7 @@
 
   <!-- ===================== BYG-FANE ===================== -->
   <section id="view-build" style="display:none">
-  <p class="sub">Tilføj <b style="color:var(--proton)">protoner</b>, <b style="color:var(--neutron)">neutroner</b> og <b style="color:var(--electron)">elektroner</b>, og se hvilket grundstof du danner, og om kernen er stabil. Værktøjet bruger begreberne fra kompendiet: skaller, atom-nummer, atom-masse, ioner og ædelgas-reglen. Klik på et felt i det periodiske system for at starte fra et bestemt grundstof.</p>
+  <p class="sub">Tilføj <b style="color:var(--proton)">protoner</b>, <b style="color:var(--neutron)">neutroner</b> og <b style="color:var(--electron)">elektroner</b>, og se hvilket grundstof du danner, og om kernen er stabil. Værktøjet bruger begreberne fra kompendiet: skaller, atom-nummer, atom-masse, ioner og ædelgas-reglen. Under <b>Atomspillet</b> bliver det vendt om: infoboksen stiller spørgsmålene, og du svarer.</p>
 
   <div class="grid">
     <!-- LEFT: atom + controls -->
@@ -2724,6 +2866,14 @@
         <p class="hint">Klik et felt for at få atom-nummer, massetal og en neutral skal-fordeling indsat automatisk.</p>
       </div>
     </div>
+  </div>
+
+  <!-- Atomspillet: infoboksen stiller spørgsmålene. Skærmene tegnes af aspInit() og venner. -->
+  <div id="atomSpil" class="asp">
+    <div id="aspValg"></div>
+    <div id="aspOpg" hidden></div>
+    <div id="aspSlut" hidden></div>
+    <p id="aspLive" class="asp-sr" aria-live="polite"></p>
   </div>
   </section>
 
@@ -4830,25 +4980,54 @@ function setFromZ(z){
   state.e = z; // neutralt
   markActive(z);
   render();
-  // hvis man klikker fra det store periodiske system, så hop til byg-fanen
+  // hvis man klikker fra det store periodiske system, så hop til byg-fanen —
+  // og til byggeren, ikke Atomspillet. Afsnittet vælges, mens fanen endnu er skjult.
   if(document.getElementById('view-ptable').style.display!=='none'){
+    if(typeof visUnderfane==='function') visUnderfane('build','byg');
     showTab('build');
   }
 }
 
-/* ---------- Tegn atom ---------- */
-function drawAtom(){
-  const svg = document.getElementById('stage');
+/* ---------- Tegn atom ----------
+   Uden argumenter tegnes byggerens atom (state) i #stage. Atomspillet tegner sine egne atomer
+   i sit eget billede: drawAtom(svg, s, {gid, etiket, uro, tom, tael}).
+     gid    præfiks på gradienternes id'er (standard 'g' → gP/gN). Spillet skal have sit eget,
+            for et url(#gP), der peger ind i den skjulte bygger, maler ingenting.
+     etiket hjørneteksten "Cl-35 / mest almindelig" (standard til) — den røber massetallet
+     uro    en ustabil kerne ryster og får en rød ring (standard til) — det røber stabiliteten
+     tom    teksten i et tomt billede
+     tael   kernen lagt i ringe, så hver kugle kan tælles (standard fra; kun op til A = 61) */
+function drawAtom(svg, s, o){
+  svg = svg || document.getElementById('stage'); s = s || state; o = o || {};
+  const g = o.gid || 'g';
   const cx=200, cy=200;
   let html='';
 
+  /* den tællelige kerne: midterkuglen, og ring k med plads til 6k kugler i radius 20k.
+     To kugler kommer aldrig tættere end 20 (diameter 16), og skallerne rykker ud efter kernen. */
+  const total = s.p+s.n;
+  let ringe = null, R = 0;
+  if(o.tael && total<=61){
+    ringe = [];
+    for(let k=0, i=0; i<total; k++){
+      const m = Math.min(k ? 6*k : 1, total-i);
+      for(let j=0;j<m;j++,i++){
+        const a = 2*Math.PI*j/m + 0.35*k;
+        ringe.push([cx + 20*k*Math.cos(a), cy + 20*k*Math.sin(a)]);
+      }
+      R = 20*k + 8;
+    }
+  }
+
   // skaller (cirkler) + elektroner
-  const fills = shellFill(state.e, state.p);
+  const fills = shellFill(s.e, s.p);
   const radii = [55,95,130,165,195,225,255];
   // mere end 4 skaller: skub skallerne sammen, så den yderste (r = 185) ligger inde i billedet
   const pres = fills.length>4 ? (185-55)/(radii[fills.length-1]-55) : 1;
+  const r1 = Math.max(55, R+24);
+  const trin = fills.length>1 ? Math.min(40, (190-r1)/(fills.length-1)) : 0;
   fills.forEach((count,i)=>{
-    const r = 55 + (radii[i]-55)*pres;
+    const r = ringe ? r1 + i*trin : 55 + (radii[i]-55)*pres;
     html += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#274569" stroke-width="1"/>`;
     for(let k=0;k<count;k++){
       const ang = (2*Math.PI*k/count) - Math.PI/2 + (i*0.4);
@@ -4860,22 +5039,28 @@ function drawAtom(){
 
   // kerne — protoner + neutroner pakket i en spiral
   const nuc = [];
-  for(let i=0;i<state.p;i++) nuc.push('p');
-  for(let i=0;i<state.n;i++) nuc.push('n');
+  for(let i=0;i<s.p;i++) nuc.push('p');
+  for(let i=0;i<s.n;i++) nuc.push('n');
   // bland lidt
   const mixed=[];
   let pi=0,ni=0;
-  for(let i=0;i<nuc.length;i++){ mixed.push(i%2===0 && pi<state.p ? (pi++,'p') : (ni<state.n?(ni++,'n'):(pi++,'p'))); }
-  const total = state.p+state.n;
+  for(let i=0;i<nuc.length;i++){ mixed.push(i%2===0 && pi<s.p ? (pi++,'p') : (ni<s.n?(ni++,'n'):(pi++,'p'))); }
   const nr = total<=1?9: 8 + Math.min(20, Math.sqrt(total)*4);
   // en radioaktiv kerne ryster og får en rød ring; isotopens navn står i hjørnet
-  const iso = state.p ? isotopInfo(state.p, state.n) : null;
-  const ustabil = iso && !iso.stabil;
+  const iso = s.p ? isotopInfo(s.p, s.n) : null;
+  const ustabil = iso && !iso.stabil && o.uro!==false;
   if(ustabil){
-    html += `<circle class="kerne-ring" cx="${cx}" cy="${cy}" r="${(nr*0.9 + 15).toFixed(1)}"/>`;
+    html += `<circle class="kerne-ring" cx="${cx}" cy="${cy}" r="${(ringe ? R + 10 : nr*0.9 + 15).toFixed(1)}"/>`;
   }
   html += `<g class="kerne${ustabil?' ustabil':''}">`;
-  mixed.forEach((t,i)=>{
+  if(ringe){
+    // protonerne spredes jævnt mellem neutronerne, og hver proton får et "+", så farven ikke står alene
+    ringe.forEach(([nx,ny],i)=>{
+      const erP = Math.floor((i+1)*s.p/total) > Math.floor(i*s.p/total);
+      html += `<circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="8" fill="url(#${g}${erP?'P':'N'})" stroke="#0d1b2a" stroke-width="0.8"/>`;
+      if(erP) html += `<text x="${nx.toFixed(1)}" y="${ny.toFixed(1)}" font-size="10" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="central" pointer-events="none">+</text>`;
+    });
+  } else mixed.forEach((t,i)=>{
     let nx=cx, ny=cy;
     if(total>1){
       const a = i*2.399963; // golden angle
@@ -4883,24 +5068,24 @@ function drawAtom(){
       nx = cx + rad*Math.cos(a);
       ny = cy + rad*Math.sin(a);
     }
-    const fill = t==='p' ? 'url(#gP)' : 'url(#gN)';
+    const fill = t==='p' ? `url(#${g}P)` : `url(#${g}N)`;
     html += `<circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="8" fill="${fill}" stroke="#0d1b2a" stroke-width="0.8"/>`;
   });
   html += `</g>`;
-  if(iso){
+  if(iso && o.etiket!==false){
     const [tekst, farve] = !iso.stabil ? ['radioaktiv', '#e8533f']
                          : iso.typisk ? ['mest almindelig', '#5ad19a'] : ['anden isotop', '#f1c75e'];
-    html += `<text x="14" y="28" fill="#eaf2ff" font-size="17" font-weight="600" font-family="sans-serif">${byZ(state.p)[1]}-${iso.A}</text>`
+    html += `<text x="14" y="28" fill="#eaf2ff" font-size="17" font-weight="600" font-family="sans-serif">${byZ(s.p)[1]}-${iso.A}</text>`
           + `<text x="14" y="46" fill="${farve}" font-size="12" font-family="sans-serif">${tekst}</text>`;
   }
 
   const defs = `<defs>
-    <radialGradient id="gP" cx="35%" cy="30%"><stop offset="0" stop-color="#ff8a76"/><stop offset="1" stop-color="#e8533f"/></radialGradient>
-    <radialGradient id="gN" cx="35%" cy="30%"><stop offset="0" stop-color="#cfd6df"/><stop offset="1" stop-color="#9aa6b5"/></radialGradient>
+    <radialGradient id="${g}P" cx="35%" cy="30%"><stop offset="0" stop-color="#ff8a76"/><stop offset="1" stop-color="#e8533f"/></radialGradient>
+    <radialGradient id="${g}N" cx="35%" cy="30%"><stop offset="0" stop-color="#cfd6df"/><stop offset="1" stop-color="#9aa6b5"/></radialGradient>
   </defs>`;
 
-  if(total===0 && state.e===0){
-    html += `<text x="200" y="205" text-anchor="middle" fill="#8fa6c6" font-size="14" font-family="sans-serif">Tomt — tilføj partikler</text>`;
+  if(total===0 && s.e===0){
+    html += `<text x="200" y="205" text-anchor="middle" fill="#8fa6c6" font-size="14" font-family="sans-serif">${o.tom || 'Tomt — tilføj partikler'}</text>`;
   }
   svg.innerHTML = defs + html;
 }
@@ -4934,57 +5119,46 @@ function expectedIon(Z){
   return -(8-hg);             // HG5→−3, HG6→−2, HG7→−1 (optager)
 }
 
-/* ---------- Opdater info-panel ---------- */
-function render(){
-  document.getElementById('np').textContent = state.p;
-  document.getElementById('nn').textContent = state.n;
-  document.getElementById('ne').textContent = state.e;
-
-  const Z = state.p;
-  const A = state.p + state.n;
-  const Q = state.p - state.e;
-  const fills = shellFill(state.e, state.p);
+/* ---------- Infoboksen som data ----------
+   Alt det, "Hvad har du bygget?" viser om s = {p, n, e} — regnet ud uden at røre siden.
+   render() viser det for byggerens state, og Atomspillet viser det samme for sine egne atomer.
+   o.stemme === 'spil' er spillets stemme: den beskriver atomet i stedet for "det, du har bygget",
+   og skriver ladninger med rigtigt minus. Uden o er teksten nøjagtig byggerens. */
+function atomInfo(s, o){
+  const spil = !!(o && o.stemme==='spil');
+  const Z = s.p;
+  const A = s.p + s.n;
+  const Q = s.p - s.e;
+  const fills = shellFill(s.e, s.p);
   const outer = fills.length ? fills[fills.length-1] : 0;
-
-  document.getElementById('vZ').textContent = Z;
-  document.getElementById('vA').textContent = A;
-  document.getElementById('vQ').textContent = (Q>0?'+':'') + Q;
-  document.getElementById('vShell').innerHTML = (state.e? outer : 0) + ' <small>e⁻</small>';
-
-  const symEl = document.getElementById('symEl');
-  const symCharge = document.getElementById('symCharge');
-  const elName = document.getElementById('elName');
-  const elLine = document.getElementById('elLine');
-  const verdict = document.getElementById('verdict');
-  const isoDom = document.getElementById('isoDom');
+  const ydre = s.e? outer : 0;
+  const m = {Z, A, Q, fills, outer, ydre, vZ:Z, vA:A, vQ: spil ? atQ(Q) : (Q>0?'+':'') + Q,
+             vShell: ydre + ' <small>e⁻</small>', tom:false};
 
   if(Z===0){
-    symEl.firstChild.textContent='?';
-    symCharge.textContent='';
-    elName.textContent='Intet atom endnu';
-    elLine.textContent='Tilføj en proton for at danne brint (H)';
-    verdict.className='verdict neutral';
-    verdict.innerHTML='Atom-nummeret bestemmes af <b>antallet af protoner</b>. Tilføj én for at starte.';
-    isoDom.hidden = true;
-    atCheckTask();
-    drawAtom(); return;
+    return Object.assign(m, {tom:true, el:null, sym:'?', navn:'Intet atom endnu',
+      linje:'Tilføj en proton for at danne brint (H)', ladTxt:'', ladFarve:'',
+      dom:{cls:'neutral', html:'Atom-nummeret bestemmes af <b>antallet af protoner</b>. Tilføj én for at starte.'},
+      kerne:null});
   }
 
   const el = byZ(Z);
-  symEl.firstChild.textContent = el[1];
-  elName.textContent = el[2] + ' (' + el[1] + ')';
-  elLine.textContent = `Atom-nummer ${Z} · ${state.n} neutroner · ${state.e} elektroner`;
+  m.el = el;
+  m.sym = el[1];
+  m.navn = el[2] + ' (' + el[1] + ')';
+  m.linje = spil ? `Atom-nummer ${Z} · ${aspAntal(s.n,'neutron','neutroner')} · ${aspAntal(s.e,'elektron','elektroner')}`
+                 : `Atom-nummer ${Z} · ${s.n} neutroner · ${s.e} elektroner`;
 
   // ladning / ion-tekst
   let chargeStr='';
   if(Q>0) chargeStr = Q===1?'+':('+'+Q);
   else if(Q<0) chargeStr = Q===-1?'–':(Math.abs(Q)+'–');
-  symCharge.textContent = chargeStr;
-  symCharge.style.color = Q>0?'var(--proton)':(Q<0?'var(--electron)':'transparent');
+  m.ladTxt = chargeStr;
+  m.ladFarve = Q>0?'var(--proton)':(Q<0?'var(--electron)':'transparent');
 
   // ædelgas-tjek: fyldt yderste skal (2 for skal 1, ellers 8) og neutral/ion
   const noble = ['He','Ne','Ar','Kr','Xe','Rn','Og'].includes(el[1]);
-  const oktet = (state.e===2) || (outer===8 && state.e>2 && (noble || mainGroup(Z)!==null));
+  const oktet = (s.e===2) || (outer===8 && s.e>2 && (noble || mainGroup(Z)!==null));
 
   if(Q!==0){
     const ionType = Q>0?'positiv ion (kat-ion)':'negativ ion (an-ion)';
@@ -5004,10 +5178,10 @@ function render(){
     } else if(exp!==null && Q===exp){
       // perfekt — danner netop den fornuftige ion
       cls='ion ok';
-      msg = `<span class="tag ok">Fornuftig ion ✓</span> ${el[2]} står i <b>hovedgruppe ${hg}</b> og danner netop en <b>${Q>0?'+':''}${Q}-ion</b>. `
+      msg = `<span class="tag ok">Fornuftig ion ✓</span> ${el[2]} står i <b>hovedgruppe ${hg}</b> og danner netop en <b>${spil ? atQ(Q) : (Q>0?'+':'')+Q}-ion</b>. `
           + (Z===1
               ? `Ved at afgive sin eneste elektron bliver brint til <b>H⁺</b> — en helt bar proton. Det er den ion, der gør et stof til en <b>syre</b>.`
-              : Q>0 && state.e===2
+              : Q>0 && s.e===2
               ? `Ved at afgive ${Q} elektron${Q>1?'er':''} opnår den heliums struktur med 2 elektroner i skallen.`
               : Q>0 && outer!==8
               ? `Ved at afgive ${Q} elektron${Q>1?'er':''} bliver den fyldte skal nedenunder den nye yderste (${outer} elektroner).`
@@ -5029,9 +5203,11 @@ function render(){
     } else if(exp!==null){
       // forkert fortegn eller forkert størrelse
       cls='ion bad';
-      const expStr = exp>0?('+'+exp):(exp);
+      const expStr = spil ? atQ(exp) : exp>0?('+'+exp):(exp);
       const expVerb = exp>0 ? `afgive ${exp} elektron${exp>1?'er':''}` : `optage ${Math.abs(exp)} elektron${Math.abs(exp)>1?'er':''}`;
-      msg = `<span class="tag bad">Usandsynlig ion ✗</span> Du har bygget en <b>${Q>0?'+':''}${Q}-ion</b>, men ${el[2]} står i <b>hovedgruppe ${hg}</b>. `
+      msg = `<span class="tag bad">Usandsynlig ion ✗</span> `
+          + (spil ? `Det er en <b>${atQ(Q)}-ion</b>, men ${el[2].toLowerCase()}` : `Du har bygget en <b>${Q>0?'+':''}${Q}-ion</b>, men ${el[2]}`)
+          + ` står i <b>hovedgruppe ${hg}</b>. `
           + `Ud fra ædelgas-reglen burde den i stedet <b>${expVerb}</b> og danne en <b>${expStr}-ion</b>.`;
     } else {
       // undergruppe / overgangsmetal — flere mulige ladninger
@@ -5039,26 +5215,69 @@ function render(){
       msg = `<span class="tag warn">Ion</span> ${el[2]} er et <b>overgangsmetal</b> (undergruppe). Disse kan danne flere forskellige ioner, så der er ikke ét entydigt "rigtigt" svar — men de er altid <b>positive</b>${Q<0?', så en negativ ion her er usandsynlig.':'.'}`;
     }
 
-    verdict.className='verdict ' + cls;
-    verdict.innerHTML = msg;
+    m.dom = {cls:cls, html:msg};
   } else if(noble || oktet){
-    verdict.className='verdict noble';
-    verdict.innerHTML = `<span class="tag noble">Ædelgas-regel</span> Yderste skal har <b>${outer} elektroner</b> — atomet er <b>stabilt</b> og søger ikke at binde sig (oktet-reglen opfyldt).`;
+    m.dom = {cls:'noble', html:
+      `<span class="tag noble">Ædelgas-regel</span> Yderste skal har <b>${outer} elektroner</b> — atomet er <b>stabilt</b> og søger ikke at binde sig (oktet-reglen opfyldt).`};
   } else if(mainGroup(Z)===null){
     // undergrupper, lanthanider og actinider — ædelgas-reglen passer ikke her
-    verdict.className='verdict neutral';
-    verdict.innerHTML = `<span class="tag neutral">Neutralt atom</span> Lige mange protoner og elektroner. ${el[2]} hører til <b>undergrupperne</b>, hvor elektronerne fordeler sig mere indviklet, end vi går ind i på F-niveau, og ædelgas-reglen passer ikke her. Som metal afgiver det elektroner og danner <b>positive ioner</b> — ofte med flere mulige ladninger (fx Fe²⁺ og Fe³⁺).`;
+    m.dom = {cls:'neutral', html:
+      `<span class="tag neutral">Neutralt atom</span> Lige mange protoner og elektroner. ${el[2]} hører til <b>undergrupperne</b>, hvor elektronerne fordeler sig mere indviklet, end vi går ind i på F-niveau, og ædelgas-reglen passer ikke her. Som metal afgiver det elektroner og danner <b>positive ioner</b> — ofte med flere mulige ladninger (fx Fe²⁺ og Fe³⁺).`};
   } else {
-    verdict.className='verdict neutral';
     const maal = fills.length===1 ? 2 : 8;   // brint: skal 1 har kun plads til 2
     const mangler = (outer<maal) ? (maal-outer) : 0;
-    verdict.innerHTML = `<span class="tag neutral">Neutralt atom</span> Lige mange protoner og elektroner. Yderste skal har <b>${outer} e⁻</b> — mangler <b>${mangler}</b> i at nå ${maal===2?'heliums fyldte skal på 2':'oktet'}, så atomet vil gerne binde sig (valens ≈ ${Math.min(mangler, outer)}).`;
+    m.dom = {cls:'neutral', html:
+      `<span class="tag neutral">Neutralt atom</span> Lige mange protoner og elektroner. Yderste skal har <b>${outer} e⁻</b> — mangler <b>${mangler}</b> i at nå ${maal===2?'heliums fyldte skal på 2':'oktet'}, så atomet vil gerne binde sig (valens ≈ ${Math.min(mangler, outer)}).`};
   }
 
   // passer neutronerne? — kernen vurderes for sig, uanset ladningen
-  const dom = isotopDom(Z, el);
-  isoDom.className = 'verdict kerne ' + dom.cls;
-  isoDom.innerHTML = dom.msg;
+  m.kerne = isotopDom(Z, el, s.n, o && o.stemme);
+  return m;
+}
+
+/* ---------- Opdater info-panel ---------- */
+function render(){
+  document.getElementById('np').textContent = state.p;
+  document.getElementById('nn').textContent = state.n;
+  document.getElementById('ne').textContent = state.e;
+
+  const m = atomInfo(state);
+
+  document.getElementById('vZ').textContent = m.vZ;
+  document.getElementById('vA').textContent = m.vA;
+  document.getElementById('vQ').textContent = m.vQ;
+  document.getElementById('vShell').innerHTML = m.vShell;
+
+  const symEl = document.getElementById('symEl');
+  const symCharge = document.getElementById('symCharge');
+  const elName = document.getElementById('elName');
+  const elLine = document.getElementById('elLine');
+  const verdict = document.getElementById('verdict');
+  const isoDom = document.getElementById('isoDom');
+
+  if(m.tom){
+    symEl.firstChild.textContent=m.sym;
+    symCharge.textContent=m.ladTxt;
+    elName.textContent=m.navn;
+    elLine.textContent=m.linje;
+    verdict.className='verdict ' + m.dom.cls;
+    verdict.innerHTML=m.dom.html;
+    isoDom.hidden = true;
+    atCheckTask();
+    drawAtom(); return;
+  }
+
+  symEl.firstChild.textContent = m.sym;
+  elName.textContent = m.navn;
+  elLine.textContent = m.linje;
+  symCharge.textContent = m.ladTxt;
+  symCharge.style.color = m.ladFarve;
+
+  verdict.className='verdict ' + m.dom.cls;
+  verdict.innerHTML = m.dom.html;
+
+  isoDom.className = 'verdict kerne ' + m.kerne.cls;
+  isoDom.innerHTML = m.kerne.msg;
   isoDom.hidden = false;
 
   drawAtom();
@@ -5066,9 +5285,9 @@ function render(){
 }
 
 /* Vurdering af kernen: er det den mest almindelige isotop, en anden stabil isotop,
-   eller en radioaktiv kerne med for mange eller for få neutroner? */
-function isotopDom(Z, el){
-  const N = state.n;
+   eller en radioaktiv kerne med for mange eller for få neutroner?
+   N er antallet af neutroner. stemme === 'spil' er Atomspillets stemme (se atomInfo). */
+function isotopDom(Z, el, N, stemme){
   const {A, At, Nt, stabile, typisk, stabil} = isotopInfo(Z, N);
   const stof = el[2].toLowerCase();                 // grundstofnavn inde i en sætning
   const navn = a => `${stof}-${a}`;
@@ -5080,9 +5299,10 @@ function isotopDom(Z, el){
   const forskel = N > Nt ? (k===1 ? 'én neutron for meget' : `${k} neutroner for mange`)
                          : (k===1 ? 'én neutron for lidt' : `${k} neutroner for få`);
   const medNt = Nt===0 ? 'uden neutroner' : `med ${neutr(Nt)}`;
+  const hvem = stemme==='spil' ? 'denne kerne har' : 'du har';   // spillet har ikke selv bygget atomet
   const sammenlign = stabile.length
-    ? ` Den mest almindelige er <b>${navn(At)}</b> ${medNt} — du har ${forskel}.`
-    : ` En af de mest langlivede er <b>${navn(At)}</b> ${medNt} — du har ${forskel}.`;
+    ? ` Den mest almindelige er <b>${navn(At)}</b> ${medNt} — ${hvem} ${forskel}.`
+    : ` En af de mest langlivede er <b>${navn(At)}</b> ${medNt} — ${hvem} ${forskel}.`;
 
   if(!stabile.length){
     // technetium, promethium og alt fra polonium og op
@@ -5409,6 +5629,1119 @@ function buildBigPT(){
      </div>`;
 }
 
+/* ============ ATOMSPILLET ============
+   Byg et atom → Atomspillet: infoboksen "Hvad har du bygget?" vendt om. Boksen stiller
+   spørgsmålene, og eleven svarer i den — fire niveauer à fem opgaver, med samme regler som
+   PhET's Build an Atom-spil: 2 point for rigtigt i første forsøg, 1 i andet, ellers 0.
+   Spillet bruger kun de rene hjælpere (byZ, A_typ, STABILE_A, isotopInfo, shellFill, mainGroup,
+   expectedIon, atIon, atQ, atNavn, atNoBrk, atomInfo, isotopDom og drawAtom). Det kalder aldrig
+   step, reset, setFromZ, fillNeutral eller render og rører hverken state, atTask eller atDone —
+   læringslaget måler byggeopgaverne gennem netop dem.
+   Det hele står før det første render() nedenfor, så alle const er klar, når siden starter, og
+   aspMaal findes, når læringslaget pakker den ind. */
+
+/* Atomspillet: generator. Ren og deterministisk: samme (niveau, seed) giver samme spil.
+   Bruger kun appens egne tabeller: byZ, A_typ, STABILE_A, isotopInfo, expectedIon. */
+const ASP_ZION = [];                                   // H Li Be N O F Na Mg Al P S Cl K Ca
+for(let z = 1; z <= 20; z++){ const x = expectedIon(z); if(x !== 0 && x !== null) ASP_ZION.push(z); }
+const ASP_ZION_BYG = ASP_ZION.filter(z => z !== 1);    // "Byg den fornuftige ion": uden brint
+const ASP_RADIO = {1:[3], 4:[7,10], 6:[11,14], 7:[13,16], 8:[15], 9:[18], 11:[22,24], 15:[32],
+                   16:[35], 17:[36], 18:[39], 19:[40], 20:[41,45]};
+const ASP_BILLEDE = s => s.p <= 10 && s.p + s.n <= 22 && s.e <= 10;
+const ASP_DELVIS = [['sym','Q'], ['A','Q'], ['sym','A'], ['Q','skal'], ['A','skal']];
+const ASP_WARN = [[5,3], [6,4], [6,-4], [14,4], [14,-4]];          // [Z, Q]; ikke B³⁻
+/* de mest bundne pladser vælges først, så de altid har et grundstof tilbage */
+const ASP_PRIO = {ion:0, iondom:1};
+
+function aspRng(seed){ let a = seed >>> 0;                         // mulberry32
+  return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const aspVaelg = (rng, liste) => liste[Math.floor(rng() * liste.length)];
+function aspVaegt(rng, w){ const k = Object.keys(w); let r = rng() * k.reduce((a, x) => a + w[x], 0);
+  for(const x of k){ r -= w[x]; if(r < 0) return x; } return k[k.length - 1]; }
+const aspFraTil = (a, b) => { const o = []; for(let i = a; i <= b; i++) o.push(i); return o; };
+const aspSamme = (u, s) => u.p === s.p && u.n === s.n && u.e === s.e;
+
+/* neutron- og elektronvalg pr. grundstof */
+const aspN = (z, k) => k === 'typisk' ? [A_typ(z) - z]
+  : k === 'stabil' ? STABILE_A[z].filter(A => A !== A_typ(z)).map(A => A - z)
+  : (ASP_RADIO[z] || []).map(A => A - z);
+const aspE = (z, k) => {
+  const l = k === 'neutral' ? [z] : (ASP_ZION.includes(z) ? [z - expectedIon(z)] : []);  // 'fornuftig'
+  return l.filter(e => e >= 0 && e <= 20 && !(z === 1 && e === 2));                       // aldrig H⁻
+};
+function aspKand(zs, nk, ek, filter){ const o = [];
+  zs.forEach(z => aspN(z, nk).forEach(n => aspE(z, ek).forEach(e => {
+    const s = {p:z, n:n, e:e}; if(!filter || filter(s)) o.push(s); })));
+  return o; }
+const aspVis = (rng, sl) => sl.vis === 'valgfri' || !sl.vis ? (rng() < .5 ? 'billede' : 'tal') : sl.vis;
+
+/* én generator pr. type: (plads, rng, ctx) → {vis, felter?, kat?, liste} */
+const ASP_GEN = {
+  grundstof(sl, rng){ const ek = aspVaegt(rng, {neutral:.65, fornuftig:.35}), vis = aspVis(rng, sl);
+    return {vis, liste: aspKand(aspFraTil(1,20), 'typisk', ek, vis === 'billede' ? ASP_BILLEDE : null)}; },
+  skal(){ return {vis:'tal', liste: aspKand(aspFraTil(3,20), 'typisk', 'neutral')}; },
+  masse(sl, rng){ const nk = aspVaegt(rng, {typisk:.5, stabil:.3, radio:.2}),
+      ek = aspVaegt(rng, {neutral:.6, fornuftig:.4}), vis = aspVis(rng, sl);
+    return {vis, liste: aspKand(aspFraTil(1,20), nk, ek, vis === 'billede' ? ASP_BILLEDE : null)}; },
+  ladning(sl, rng){ const ek = aspVaegt(rng, {neutral:.35, fornuftig:.65}), vis = aspVis(rng, sl);
+    return {vis, liste: aspKand(aspFraTil(1,20), 'typisk', ek, vis === 'billede' ? ASP_BILLEDE : null)}; },
+  udfyld(sl, rng, ctx){ const nk = aspVaegt(rng, {typisk:.6, stabil:.25, radio:.15}),
+      ek = aspVaegt(rng, {fornuftig:.55, neutral:.45});
+    const felter = sl.alt ? ['sym','A','Q','skal']
+                 : aspVaelg(rng, ASP_DELVIS.filter(f => !ctx.brugteFelter.has(f.join())));
+    const vis = felter.includes('skal') ? 'tal' : (rng() < .5 ? 'billede' : 'tal');
+    return {vis, felter, liste: aspKand(aspFraTil(1,20), nk, ek, vis === 'billede' ? ASP_BILLEDE : null)}; },
+  byg(sl, rng){ const nk = aspVaegt(rng, {typisk:.5, stabil:.3, radio:.2}),
+      ek = aspVaegt(rng, {neutral:.4, fornuftig:.6});
+    return {vis:'byg', liste: aspKand(aspFraTil(3,20), nk, ek)}; },
+  iondom(sl, rng){ const kat = sl.kat, typ = z => A_typ(z) - z; let l;
+    if(kat === 'ok') l = aspKand(ASP_ZION, 'typisk', 'fornuftig');
+    else if(kat === 'warn') l = ASP_WARN.map(([z, q]) => ({p:z, n:typ(z), e:z - q}));
+    else { l = [];
+      ASP_ZION.forEach(z => { const x = expectedIon(z);
+        [...new Set([-x, x + 1, x - 1])].filter(q => q !== 0 && Math.abs(q) <= 3).forEach(q => {
+          const e = z - q; if(e >= 0 && e <= 20 && !(z === 1 && e === 2)) l.push({p:z, n:typ(z), e}); }); });
+      [2, 10, 18].forEach(z => [1, 2, -1].forEach(q => l.push({p:z, n:typ(z), e:z - q}))); }
+    const vis = rng() < .5 ? 'billede' : 'tal';
+    return {vis, kat, liste: vis === 'billede' ? l.filter(ASP_BILLEDE) : l}; },
+  kernedom(sl, rng){ const kat = sl.kat, nk = kat === 'ok' ? 'typisk' : kat === 'warn' ? 'stabil' : 'radio';
+    const vis = rng() < .5 ? 'billede' : 'tal';
+    return {vis, kat, liste: aspKand(aspFraTil(1,20), nk, 'neutral', vis === 'billede' ? ASP_BILLEDE : null)}; },
+  ion(){ return {vis:'byg', liste: aspKand(ASP_ZION_BYG, 'typisk', 'fornuftig')}; }
+};
+
+/* niveauernes plan: fem pladser {t, vis?, alt?, kat?} */
+const ASP_PLAN = [
+  rng => { const v = ['billede','tal','valgfri'];
+    for(let i = 2; i > 0; i--){ const j = Math.floor(rng() * (i + 1)); [v[i], v[j]] = [v[j], v[i]]; }
+    return [...v.map(x => ({t:'grundstof', vis:x})), {t:'skal'}, {t:'skal'}]; },
+  rng => [{t:'masse', vis:'billede'}, {t:'masse', vis:'tal'}, {t:'ladning', vis:'billede'},
+          {t:'ladning', vis:'tal'}, {t: rng() < .5 ? 'masse' : 'ladning', vis:'valgfri'}],
+  ()  => [{t:'udfyld'}, {t:'udfyld'}, {t:'udfyld', alt:true}, {t:'byg'}, {t:'byg'}],
+  rng => { const ik = () => aspVaegt(rng, {ok:.45, bad:.35, warn:.2}),
+                 kk = () => aspVaegt(rng, {ok:.35, warn:.35, bad:.3});
+    return [{t:'iondom', kat:ik()}, {t:'iondom', kat:ik()},
+            {t:'kernedom', kat:kk()}, {t:'kernedom', kat:kk()}, {t:'ion'}]; }
+];
+
+/* alle forskellige rækkefølger af typerne uden to ens naboer, sorteret */
+function aspPerms(typer){ const ud = new Set();
+  const rek = (rest, acc) => { if(!rest.length){ ud.add(acc.join('|')); return; }
+    rest.forEach((t, i) => { if(acc.length && acc[acc.length - 1] === t) return;
+      rek(rest.slice(0, i).concat(rest.slice(i + 1)), acc.concat(t)); }); };
+  rek(typer, []); return [...ud].sort().map(x => x.split('|')); }
+
+function aspLavSpil(niv, seed, undgaa){
+  undgaa = undgaa || [];
+  const rng = aspRng(seed), plan = ASP_PLAN[niv - 1](rng);
+  const orden = aspVaelg(rng, aspPerms(plan.map(x => x.t)));
+  const koe = {}; plan.forEach(x => (koe[x.t] = koe[x.t] || []).push(x));
+  const pladser = orden.map(t => koe[t].shift());          // hver types pladser i planens rækkefølge
+  const valgOrden = pladser.map((sl, i) => i)
+    .sort((a, b) => (ASP_PRIO[pladser[a].t] ?? 9) - (ASP_PRIO[pladser[b].t] ?? 9) || a - b);
+  const brugtZ = new Set(), ctx = {brugteFelter: new Set()}, liste = new Array(pladser.length);
+  for(const i of valgOrden){
+    const sl = pladser[i]; let valgt = null, info = null;
+    for(let k = 0; k < 30 && !valgt; k++){
+      info = ASP_GEN[sl.t](sl, rng, ctx);
+      const l2 = info.liste.filter(s => !brugtZ.has(s.p));
+      const l1 = l2.filter(s => !undgaa.some(u => aspSamme(u, s)));
+      const l = l1.length ? l1 : l2;
+      if(l.length) valgt = aspVaelg(rng, l);
+    }
+    if(!valgt){                                            // datafejl — sker ikke med tabellerne her
+      console.warn('Atomspillet: ingen kandidat til', sl.t, 'niveau', niv, 'seed', seed);
+      valgt = (info && info.liste[0]) || {p:6, n:6, e:6};
+    }
+    brugtZ.add(valgt.p);
+    if(info.felter) ctx.brugteFelter.add(info.felter.join());
+    liste[i] = {nr: i + 1, t: sl.t, vis: info.vis, felter: info.felter, kat: info.kat,
+                s: {p: valgt.p, n: valgt.n, e: valgt.e}};
+  }
+  return liste;
+}
+
+/* ---------- Atomspillet: data ---------- */
+/* niveauerne: navn, teksten på knappen og et lille ikon bygget af appens egne klasser */
+const ASP_NIV = [
+  {nr:1, navn:'Hvilket grundstof?',
+   kort:'Find grundstoffet ud fra protonerne, og afgør, om det er et neutralt atom eller en ion. Fordel elektronerne på skallerne, og find ud af, hvor mange der er i den yderste.',
+   ikon:'<span class="cell cat-nonmetal"><span class="z">6</span><span class="s">C</span></span>'},
+  {nr:2, navn:'Massetal og ladning',
+   kort:'Regn massetal og ladning ud fra atom-billedet eller partikeltallene.',
+   ikon:'<span class="stat"><span class="k">Massetal</span><span class="v">?</span></span>'},
+  {nr:3, navn:'Udfyld og byg',
+   kort:'Udfyld de felter i infoboksen, der mangler — og byg atomet ud fra en færdig infoboks.',
+   ikon:'<span class="symbolbox"><span class="sym">?</span></span>'},
+  {nr:4, navn:'Ioner og isotoper',
+   kort:'Er ionen fornuftig? Hvilken slags kerne er det? Bedøm atomet, som infoboksen ville, og byg den fornuftige ion.',
+   ikon:'<span class="tag ok">✓</span><span class="tag bad">✗</span>'}
+];
+/* spillets lille periodiske system: hovedgruppe 1–8, periode 1–4 (0 = tomt felt) */
+const ASP_PT = [[1,0,0,0,0,0,0,2],[3,4,5,6,7,8,9,10],[11,12,13,14,15,16,17,18],[19,20,0,0,0,0,0,0]];
+/* køleteknik efter løsningen — fra byg-opgaverne (AT_TASKS) og kølemiddeltabellen */
+const ASP_KOEL = {
+  1:'Brint sidder i propan (R290), ammoniak (R717) og vand (R718).',
+  2:'Helium har R-nummeret R704 og bruges som sporgas, når du leder efter utætheder.',
+  6:'Carbon er rygraden i propan (R290) og i alle HFC-kølemidler.',
+  7:'Nitrogen kender du fra den N₂, du trykprøver med.',
+  8:'Oxygen sidder i vand (R718) og i CO₂ (R744).',
+  9:'Fluor er F\'et i F-gasser som R32 og R134a.',
+  11:'Natrium kender du som Na⁺ i saltlage (brine) af køkkensalt, NaCl.',
+  13:'Når aluminiumslamellerne på en fordamper tæres, bliver aluminium til Al³⁺.',
+  17:'Klor er det atom i R22 og R12, der nedbryder ozon.',
+  18:'Argon bruges som dækgas ved svejsning.',
+  20:'Ca²⁺ kender du fra CaCl₂-brine.'
+};
+const ASP_NOEGLE = 'kemikoel.atomspil.v1';   // {"v":1,"ur":false,"niv":{"2":{"bedst":8,"tid":74}}}
+const ASP_GRAENSE = {p:20, n:40, e:20};      // tællernes loft — som tabellen og målene
+const ASP_INSTR = {A:'Klik på grundstoffet i det periodiske system.', B:'Tæl partiklerne på atom-billedet.',
+                   C:'Byg atomet, så det passer til infoboksen.', D:'Ændr antallet af elektroner, til ionen er fornuftig.'};
+const ASP_FELTNAVN = {Z:'Atom-nummer', A:'Massetal', Q:'Ladning', skal:'Yderste skal'};
+const ASP_DOMTAG = {ok:'Fornuftig ion ✓', warn:'Ualmindelig ion', bad:'Usandsynlig ion ✗'};
+const ASP_KERNETAG = {ok:'Mest almindelige isotop ✓', warn:'Anden isotop', bad:'Ustabil kerne ✗'};
+const ASP_GRUNDTAG = {neutral:'Neutralt atom', ion:'Ion'};
+
+/* spillets tilstand: én const, der ændres, men aldrig erstattes */
+const ASP = {skaerm:'valg', niv:0, seed:0, liste:[], i:0, fase:'svar', forsoeg:0, point:0,
+  svar:{}, forkert:[], byg:{p:0,n:0,e:0}, res:[], logget:{}, tid:0, urId:null, t0:0,
+  klarTilTjek:false, slut:null, gemt:{v:1, ur:false, niv:{}}, sidste:{}, klar:false,
+  laast:[], ude:{}, fb:null, sidsteSvar:null, graense:false};
+
+/* Læringslaget pakker denne ind (pakInd) og logger den. Kaldes én gang pr. kompetence pr. spil. */
+function aspMaal(id, komp, ok, f, s){}
+
+/* ---------- Atomspillet: små rene hjælpere ---------- */
+/* "ingen elektroner", "1 proton", "6 protoner" — kun i prosa; regnestykker står med tal */
+function aspAntal(k, ental, flertal){ return k===0 ? 'ingen ' + flertal : k===1 ? '1 ' + ental : k + ' ' + flertal; }
+const aspStof = z => byZ(z)[2].toLowerCase();                 // "klor", "brint" — inde i en sætning
+const aspTag = (cls, txt) => `<span class="tag ${cls}">${txt}</span>`;
+const aspEsc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const aspOg = l => l.length<2 ? l.join('') : l.slice(0,-1).join(', ') + ' og ' + l[l.length-1];
+const aspYdre0 = z => { const f = shellFill(z); return f[f.length-1]; };   // yderste skal i det neutrale atom
+const aspFoersteTag = h => (h.match(/^<span class="tag [^"]*">[^<]*<\/span>/) || [''])[0];
+const aspIkkeHelt = h => `Ikke helt. ${h} Du har ét forsøg mere.`;
+const aspPel = p => `${aspAntal(p,'proton','protoner')}`;
+const aspEl = e => `${aspAntal(e,'elektron','elektroner')}`;
+
+/* Et tal fra et svarfelt: null er tomt, NaN er ugyldigt. Ladningen må skrives +2, 2+, −1, 1−, + og −. */
+function aspLaesTal(txt, medFortegn){
+  const t = String(txt==null ? '' : txt).trim().replace(/[−–]/g, '-');
+  if(t==='') return null;
+  if(!medFortegn) return /^\d{1,3}$/.test(t) ? +t : NaN;
+  if(/^[+-]?\d{1,2}$/.test(t)) return +t || 0;
+  if(/^\d{1,2}[+-]$/.test(t)) return (t.slice(-1)==='-' ? -1 : 1) * parseInt(t, 10) || 0;
+  if(t==='+') return 1;
+  if(t==='-') return -1;
+  return NaN;
+}
+function aspFmtTid(sek){ sek = Math.max(0, Math.round(sek || 0)); return Math.floor(sek/60) + ':' + String(sek%60).padStart(2, '0'); }
+/* fem stjerner, der fyldes i forhold til pointene: 1 point er en halv stjerne */
+function aspStjerner(point){
+  let h = '';
+  for(let i = 0; i < 5; i++) h += `<span class="asp-stj" style="--f:${Math.max(0, Math.min(1, point/2 - i))*100}%">★</span>`;
+  return h;
+}
+/* PhET's grænser: over 95 % fremragende, over 75 % rigtig godt, mindst 50 % godt */
+function aspTitel(point){
+  if(point >= 10) return {titel:'Fremragende!', opmuntring:'<span class="tag ok">Fuldt hus!</span> Alle fem rigtige i første forsøg.'};
+  if(point >= 8)  return {titel:'Rigtig godt!', opmuntring:'Flot! Spil niveauet igen, og se, om du kan få fuldt hus.'};
+  if(point >= 5)  return {titel:'Godt!', opmuntring:'Godt på vej. Kig på de opgaver, hvor du mistede point — infoboksen viste, hvad der skulle til.'};
+  return {titel:'Bliv ved!', opmuntring:'Det her niveau driller endnu. Byg atomerne i Byg selv, og se, hvad infoboksen siger om dem.'};
+}
+/* én læringshændelse for én kompetence i ét spil: ok når alle gav point, f = 1 når alle sad i første forsøg */
+function aspSamlMaal(res, komp){
+  const r = res.filter(x => x && x.komp===komp);
+  if(!r.length) return null;
+  return {ok: r.every(x => x.point >= 1) ? 1 : 0, f: r.every(x => x.point===2) ? 1 : 2,
+          s: r.reduce((a, x) => a + (x.s || 0), 0)};
+}
+
+/* ---------- Atomspillet: facit og tjek ---------- */
+/* Facit for en opgave, regnet med den samme atomInfo, som tegner infoboksen.
+   Uden argument: den opgave, der står på skærmen (til tests). */
+function aspFacit(d){
+  d = d || ASP.liste[ASP.i];
+  if(!d) return null;
+  const s = d.s, m = atomInfo(s, {stemme:'spil'});
+  return {Z:s.p, sym:m.sym, valg: s.p===s.e ? 'neutral' : 'ion', A:m.A, Q:m.Q, skal:m.ydre,
+          p:s.p, n:s.n, e:s.e, dom: m.dom.cls.split(' ')[1] || null, kerne: m.kerne.cls};
+}
+/* Hvert felt er heltal eller en kategori fra boksens egen funktion — så har hver opgave ét svar */
+function aspRet(d, svar){
+  const f = aspFacit(d);
+  const forkert = ASP_TYPER[d.t].felter(d).filter(k => svar[k] !== f[k]);
+  return {ok: !forkert.length, forkert};
+}
+function aspHint(d, svar){ return ASP_TYPER[d.t].hint(d, svar); }
+
+/* ét felts tip ved første forkerte forsøg — de bruges også inde i "Udfyld infoboksen" */
+function aspHintZ(d, v){
+  const s = d.s, pic = d.vis==='billede';
+  if(v===s.e && s.e!==s.p) return 'Du har valgt efter elektronerne. Det er protonerne, der bestemmer grundstoffet — elektroner kan atomet afgive og optage.';
+  if(v===s.n && s.n!==s.p) return pic ? 'Du har vist talt neutronerne — de grå kugler. Det er protonerne, der bestemmer grundstoffet.'
+                                      : 'Du har valgt efter neutronerne. Det er protonerne, der bestemmer grundstoffet.';
+  if(v===s.p+s.n) return 'Du har brugt massetallet (protoner + neutroner). Atom-nummeret er kun protonerne.';
+  return pic ? 'Atom-nummeret er antallet af protoner. Tæl de røde kugler i kernen igen.'
+             : 'Atom-nummeret er antallet af protoner. Find det tal i det periodiske system.';
+}
+function aspHintA(d, v){
+  const s = d.s;
+  if(s.e>0 && v===s.p+s.n+s.e) return 'Du har talt elektronerne med. De vejer næsten ingenting, så massetallet er kun protoner + neutroner.';
+  if(v===s.p) return `${v} er atom-nummeret — antallet af protoner. Massetallet er protoner + neutroner.`;
+  if(v===s.n) return `${v} er kun neutronerne. Læg protonerne til.`;
+  return 'Massetallet er protoner + neutroner.' + (d.vis==='billede' ? ' Tæl kernen igen — både de røde og de grå kugler.' : ' Læg de to tal sammen.');
+}
+function aspHintQ(d, v){
+  const Q = d.s.p - d.s.e;
+  if(Q!==0 && v===-Q) return 'Tallet passer, men fortegnet er forkert: flere elektroner end protoner giver minus, færre giver plus.';
+  if(Q!==0 && v===0) return 'Der er ikke lige mange protoner og elektroner, så partiklen er ikke neutral.';
+  return 'Ladningen er antallet af protoner minus antallet af elektroner. Neutronerne er neutrale og tæller ikke med.';
+}
+/* Målet regnes som i boksen: 2 når den yderste skal er den første, ellers 8 */
+function aspHintSkal(d, v){
+  const s = d.s, f = shellFill(s.e, s.p), ydre = f.length ? f[f.length-1] : 0, Q = s.p - s.e;
+  const maal = f.length<=1 ? 2 : 8, mangler = Math.max(0, maal - ydre);
+  if(v===s.e) return `${s.e} er alle elektronerne. Fordel dem på skallerne, og tæl kun dem i den yderste.`;
+  if(Q!==0 && v===aspYdre0(s.p)) return `Det er yderste skal for det neutrale atom — men ${atIon(byZ(s.p)[1], Q)} har ${Q>0?'afgivet':'optaget'} ${aspAntal(Math.abs(Q),'elektron','elektroner')}.`;
+  if(s.e>0 && mangler>0 && v===mangler) return `${v} er det antal, atomet mangler i at nå ${maal===8?'oktet':'heliums fyldte skal på 2'}. Spørgsmålet er, hvor mange der er i yderste skal.`;
+  if(v>8) return 'Der er som regel højst 8 elektroner i den yderste skal. Fyld skallerne indefra: 2 i den inderste, så 8.';
+  return 'Fyld skallerne indefra: 2 i den inderste, så 8 — og tæl, hvor mange der er tilbage til den yderste.';
+}
+/* yderste skal forklaret: rigtigt-teksten (rigtig) og vis-svaret-teksten */
+function aspSkalTxt(d, rigtig){
+  const s = d.s, f = shellFill(s.e, s.p), ydre = f.length ? f[f.length-1] : 0;
+  const R = rigtig ? 'Rigtigt! ' : '';
+  if(s.e===0) return `${R}${atIon(byZ(s.p)[1], s.p)} har ingen elektroner, så der er 0 e⁻ i yderste skal.`;
+  if(f.length<=1) return `${R}Med kun ${aspEl(s.e)} er der kun én skal, så yderste skal har ${s.e} e⁻.`;
+  return rigtig ? `Rigtigt! ${aspEl(s.e)} fordeler sig ${f.join('-')}, så der er ${ydre} i yderste skal.`
+                : `${aspEl(s.e)} fordeler sig ${f.join('-')}. Yderste skal har ${ydre} e⁻.`;
+}
+const aspStort = t => t.charAt(0).toUpperCase() + t.slice(1);
+/* neutralt atom eller ion? — sætningen efter grundstoffet */
+function aspNeutralIon(s){
+  return s.p===s.e ? 'Der er lige mange protoner og elektroner, så det er et neutralt atom.'
+    : `Der er ${aspPel(s.p)} og ${aspEl(s.e)}, så det er en ion med ladningen ${atQ(s.p-s.e)}: <b>${atIon(byZ(s.p)[1], s.p-s.e)}</b>.`;
+}
+/* "Udfyld infoboksen": hvor mange af felterne er rigtige? */
+function aspUdfyldTal(d, svar){
+  const fl = ASP_TYPER.udfyld.felter(d), forkert = aspRet(d, svar).forkert;
+  return {k: fl.length - forkert.length, m: fl.length, forkert};
+}
+
+/* ---------- Atomspillet: de ni opgavetyper ----------
+   {navn, komp, felter(d), prompt(d), rigtig(d), hint(d, svar), vis(d), drillede}
+   hint er hele teksten ved første forkerte forsøg; opbrugt (valgfri) teksten ved andet. */
+const ASP_TYPER = {
+  grundstof: {navn:'Hvilket grundstof?', komp:'atom-tal', felter: () => ['Z','valg'],
+    prompt: d => d.vis==='billede'
+      ? 'Tæl protonerne — de røde kugler med + i kernen — og klik på grundstoffet i det periodiske system. Er det et neutralt atom eller en ion?'
+      : 'Find grundstoffet med så mange protoner i det periodiske system, og klik på det. Er det et neutralt atom eller en ion?',
+    rigtig: d => `Rigtigt! ${aspStort(aspPel(d.s.p))} giver atom-nummer ${d.s.p} — det er <b>${aspStof(d.s.p)} (${byZ(d.s.p)[1]})</b>. ${aspNeutralIon(d.s)}`,
+    hint(d, svar){
+      const valgOk = svar.valg === (d.s.p===d.s.e ? 'neutral' : 'ion');
+      if(svar.Z===d.s.p) return aspIkkeHelt('Grundstoffet er rigtigt ✓ — men sammenlign protoner og elektroner. Et neutralt atom har lige mange af hver.');
+      return aspIkkeHelt(aspHintZ(d, svar.Z) + (valgOk ? '' : ' Og sammenlign protoner og elektroner: et neutralt atom har lige mange af hver.'));
+    },
+    vis: d => `Det er <b>${aspStof(d.s.p)} (${byZ(d.s.p)[1]})</b>: ${aspPel(d.s.p)} giver atom-nummer ${d.s.p}. ${aspNeutralIon(d.s)}`,
+    drillede:'Det er protonerne — og kun dem — der bestemmer grundstoffet.'},
+
+  masse: {navn:'Hvad er massetallet?', komp:'atom-tal', felter: () => ['A'],
+    prompt: d => d.vis==='billede' ? 'Tæl partiklerne i kernen, og skriv massetallet i infoboksen.' : 'Skriv massetallet i infoboksen.',
+    rigtig: d => `Rigtigt! Massetal = protoner + neutroner = ${d.s.p} + ${d.s.n} = ${d.s.p+d.s.n}. Elektronerne tæller ikke med — de vejer næsten ingenting.`,
+    hint: (d, svar) => aspIkkeHelt(aspHintA(d, svar.A)),
+    vis: d => `Massetallet er ${d.s.p} + ${d.s.n} = ${d.s.p+d.s.n} (${aspPel(d.s.p)} og ${aspAntal(d.s.n,'neutron','neutroner')}). Kernen er <b>${aspStof(d.s.p)}-${d.s.p+d.s.n}</b> (<sup>${d.s.p+d.s.n}</sup>${byZ(d.s.p)[1]}).`,
+    drillede:'Massetal = protoner + neutroner. Elektronerne tæller ikke med.'},
+
+  ladning: {navn:'Hvad er ladningen?', komp:'atom-ion', felter: () => ['Q'],
+    prompt: d => d.vis==='billede'
+      ? 'Tæl protonerne og elektronerne, og skriv ladningen i infoboksen. Protonerne er positive, elektronerne negative.'
+      : 'Skriv ladningen i infoboksen. Protonerne er positive, elektronerne negative.',
+    rigtig(d){ const Q = d.s.p - d.s.e;
+      return `Rigtigt! Ladning = protoner − elektroner = ${d.s.p} − ${d.s.e} = ${atQ(Q)}. `
+        + (Q>0 ? 'Der mangler elektroner, så det er en positiv ion.' : Q<0 ? 'Der er elektroner i overskud, så det er en negativ ion.'
+               : 'Lige mange af hver — det er et neutralt atom.'); },
+    hint: (d, svar) => aspIkkeHelt(aspHintQ(d, svar.Q)),
+    vis(d){ const Q = d.s.p - d.s.e;
+      return `Ladningen er ${d.s.p} − ${d.s.e} = ${atQ(Q)} (${aspPel(d.s.p)} og ${aspEl(d.s.e)}). `
+        + (Q ? `Det er ionen <b>${atIon(byZ(d.s.p)[1], Q)}</b>.` : 'Det er et neutralt atom.'); },
+    drillede:'Ladning = protoner − elektroner. Flere elektroner end protoner giver minus.'},
+
+  skal: {navn:'Hvor mange i yderste skal?', komp:'atom-opbygning', felter: () => ['skal'],
+    prompt: () => 'Fordel elektronerne på skallerne, og skriv, hvor mange der er i den yderste. Fyld skallerne indefra: højst 2 i den inderste og 8 i den næste. Den tredje skal har plads til 18, men for grundstof 1–20 får den kun 8, før den fjerde begynder.',
+    rigtig: d => aspSkalTxt(d, true),
+    hint: (d, svar) => aspIkkeHelt(aspHintSkal(d, svar.skal)),
+    vis: d => aspSkalTxt(d, false),
+    drillede:'Fyld skallerne indefra: 2 i den inderste og 8 i den næste — for grundstof 1–20 også højst 8 i den tredje — og tæl kun dem i den yderste.'},
+
+  udfyld: {navn:'Udfyld infoboksen', komp:'atom-tal',
+    felter: d => d.felter.map(f => f==='sym' ? 'Z' : f),
+    prompt(d){ const sym = d.felter.includes('sym');
+      if(d.vis==='billede') return sym ? 'Felterne med ? mangler. Tæl partiklerne på atom-billedet, klik på grundstoffet i det periodiske system, og skriv tallene.'
+                                       : 'Felterne med ? mangler. Tæl partiklerne på atom-billedet, og skriv tallene.';
+      return 'Felterne med ? mangler. Brug partikeltallene til at udfylde dem.' + (sym ? ' Grundstoffet vælger du i det periodiske system.' : ''); },
+    rigtig: d => `Rigtigt! Hele infoboksen passer: <b>${atNavn(d.s)}</b>.`,
+    hint(d, svar){
+      const {k, m, forkert} = aspUdfyldTal(d, svar), f = forkert[0];
+      let t = k>=2 ? `Ikke helt. ${k} af ${m} felter er rigtige.` : k===1 ? `Ikke helt. 1 af ${m} felter er rigtigt.`
+            : 'Ikke helt. Ingen af felterne er rigtige endnu.';
+      if(k>0) t += forkert.length===1 ? ' Ret det røde felt.' : ' Ret de røde felter.';
+      t += ' ' + (f==='Z' ? aspHintZ(d, svar.Z) : f==='A' ? aspHintA(d, svar.A) : f==='Q' ? aspHintQ(d, svar.Q) : aspHintSkal(d, svar.skal));
+      return t + ' Du har ét forsøg mere.';
+    },
+    opbrugt(d, svar){
+      const {k, m} = aspUdfyldTal(d, svar);
+      return (k>=2 ? `Desværre — ${k} af ${m} felter var rigtige.` : k===1 ? `Desværre — 1 af ${m} felter var rigtigt.`
+            : 'Desværre — ingen af felterne var rigtige.') + ' Tryk på <b>Vis svaret</b>.';
+    },
+    vis(d){ const s = d.s, L = {
+        sym:`Grundstof: ${aspPel(s.p)} giver ${aspStof(s.p)} (${byZ(s.p)[1]}).`,
+        A:`Massetal: ${s.p} + ${s.n} = ${s.p+s.n}`,
+        Q:`Ladning: ${s.p} − ${s.e} = ${atQ(s.p-s.e)}`,
+        skal:'Yderste skal: ' + aspSkalTxt(d, false)};
+      return '<ul class="asp-facit">' + d.felter.map(f => `<li>${L[f]}</li>`).join('') + '</ul>'; },
+    drillede:'Atom-nummer = protoner, massetal = protoner + neutroner, ladning = protoner − elektroner.'},
+
+  byg: {navn:'Byg atomet', komp:'atom-opbygning', felter: () => ['p','n','e'],
+    prompt: () => 'Byg det atom, infoboksen beskriver. Brug + og − under atomet, eller skriv tallene direkte.',
+    rigtig: d => `Rigtigt! ${aspStort(aspPel(d.s.p))}, ${aspAntal(d.s.n,'neutron','neutroner')} og ${aspEl(d.s.e)} passer præcis til infoboksen: <b>${atNavn(d.s)}</b>.`,
+    hint(d, b){
+      const s = d.s, Q = s.p - s.e, Q2 = b.p - b.e;
+      if(!b.p) return aspIkkeHelt(`Der er ingen protoner, så det er ikke noget grundstof. Atom-nummeret ${s.p} er antallet af protoner.`);
+      if(b.p!==s.p) return aspIkkeHelt(`Du har bygget ${atNavn(b)} — det er ikke ${aspStof(s.p)}. Atom-nummeret ${s.p} er antallet af protoner.`);
+      if(b.n!==s.n) return aspIkkeHelt(`Grundstoffet passer ✓, men massetallet bliver ${b.p+b.n} — i infoboksen står der ${s.p+s.n}. Neutroner = massetal − atom-nummer.`);
+      if(Q2===-Q && Q!==0) return aspIkkeHelt(`Kernen passer ✓, men ladningen bliver ${atQ(Q2)} — fortegnet er vendt. Plus betyder færre elektroner end protoner, minus betyder flere.`);
+      return aspIkkeHelt(`Kernen passer ✓, men ladningen bliver ${atQ(Q2)} — i infoboksen står der ${atQ(Q)}. Ret elektronerne.`);
+    },
+    vis(d){ const s = d.s, Q = s.p - s.e, A = s.p + s.n;
+      return `Atom-nummer ${s.p} giver ${aspPel(s.p)}. Massetal ${A} − ${s.p} = ${aspAntal(s.n,'neutron','neutroner')}. `
+        + (Q>0 ? `Ladning ${atQ(Q)} betyder ${aspEl(Q)} færre end protonerne: ${s.p} − ${Q} = ${aspEl(s.e)}.`
+         : Q<0 ? `Ladning ${atQ(Q)} betyder ${aspEl(-Q)} flere end protonerne: ${s.p} + ${-Q} = ${aspEl(s.e)}.`
+         : `Ladning 0 betyder lige så mange elektroner som protoner: ${aspEl(s.e)}.`); },
+    drillede:'Neutroner = massetal − atom-nummer. Plus-ladning betyder færre elektroner end protoner, minus-ladning flere.'},
+
+  ion: {navn:'Byg den fornuftige ion', komp:'atom-ion', felter: () => ['e'],
+    prompt: d => `Lav ${aspStof(d.s.p)}atomet om til den ion, infoboksen kalder <span class="tag ok">Fornuftig ion ✓</span>. Du må kun ændre elektronerne.`,
+    rigtig(d){ const s = d.s, x = expectedIon(s.p), f = shellFill(s.e, s.p), ion = atIon(byZ(s.p)[1], x);
+      return f.length>1
+        ? `Rigtigt! ${byZ(s.p)[2]} står i hovedgruppe ${mainGroup(s.p)} og ${x>0?'afgiver':'optager'} ${aspEl(Math.abs(x))} — så bliver atomet til <b>${ion}</b> med ${aspEl(s.e)} fordelt ${f.join('-')}.`
+        : `Rigtigt! ${byZ(s.p)[2]} står i hovedgruppe ${mainGroup(s.p)} og afgiver ${aspEl(x)} — så bliver atomet til <b>${ion}</b> med 2 elektroner i den inderste skal, ligesom helium.`; },
+    hint(d, b){
+      const s = d.s, x = expectedIon(s.p), Q2 = s.p - b.e, y0 = aspYdre0(s.p), el = byZ(s.p);
+      const dom = atomInfo({p:s.p, n:s.n, e:b.e}).dom.cls.split(' ')[1] || 'bad';
+      const t = `Infoboksen ville sige ${aspTag(dom, ASP_DOMTAG[dom])} om <b>${atIon(el[1], Q2)}</b>. `;
+      if(x>0 && Q2<0) return aspIkkeHelt(t + `${el[2]} har ${aspEl(y0)} i yderste skal. Er det lettere at komme af med ${y0===1?'den':'dem'} eller at få ${8-y0} til?`);
+      if(x<0 && Q2>0) return aspIkkeHelt(t + `${el[2]} har ${aspEl(y0)} i yderste skal og mangler kun ${8-y0} i at nå oktet. Skal ${aspStof(s.p)} afgive eller optage elektroner?`);
+      return aspIkkeHelt(t + 'Fortegnet passer ✓. Men atomet afgiver eller optager så få elektroner som muligt for at få en fyldt yderste skal — hold øje med feltet Yderste skal.');
+    },
+    vis(d){ const s = d.s, x = expectedIon(s.p), y0 = aspYdre0(s.p), el = byZ(s.p), ion = atIon(el[1], x);
+      return x>0
+        ? `${el[2]} har ${aspEl(y0)} i yderste skal som neutralt atom. Det er lettere at afgive ${y0===1?'den':'dem'} end at optage ${8-y0}, så ionen er <b>${ion}</b>: ${aspPel(s.p)} og ${aspEl(s.e)}.`
+        : `${el[2]} har ${aspEl(y0)} i yderste skal som neutralt atom. Det er lettere at optage ${aspEl(-x)} end at afgive ${y0}, så ionen er <b>${ion}</b>: ${aspPel(s.p)} og ${aspEl(s.e)}.`; },
+    drillede:'Atomet afgiver eller optager så få elektroner som muligt for at få en fyldt yderste skal.'},
+
+  iondom: {navn:'Fornuftig ion?', komp:'atom-ion', felter: () => ['dom'],
+    prompt: d => `Hvad ville infoboksen sige om <b>${atIon(byZ(d.s.p)[1], d.s.p-d.s.e)}</b>? Vælg den dom, den ville give.`,
+    rigtig: () => 'Rigtigt! Infoboksen siger det samme. Læs begrundelsen i infoboksen ovenfor.',
+    hint(d, svar){
+      const z = d.s.p, f = aspFacit(d).dom, c = svar.dom, nv = aspStof(z), y0 = aspYdre0(z);
+      const T = k => aspTag(k, ASP_DOMTAG[k]), ion = atIon(byZ(z)[1], z - d.s.e);
+      const okAnden = `Tænk på ædelgas-reglen: som neutralt atom har ${nv} ${aspEl(y0)} i yderste skal. Afgiver eller optager ${nv} elektroner — og hvor mange?`;
+      let h;
+      if(f==='ok') h = z===1 ? 'Brint står i hovedgruppe 1 ligesom lithium og natrium. Hvad gør atomerne i hovedgruppe 1 med deres ene yderste elektron?' : okAnden;
+      else if(f==='warn') h = z===5
+        ? (c==='ok' ? 'Som neutralt atom har bor 3 elektroner i yderste skal, men bor ligger på metal-trappen. Danner bor en simpel ion — eller deler det elektroner i stedet?'
+                    : 'B³⁺ passer faktisk med ædelgas-reglen, for bor står i hovedgruppe 3. Men bor ligger på metal-trappen — hvad gør bor i stedet for at danne ioner?')
+        : (c==='ok' ? `Som neutralt atom har ${nv} 4 elektroner i yderste skal. Danner ${nv} ioner — eller deler det elektroner i stedet?`
+                    : `${T('bad')} bruger infoboksen om ioner, der går imod ædelgas-reglen. Men ${nv} står i hovedgruppe 4, hvor der er lige langt til at afgive 4 og til at optage 4. Hvad gør ${nv} i stedet for at danne ioner?`);
+      else if(mainGroup(z)===8) h = `Som neutralt atom har ${nv} fyldt yderste skal — ${nv} er en ædelgas. Danner ædelgasser ioner?`;
+      else h = c==='ok' ? okAnden
+        : `${T('warn')} bruger infoboksen kun om bor, carbon og silicium, som hellere deler elektroner. ${byZ(z)[2]} følger ædelgas-reglen — passer ${ion} til den?`;
+      return aspIkkeHelt(h);
+    },
+    vis: d => `Infoboksen siger ${aspTag(aspFacit(d).dom, ASP_DOMTAG[aspFacit(d).dom])} — læs begrundelsen ovenfor.`,
+    drillede:'En fornuftig ion har fået ædelgas-struktur ved at afgive eller optage så få elektroner som muligt. Ædelgasserne danner ikke ioner, og bor, carbon og silicium deler hellere elektroner.'},
+
+  kernedom: {navn:'Hvilken slags kerne?', komp:'atom-tal', felter: () => ['kerne'],
+    prompt: d => `Regn massetallet ud, og sammenlign med listen over de stabile isotoper af ${aspStof(d.s.p)}. Hvad siger infoboksen om kernen?`,
+    rigtig: d => `Rigtigt! Massetallet er ${d.s.p} + ${d.s.n} = ${d.s.p+d.s.n}. Læs infoboksens begrundelse ovenfor.`,
+    hint: () => aspIkkeHelt('Regn først massetallet ud: protoner + neutroner. Står det på listen — og er det den mest almindelige?'),
+    vis(d){ const k = aspFacit(d).kerne;
+      return `Massetallet er ${d.s.p} + ${d.s.n} = ${d.s.p+d.s.n}. Infoboksen siger ${aspTag(k, ASP_KERNETAG[k])} — læs begrundelsen ovenfor.`; },
+    drillede:'Kun bestemte antal neutroner giver en stabil kerne — massetallet skal stå på listen over stabile isotoper, og den mest almindelige er kun én af dem.'}
+};
+
+/* ---------- Atomspillet: gemte bedste scorer (pr. enhed) ---------- */
+function aspHent(){
+  try{
+    const r = localStorage.getItem(ASP_NOEGLE);
+    if(!r) return;
+    const d = JSON.parse(r);
+    if(!d || typeof d!=='object') return;
+    if(typeof d.ur==='boolean') ASP.gemt.ur = d.ur;
+    if(d.niv && typeof d.niv==='object') ['1','2','3','4'].forEach(k => {
+      const x = d.niv[k];
+      if(x && Number.isInteger(x.bedst) && x.bedst>=0 && x.bedst<=10)
+        ASP.gemt.niv[k] = {bedst:x.bedst, tid: Number.isInteger(x.tid) && x.tid>0 ? x.tid : null};
+    });
+  }catch(e){}
+}
+function aspGem(){ try{ localStorage.setItem(ASP_NOEGLE, JSON.stringify(ASP.gemt)); }catch(e){} }
+/* som PhET's updateScoreAndBestTime: ny bedste score, eller samme score på kortere tid */
+function aspGemBedst(){
+  const k = String(ASP.niv), p = ASP.point, ur = ASP.gemt.ur, tid = ASP.tid, g = ASP.gemt.niv[k];
+  const tt = 'Tid ' + aspFmtTid(tid);
+  let txt = '';
+  if(!g){
+    ASP.gemt.niv[k] = {bedst:p, tid: ur && tid>0 ? tid : null};
+    if(p>0) txt = 'Ny bedste score!' + (ur ? ' · ' + tt : '');
+  } else if(p>g.bedst){
+    g.bedst = p; g.tid = ur && tid>0 ? tid : null;
+    txt = 'Ny bedste score!' + (ur ? ' · ' + tt : '');
+  } else if(ur && p===g.bedst && p>0 && tid>0 && (g.tid===null || tid<g.tid)){
+    g.tid = tid;
+    txt = `${tt} — ny rekord for ${p} point!`;
+  } else if(ur && g.tid){
+    txt = `${tt} (din bedste: ${aspFmtTid(g.tid)})`;
+  }
+  aspGem();
+  return txt;
+}
+
+/* ---------- Atomspillet: tidtagning ---------- */
+/* tæller kun, mens opgaven står fremme, og siden ikke er skjult */
+function aspUrTik(){
+  const o = document.getElementById('aspOpg');
+  if(!o || o.offsetParent===null || document.hidden) return;
+  ASP.tid++;
+  const u = document.getElementById('aspUr');
+  if(u) u.textContent = 'Tid ' + aspFmtTid(ASP.tid);
+}
+function aspStopUr(){ if(ASP.urId!==null){ clearInterval(ASP.urId); ASP.urId = null; } }
+
+/* ---------- Atomspillet: læringshændelser ---------- */
+function aspLogKomp(komp, res){
+  if(ASP.logget[komp]) return;
+  const m = aspSamlMaal(res || ASP.res, komp);
+  if(!m) return;
+  ASP.logget[komp] = true;
+  aspMaal(ASP.niv + ':' + komp, komp, m.ok, m.f, m.s);
+}
+/* "Til niveauerne" midt i et spil: en opgave, der er forsøgt, men ikke løst, tæller 0 point */
+function aspFlushMaal(){
+  const res = ASP.res.slice(), d = ASP.liste[ASP.i];
+  if(d && !res[ASP.i] && ASP.forsoeg>0)
+    res[ASP.i] = {komp:ASP_TYPER[d.t].komp, point:0, s:(Date.now()-ASP.t0)/1000};
+  [...new Set(res.filter(Boolean).map(r => r.komp))].forEach(k => aspLogKomp(k, res));
+}
+
+/* ---------- Atomspillet: tegning ---------- */
+const aspId = id => document.getElementById(id);
+function aspMeld(txt){ const l = aspId('aspLive'); if(l) l.textContent = txt; }
+function aspSkaerm(k){
+  ASP.skaerm = k;
+  aspId('aspValg').hidden = k!=='valg';
+  aspId('aspOpg').hidden = k!=='opg';
+  aspId('aspSlut').hidden = k!=='slut';
+}
+const aspUdfoldet = () => ASP.fase==='rigtig' || ASP.fase==='vist';   // boksen er foldet helt ud
+const aspReduceret = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+function aspNivKnap(n){
+  const g = ASP.gemt.niv[n.nr];
+  const bedst = !g ? 'Ikke spillet endnu' : `Bedste: ${g.bedst} af 10 point` + (g.tid ? ' · ' + aspFmtTid(g.tid) : '');
+  return `<button type="button" class="asp-niv" data-asp="niv" data-niv="${n.nr}">
+      <span class="asp-ikon" aria-hidden="true">${n.ikon}</span>
+      <span class="asp-niv-tekst">
+        <span class="eyebrow">Niveau ${n.nr}</span>
+        <b class="asp-niv-navn">${n.navn}</b>
+        <small class="asp-niv-txt">${n.kort}</small>
+        <span class="asp-stjerner" aria-hidden="true">${aspStjerner(g ? g.bedst : 0)}</span>
+        <span class="asp-niv-bedst">${bedst}</span>
+      </span>
+    </button>`;
+}
+function aspTegnValg(){
+  const g = ASP.gemt.niv, nr = [1,2,3,4], ur = ASP.gemt.ur;
+  const sum = nr.reduce((a, n) => a + (g[n] ? g[n].bedst : 0), 0);
+  const alle = nr.every(n => g[n] && g[n].bedst===10), nogen = nr.some(n => g[n]);
+  const mrk = alle ? '40 af 40 point ✓' : nogen ? `SPIL · ${sum} af 40 point` : 'SPIL · 4 niveauer';
+  aspId('aspValg').innerHTML = `
+    <div class="card opg-kort${alle?' klar':''}">
+      <h2><span class="opg-mrk${alle?' klar':''}" id="aspMrk">${mrk}</span>Atomspillet</h2>
+      <p class="sub" style="margin:0 0 14px">Hvert spil har fem opgaver, og det er infoboksen fra <b>Byg selv</b>,
+        der stiller dem: de felter, der står med ?, skal du udfylde. Rigtigt i første forsøg giver 2 point,
+        i andet forsøg 1 point — 10 point er fuldt hus.</p>
+      <div class="asp-niveauer">${ASP_NIV.map(aspNivKnap).join('')}</div>
+      <div class="row"><button type="button" class="mb-task${ur?' on':''}" data-asp="ur" id="aspUrKnap" aria-pressed="${ur}">Tidtagning: ${ur?'til':'fra'}</button></div>
+      <p class="hint">Start med niveau 1, eller spring direkte til det, du vil øve.</p>
+    </div>`;
+}
+
+/* hvilken slags er hvert felt i boksen, mens opgaven står? vis, svar, skjul, foelg (følger det
+   valgte grundstof), live (følger det, eleven bygger), tag, maal og valg — samt instruktionslinjerne A–D */
+function aspModi(d){
+  const V = 'vis', S = 'skjul', pic = d.vis==='billede';
+  const alt = {sym:V, lad:V, linje:V, Z:V, A:V, Q:V, skal:V, dom:S, kerne:S};
+  const skjult = {sym:S, lad:S, linje:'B', Z:S, A:S, Q:S, skal:S, dom:S, kerne:S};
+  switch(d.t){
+    case 'grundstof': return {sym:'svar', lad:S, linje:'A', Z:'foelg', A:S, Q:S, skal:S, dom:'valg', kerne:S};
+    case 'masse':     return pic ? Object.assign(skjult, {A:'svar'}) : Object.assign(alt, {A:'svar'});
+    case 'ladning':   return pic ? Object.assign(skjult, {Q:'svar'}) : Object.assign(alt, {lad:S, Q:'svar'});
+    case 'skal':      return Object.assign(alt, {skal:'svar'});
+    case 'udfyld': { const h = x => d.felter.includes(x);
+      /* står atom-nummeret i linjen, er grundstoffet givet — så står instruktionen der i stedet */
+      return Object.assign(alt, {sym: h('sym') ? 'svar' : V, lad: h('Q') ? S : V,
+        linje: pic ? 'B' : h('sym') ? 'A' : V, Z: h('sym') ? 'foelg' : V,
+        A: h('A') ? 'svar' : V, Q: h('Q') ? 'svar' : V, skal: h('skal') ? 'svar' : V}); }
+    case 'byg':      return Object.assign(alt, {linje:'C', dom:'tag', kerne:'tag'});
+    case 'ion':      return Object.assign(alt, {lad:'live', linje:'D', Q:'live', skal:'live', dom:'maal'});
+    case 'iondom':   return Object.assign(alt, {dom:'valg'});
+    case 'kernedom': return Object.assign(alt, {linje: pic ? 'B' : V, A:S, kerne:'valg'});
+  }
+  return alt;
+}
+/* ✓ eller ✗ på et svarfelt: efter et tjek, og på de rigtige felter, der er låst efter "Prøv igen" */
+function aspMaerke(k){
+  const d = ASP.liste[ASP.i];
+  if(!d || !ASP_TYPER[d.t].felter(d).includes(k)) return '';
+  if(ASP.fase==='rigtig') return 'rigtig';
+  if(ASP.fase==='igen' || ASP.fase==='opbrugt' || ASP.fase==='vist') return ASP.forkert.includes(k) ? 'forkert' : 'rigtig';
+  return ASP.laast.includes(k) ? 'rigtig' : '';
+}
+const aspMrk = mk => `<span class="asp-mrk" aria-hidden="true">${mk==='rigtig' ? '✓' : mk==='forkert' ? '✗' : ''}</span>`;
+/* "dit svar: 36" — kun på de forkerte felter, når svaret er vist */
+function aspDit(k){
+  if(ASP.fase!=='vist' || !ASP.forkert.includes(k) || !ASP.sidsteSvar) return '';
+  const v = ASP.sidsteSvar[k];
+  const t = k==='Q' ? atQ(v) : k==='Z' ? byZ(v)[1] : k==='valg' ? ASP_GRUNDTAG[v]
+          : k==='dom' ? ASP_DOMTAG[v] : k==='kerne' ? ASP_KERNETAG[v] : v;
+  return `<small class="asp-dit">dit svar: ${t}</small>`;
+}
+function aspSvarFelt(k){
+  const aktiv = ASP.fase==='svar' && !ASP.laast.includes(k), mk = aspMaerke(k);
+  const q = k==='Q', navn = ASP_FELTNAVN[k], v = aspLaesTal(ASP.svar[k], q);
+  // et låst svar står, som boksen ville skrive det: ladningen med fortegn og rigtigt minus
+  const txt = !aktiv && q && typeof v==='number' && !Number.isNaN(v) ? atQ(v) : ASP.svar[k] || '';
+  const ugyldig = aktiv && Number.isNaN(v);
+  return `<div class="stat asp-svar${aktiv ? '' : ' asp-laast'}${mk ? ' asp-' + mk : ''}"><div class="k">${navn} ${aspMrk(mk)}</div>`
+    + `<div class="v"><span class="asp-trin">`
+    + `<button type="button" data-asp="felt" data-felt="${k}" data-d="-1" aria-label="${navn}: én mindre"${aktiv ? '' : ' disabled'}>−</button>`
+    + `<input class="asp-ind" id="aspF-${k}" data-felt="${k}" inputmode="${q ? 'text' : 'numeric'}" placeholder="?" aria-label="${navn}" aria-describedby="aspKlarHint" value="${aspEsc(txt)}"${aktiv ? '' : ' readonly'}${ugyldig || mk==='forkert' ? ' aria-invalid="true"' : ''}>`
+    + `<button type="button" data-asp="felt" data-felt="${k}" data-d="1" aria-label="${navn}: én mere"${aktiv ? '' : ' disabled'}>+</button>`
+    + `</span></div></div>`;
+}
+/* valgbrikkerne bærer boksens egne mærkater — en radiogruppe, så piletasterne virker */
+function aspChips(k, valg){
+  const aktiv = ASP.fase==='svar' && !ASP.laast.includes(k), mk = aspMaerke(k), ude = ASP.ude[k] || [];
+  return `<fieldset class="asp-valg"${aktiv ? '' : ' disabled'}><legend class="asp-sr">Hvad siger infoboksen?</legend>`
+    + valg.map(([v, cls, txt]) => {
+        const valgt = ASP.svar[k]===v, udelukket = ude.includes(v);
+        const kl = udelukket ? ' asp-ude asp-forkert' : valgt && mk ? ' asp-' + mk : '';
+        return `<label class="asp-chip${kl}"><input type="radio" name="aspValg" data-felt="${k}" value="${v}"${valgt ? ' checked' : ''}${udelukket ? ' disabled' : ''}>`
+          + `${aspTag(cls, txt)}${valgt && mk ? aspMrk(mk) : udelukket ? aspMrk('forkert') : ''}</label>`;
+      }).join('') + '</fieldset>';
+}
+/* Infoboksen i de eksisterende klasser — tegnet af atomInfo i spillets stemme */
+function aspBoks(d){
+  const s = d.s, ude = aspUdfoldet(), M = ude ? null : aspModi(d);
+  const m = atomInfo(s, {stemme:'spil'});
+  const lv = d.t==='ion' && !ude ? atomInfo({p:s.p, n:s.n, e: ASP.byg.e==null ? s.p : ASP.byg.e}, {stemme:'spil'}) : m;
+  const md = k => ude ? 'vis' : M[k];
+
+  // symbolet med ladning, navn og linje
+  let sym, navn, symKl = '';
+  if(md('sym')==='svar'){
+    const z = ASP.svar.Z, mk = aspMaerke('Z');
+    sym = z ? byZ(z)[1] : '<span class="asp-sym-q">?</span>';
+    navn = (z ? byZ(z)[2] + ' (' + byZ(z)[1] + ')' : 'Vælg et grundstof') + (mk ? ' ' + aspMrk(mk) : '');
+    if(mk) symKl = ' asp-' + mk;
+  } else if(md('sym')==='skjul'){ sym = '–'; navn = 'Ukendt atom'; }
+  else {
+    sym = m.sym; navn = m.navn;
+    const mk = ude ? aspMaerke('Z') : '', dit = mk ? aspDit('Z') : '';
+    if(mk){ navn += dit || ' ' + aspMrk('rigtig'); if(!dit) symKl = ' asp-rigtig'; }
+  }
+  const lad = md('lad')==='vis' ? m : md('lad')==='live' ? lv : null;
+  const linje = md('linje')==='vis' ? m.linje : `<span class="asp-instr">${ASP_INSTR[md('linje')]}</span>`;
+  let h = `<div class="symbolbox${symKl}"><div class="sym">${sym}<span class="charge"${lad ? ` style="color:${lad.ladFarve}"` : ''}>${lad ? lad.ladTxt : ''}</span></div>`
+        + `<div class="meta"><div class="name">${navn}</div><div class="line">${linje}</div></div></div>`;
+
+  // de fire felter
+  h += '<div class="read">' + ['Z','A','Q','skal'].map(k => {
+    const navnK = ASP_FELTNAVN[k], mode = md(k);
+    if(mode==='skjul') return `<div class="stat asp-skjul"><div class="k">${navnK}</div><div class="v">–</div></div>`;
+    if(mode==='foelg') return `<div class="stat"><div class="k">${navnK}</div><div class="v">${ASP.svar.Z || '<span class="asp-sym-q">?</span>'}</div></div>`;
+    if(mode==='svar') return aspSvarFelt(k);
+    const src = mode==='live' ? lv : m, v = {Z:src.vZ, A:src.vA, Q:src.vQ, skal:src.vShell}[k];
+    const mk = ude && k!=='Z' ? aspMaerke(k) : '', dit = mk ? aspDit(k) : '';
+    if(mk && !dit) return `<div class="stat asp-rigtig"><div class="k">${navnK} ${aspMrk('rigtig')}</div><div class="v">${v}</div></div>`;
+    return `<div class="stat"><div class="k">${navnK}</div><div class="v">${v}</div>${dit}</div>`;
+  }).join('') + '</div>';
+
+  // elektronernes dom og kernens dom
+  const dm = md('dom'), km = md('kerne');
+  if(dm==='vis') h += `<div class="verdict ${m.dom.cls}">${m.dom.html}</div>` + aspDit(d.t==='grundstof' ? 'valg' : 'dom');
+  else if(dm==='tag') h += `<div class="verdict ${m.dom.cls}">${aspFoersteTag(m.dom.html)}</div>`;
+  else if(dm==='maal') h += `<div class="verdict ion ok"><span class="tag ok">Fornuftig ion ✓</span> Sådan skal infoboksen dømme den ion, du bygger.</div>`;
+  else if(dm==='valg') h += d.t==='grundstof'
+    ? aspChips('valg', [['neutral','neutral',ASP_GRUNDTAG.neutral], ['ion','ion',ASP_GRUNDTAG.ion]])
+    : aspChips('dom', ['ok','warn','bad'].map(k => [k, k, ASP_DOMTAG[k]]));
+  if(km==='vis') h += `<div class="verdict kerne ${m.kerne.cls}">${m.kerne.msg}</div>` + aspDit('kerne');
+  else if(km==='tag') h += `<div class="verdict kerne ${m.kerne.cls}">${aspFoersteTag(m.kerne.msg)}</div>`;
+  else if(km==='valg') h += aspChips('kerne', ['ok','warn','bad'].map(k => [k, k, ASP_KERNETAG[k]]));
+
+  // de stabile isotoper, så kernens dom kan afgøres uden at kende tabellen udenad
+  if(d.t==='kernedom'){
+    const z = s.p, st = STABILE_A[z], nv = aspStof(z);
+    h += `<div class="mb-taskbox asp-isotoper">${atNoBrk(st.length===1
+      ? `${byZ(z)[2]} har kun én stabil isotop: <b>${nv}-${st[0]}</b>.`
+      : `Stabile isotoper af ${nv}: ${aspOg(st.map(a => nv + '-' + a))}. Den mest almindelige er <b>${nv}-${A_typ(z)}</b>.`)}</div>`;
+  }
+  h += `<div class="quiz-feedback${ASP.fb ? ' show ' + ASP.fb.cls : ''}" id="aspFb">${ASP.fb ? atNoBrk(ASP.fb.html) : ''}</div>`;
+  if(ude && ASP_KOEL[s.p]) h += `<div class="mb-koel"><b>Køleteknik:</b> ${ASP_KOEL[s.p]}</div>`;
+  return h;
+}
+/* spillets periodiske system: knapper med data-sz (aldrig data-z og .active, som byggeren leder efter) */
+function aspPT(valgtZ, forkertZ){
+  const laast = ASP.fase!=='svar' || ASP.laast.includes('Z'), ude = ASP.ude.Z || [];
+  const kan = z => !!z && !laast && !ude.includes(z);
+  // roving tabindex: ét tabstop — det valgte grundstof, ellers brint, ellers det første, der kan vælges
+  const alle = [].concat(...ASP_PT).filter(Boolean);
+  const stop = kan(valgtZ) ? valgtZ : kan(1) ? 1 : (alle.find(kan) || valgtZ || 1);
+  let h = ASP_PT[0].map((_, i) => `<span class="asp-pt-hg" aria-hidden="true">${i+1}</span>`).join('');
+  ASP_PT.forEach(r => r.forEach(z => {
+    if(!z){ h += '<span class="cell empty" aria-hidden="true"></span>'; return; }
+    const el = byZ(z), kl = (z===valgtZ ? ' asp-valgt' : '') + (z===forkertZ || ude.includes(z) ? ' asp-forkert' : '');
+    h += `<button type="button" class="cell cat-${el[4]} asp-cell${kl}" data-asp="z" data-sz="${z}" aria-label="${el[2]}, atom-nummer ${z}" aria-pressed="${z===valgtZ}" tabindex="${z===stop ? 0 : -1}"${kan(z) ? '' : ' disabled'}><span class="z">${z}</span><span class="s">${el[1]}</span></button>`;
+  }));
+  return `<div class="asp-pt" role="group" aria-label="Det periodiske system, grundstof 1 til 20">${h}</div>`;
+}
+function aspHoejre(d){
+  const titel = d.t==='byg' || d.t==='ion' ? 'Det skal du bygge' : 'Infoboksen';
+  let h = `<div class="card asp-boks" id="aspBoksKort"><h2>${titel}</h2>${aspBoks(d)}</div>`;
+  if(ASP_TYPER[d.t].felter(d).includes('Z') && !aspUdfoldet()){
+    const fk = (ASP.fase==='igen' || ASP.fase==='opbrugt') && ASP.forkert.includes('Z') ? ASP.svar.Z : null;
+    h += `<div class="card" style="margin-top:18px"><h2>Det periodiske system</h2>${aspPT(ASP.svar.Z, fk)}`
+       + `<p class="hint">Klik på grundstoffet. Tallene øverst er hovedgrupperne.</p></div>`;
+  }
+  return h;
+}
+const aspBilledTekst = s => `Atom-billede: ${aspPel(s.p)}, ${aspAntal(s.n,'neutron','neutroner')} og ${aspEl(s.e)}`;
+const ASP_LEGENDE = '<div class="shells-legend">Røde kugler med + er protoner, grå kugler er neutroner, og de blå prikker på skallerne er elektroner.</div>';
+const ASP_BINS = [['p','Protoner','positiv (+)','protoner'], ['n','Neutroner','neutral (0)','neutroner'], ['e','Elektroner','negativ (−)','elektroner']];
+/* det, eleven har bygget — et ugyldigt felt tegnes som 0 */
+function aspBygS(){ const b = ASP.byg; return {p:b.p || 0, n:b.n || 0, e:b.e || 0}; }
+function aspVenstre(d){
+  if(d.vis==='tal'){
+    return `<div class="card"><h2>Partiklerne</h2><div class="bins">` + ASP_BINS.map(([k, navn, lad]) =>
+      `<div class="bin"><div class="dot ${k}"></div><div class="lbl"><b>${navn}</b>${lad}</div><span class="asp-num">${d.s[k]}</span></div>`).join('')
+      + '</div></div>';
+  }
+  const svg = `<svg class="stage asp-stage" id="aspStage" viewBox="0 0 400 400" role="img" aria-label="${aspBilledTekst(d.vis==='byg' ? aspBygS() : d.s)}"></svg>`;
+  if(d.vis==='billede') return `<div class="card"><h2>Atom-model</h2>${svg}${ASP_LEGENDE}</div>`;
+  const aktiv = ASP.fase==='svar', ion = d.t==='ion';
+  return `<div class="card"><h2>Byg atomet</h2>${svg}${ASP_LEGENDE}<div class="bins">` + ASP_BINS.map(([k, navn, lad, fl]) => {
+      const fast = ion && k!=='e', laast = !aktiv || fast || ASP.laast.includes(k);
+      const mk = fast ? '' : aspMaerke(k), dit = aspDit(k), roed = mk==='forkert' && !dit;
+      const v = ASP.byg[k];
+      return `<div class="bin${mk==='rigtig' ? ' asp-rigtig' : roed ? ' asp-forkert' : ''}"><div class="dot ${k}"></div>`
+        + `<div class="lbl"><b>${navn}${mk && !dit ? ' ' + aspMrk(mk) : ''}</b>${lad}</div><div class="counter">`
+        + `<button type="button" data-asp="trin" data-type="${k}" data-d="-1" aria-label="færre ${fl}"${laast ? ' disabled' : ''}>−</button>`
+        + `<input class="num" id="aspN-${k}" inputmode="numeric" aria-label="Antal ${fl}" aria-describedby="aspGraense" value="${v==null ? '' : v}"${laast ? ' readonly' : ''}${roed ? ' aria-invalid="true"' : ''}>`
+        + `<button type="button" data-asp="trin" data-type="${k}" data-d="1" aria-label="flere ${fl}"${laast ? ' disabled' : ''}>+</button></div>`
+        + (fast ? '<small class="asp-laast">låst</small>' : '') + dit + '</div>';
+    }).join('') + `</div><div class="row"><button type="button" class="btn" data-asp="nulstil"${aktiv ? '' : ' disabled'}>Nulstil</button></div>`
+    + `<p class="hint" id="aspGraense"${ASP.graense ? '' : ' hidden'}>I spillet kan du højst have 20 protoner, 40 neutroner og 20 elektroner.</p></div>`;
+}
+/* atom-billedet: tælleligt, uden hjørnetekst og uro, så længe opgaven står — helt ud efter svaret */
+function aspTegnBillede(){
+  const svg = aspId('aspStage'), d = ASP.liste[ASP.i];
+  if(!svg || !d) return;
+  const s = d.vis==='byg' ? aspBygS() : d.s, ude = aspUdfoldet();
+  drawAtom(svg, s, {gid:'asp', tael:true, etiket:ude, uro:ude, tom:'Byg atomet her'});
+  svg.setAttribute('aria-label', aspBilledTekst(s));
+}
+const ASP_ANSIGT = {
+  glad: '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" style="fill:var(--ok)"/><circle cx="11" cy="13" r="2" fill="#04331f"/><circle cx="21" cy="13" r="2" fill="#04331f"/><path d="M10 19q6 6 12 0" stroke="#04331f" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>',
+  sur:  '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" style="fill:var(--proton)"/><circle cx="11" cy="13" r="2" fill="#3a0d06"/><circle cx="21" cy="13" r="2" fill="#3a0d06"/><path d="M10 23q6-6 12 0" stroke="#3a0d06" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>'
+};
+function aspTegnOpg(){
+  const d = ASP.liste[ASP.i], T = ASP_TYPER[d.t], f = ASP.fase, sidst = ASP.i===ASP.liste.length-1;
+  const loest = ASP.res.filter(Boolean).length, sejr = f==='rigtig', ud = f==='rigtig' || f==='vist';
+  const p = ASP.res[ASP.i] ? ASP.res[ASP.i].point : 0;
+  const ansigt = sejr ? ASP_ANSIGT.glad : f==='igen' || f==='opbrugt' || f==='vist' ? ASP_ANSIGT.sur : '';
+  const kort = sejr ? `+${p} point` : f==='igen' ? 'Ikke helt' : f==='opbrugt' || f==='vist' ? '0 point' : '';
+  aspId('aspOpg').innerHTML = `
+    <div class="card asp-top">
+      <div class="quiz-bar">
+        <span id="aspNr">Niveau ${ASP.niv} · Opgave ${ASP.i+1} af ${ASP.liste.length}</span>
+        <span class="asp-ur" id="aspUr" role="timer"${ASP.gemt.ur ? '' : ' hidden'}>Tid ${aspFmtTid(ASP.tid)}</span>
+        <span class="quiz-score" id="aspPoint">Point: ${ASP.point}</span>
+        <button type="button" class="btn" data-asp="tilvalg">Til niveauerne</button>
+      </div>
+      <div class="quiz-track"><div class="quiz-track-fill" id="aspTrack" style="width:${loest/ASP.liste.length*100}%"></div></div>
+      <h3 class="quiz-q" id="aspQ" tabindex="-1">${T.navn}</h3>
+      <p class="hint" id="aspPrompt" style="margin:0">${T.prompt(d)}</p>
+    </div>
+    <form class="grid" id="aspForm" novalidate autocomplete="off" style="margin-top:18px">
+      <div id="aspVenstre">${aspVenstre(d)}</div>
+      <div id="aspHoejre">${aspHoejre(d)}</div>
+    </form>
+    <div class="asp-handling" id="aspHandling">
+      <span class="asp-ansigt" aria-hidden="true">${ansigt}</span><span class="asp-kort" id="aspKort">${kort}</span>
+      <button type="submit" form="aspForm" class="btn primary" id="aspTjek" aria-describedby="aspKlarHint"${f==='svar' ? '' : ' hidden'}>Tjek</button>
+      <span class="hint" id="aspKlarHint"${f==='svar' ? '' : ' hidden'}></span>
+      <button type="button" class="btn" data-asp="igen" id="aspIgen"${f==='igen' ? '' : ' hidden'}>Prøv igen</button>
+      <button type="button" class="btn" data-asp="vis" id="aspVis"${f==='opbrugt' ? '' : ' hidden'}>Vis svaret</button>
+      <button type="button" class="btn primary" data-asp="${sidst ? 'slut' : 'naeste'}" id="aspNaeste"${ud ? '' : ' hidden'}>${sidst ? 'Se resultatet →' : 'Næste →'}</button>
+    </div>`;
+  aspTegnBillede();
+  aspKlar();
+}
+/* højre side for sig: efter et klik i tabellen og mens ionen bygges */
+function aspTegnHoejre(){ const h = aspId('aspHoejre'); if(h) h.innerHTML = aspHoejre(ASP.liste[ASP.i]); }
+/* Tjek kan først trykkes, når alle felter med ? har et gyldigt svar — og hintet siger hvorfor */
+function aspKlar(){
+  const d = ASP.liste[ASP.i], tjek = aspId('aspTjek'), hint = aspId('aspKlarHint');
+  let h = '';
+  if(d && ASP.fase==='svar'){
+    const fl = ASP_TYPER[d.t].felter(d).filter(k => !ASP.laast.includes(k));
+    const TAELLER = {p:'Protoner', n:'Neutroner', e:'Elektroner'};
+    for(const k of fl){
+      if((k==='A' || k==='skal') && Number.isNaN(aspLaesTal(ASP.svar[k], false))){ h = `Skriv et helt tal i feltet ${ASP_FELTNAVN[k]}, fx 12.`; break; }
+      if(k==='Q' && Number.isNaN(aspLaesTal(ASP.svar[k], true))){ h = 'Skriv ladningen som et helt tal, fx +2, 0 eller −1.'; break; }
+      if(TAELLER[k] && ASP.byg[k]==null){ h = `Skriv et helt tal i feltet ${TAELLER[k]}.`; break; }
+    }
+    if(!h){
+      if(d.t==='byg' && !ASP.byg.p && !ASP.byg.n && !ASP.byg.e) h = 'Byg atomet først.';
+      else if(d.t==='ion' && ASP.byg.e===d.s.p) h = 'Ændr antallet af elektroner først.';
+      else if(fl.some(k => k==='Z' ? !ASP.svar.Z : (k==='A' || k==='Q' || k==='skal') && aspLaesTal(ASP.svar[k], k==='Q')===null)) h = 'Udfyld felterne med ? først.';
+      else if(fl.some(k => (k==='valg' || k==='dom' || k==='kerne') && !ASP.svar[k])) h = 'Vælg et svar først.';
+    }
+  }
+  ASP.klarTilTjek = !!d && ASP.fase==='svar' && !h;
+  if(tjek) tjek.disabled = !ASP.klarTilTjek;
+  if(hint) hint.textContent = h;
+}
+function aspFokus(id){ const e = aspId(id); if(e) e.focus(); }
+/* feedbacken rulles frem — scroll-margin holder den fri af den klæbende knaplinje på mobil.
+   Står feedbacken allerede helt inde i billedet, ruller Chrome ikke, heller ikke når knaplinjen
+   dækker dens nederste del. Så rulles det stykke, der mangler, med hånden. */
+function aspRulFb(){
+  const fb = aspId('aspFb'), bar = aspId('aspHandling');
+  if(!fb) return;
+  const glat = aspReduceret() ? 'auto' : 'smooth', r = fb.getBoundingClientRect();
+  const kant = bar && getComputedStyle(bar).position==='sticky' ? Math.min(innerHeight, bar.getBoundingClientRect().top) : innerHeight;
+  if(r.top >= 0 && r.bottom <= innerHeight){
+    if(r.bottom > kant - 8) window.scrollBy({top: Math.min(r.bottom - kant + 20, r.top), behavior: glat});
+    return;
+  }
+  fb.scrollIntoView({block:'nearest', behavior: glat});
+}
+
+/* ---------- Atomspillet: forløbet ---------- */
+function aspNyOpgave(){
+  const d = ASP.liste[ASP.i];
+  Object.assign(ASP, {fase:'svar', forsoeg:0, forkert:[], laast:[], fb:null, sidsteSvar:null, graense:false,
+    svar:{Z:null, valg:null, A:'', Q:'', skal:'', dom:null, kerne:null}, ude:{Z:[], valg:[], dom:[], kerne:[]},
+    byg: d.t==='ion' ? {p:d.s.p, n:d.s.n, e:d.s.p} : {p:0, n:0, e:0}, t0:Date.now()});
+}
+function aspStart(niv, seed){
+  if(!ASP.klar) aspInit();
+  if(seed==null) seed = (Date.now() ^ Math.floor(Math.random()*4294967296)) >>> 0;
+  aspStopUr();
+  const liste = aspLavSpil(niv, seed, ASP.sidste[niv]);
+  ASP.sidste[niv] = liste.map(d => d.s);                   // næste spil på niveauet undgår de samme atomer
+  Object.assign(ASP, {niv, seed, liste, i:0, point:0, res:[], logget:{}, tid:0, slut:null});
+  aspNyOpgave();
+  if(ASP.gemt.ur) ASP.urId = setInterval(aspUrTik, 1000);
+  aspSkaerm('opg');
+  aspTegnOpg();
+  aspFokus('aspQ');
+  aspMeld(`Opgave 1 af ${liste.length}: ${ASP_TYPER[liste[0].t].navn}`);
+}
+function aspLaesSvar(){
+  const v = ASP.svar, b = ASP.byg;
+  return {Z:v.Z, valg:v.valg, dom:v.dom, kerne:v.kerne, A:aspLaesTal(v.A, false), Q:aspLaesTal(v.Q, true),
+          skal:aspLaesTal(v.skal, false), p:b.p, n:b.n, e:b.e};
+}
+/* opgaven er afgjort (rigtig eller opbrugt): resultatet gemmes, og er det kompetencens sidste
+   opgave i spillet, logges den med det samme — så går intet tabt, hvis siden lukkes */
+function aspAfgjort(point){
+  const d = ASP.liste[ASP.i], T = ASP_TYPER[d.t];
+  ASP.res[ASP.i] = {nr:d.nr, t:d.t, komp:T.komp, point, s:(Date.now()-ASP.t0)/1000, q:T.navn, navn:atNavn(d.s)};
+  if(!ASP.liste.slice(ASP.i+1).some(x => ASP_TYPER[x.t].komp===T.komp)) aspLogKomp(T.komp);
+  if(ASP.i===ASP.liste.length-1) aspAfslutNiveau();
+}
+function aspTjek(){
+  if(!ASP.klarTilTjek || ASP.fase!=='svar') return;
+  const d = ASP.liste[ASP.i], T = ASP_TYPER[d.t], svar = aspLaesSvar(), r = aspRet(d, svar);
+  ASP.forsoeg++;
+  ASP.sidsteSvar = svar;
+  ASP.forkert = r.forkert;
+  if(r.ok){
+    const p = ASP.forsoeg===1 ? 2 : 1;
+    ASP.point += p;
+    ASP.fase = 'rigtig';
+    ASP.fb = {cls:'good', html:T.rigtig(d)};
+    aspAfgjort(p);
+    aspTegnOpg();
+    aspId('aspNaeste').focus({preventScroll:true});
+    aspMeld(`Rigtigt! ${p} point.`);
+    aspRulFb();
+  } else if(ASP.forsoeg===1){
+    ASP.fase = 'igen';
+    ASP.fb = {cls:'trin', html:aspHint(d, svar)};
+    aspTegnOpg();
+    aspId('aspIgen').focus({preventScroll:true});
+    aspMeld('Ikke rigtigt. Du har ét forsøg mere.');
+    aspRulFb();
+  } else {
+    ASP.fase = 'opbrugt';
+    ASP.fb = {cls:'bad', html: T.opbrugt ? T.opbrugt(d, svar) : 'Desværre — heller ikke denne gang. Tryk på <b>Vis svaret</b>.'};
+    aspAfgjort(0);
+    aspTegnOpg();
+    aspId('aspVis').focus({preventScroll:true});
+    aspMeld('Ikke rigtigt. Tryk på Vis svaret.');
+    aspRulFb();
+  }
+}
+/* kun de forkerte felter låses op; et forkert valg i tabellen eller blandt brikkerne kan ikke vælges igen */
+function aspIgen(){
+  if(ASP.fase!=='igen') return;
+  const d = ASP.liste[ASP.i], fl = ASP_TYPER[d.t].felter(d);
+  ASP.laast = fl.filter(k => !ASP.forkert.includes(k));
+  ASP.forkert.forEach(k => { if(ASP.ude[k]){ ASP.ude[k].push(ASP.svar[k]); ASP.svar[k] = null; } });
+  ASP.fase = 'svar';
+  aspTegnOpg();
+  const k = ASP.forkert[0];
+  const maal = k==='Z' ? document.querySelector('#aspOpg .asp-cell[tabindex="0"]')
+            : ASP.ude[k] ? document.querySelector('#aspOpg .asp-valg input:not(:disabled)')
+            : aspId(ASP_FELTNAVN[k] ? 'aspF-' + k : 'aspN-' + k);
+  if(maal) maal.focus();
+}
+function aspVisSvar(){
+  if(ASP.fase!=='opbrugt') return;
+  const d = ASP.liste[ASP.i];
+  ASP.fase = 'vist';
+  ASP.fb = {cls:'lektion', html:ASP_TYPER[d.t].vis(d)};
+  if(d.vis==='byg') ASP.byg = {p:d.s.p, n:d.s.n, e:d.s.e};    // tællerne sættes til facit
+  aspTegnOpg();
+  aspId('aspNaeste').focus({preventScroll:true});
+  aspMeld('Svaret er vist.');
+  aspRulFb();
+}
+function aspNaeste(){
+  if(ASP.i>=ASP.liste.length-1){ aspVisSlut(); return; }
+  ASP.i++;
+  aspNyOpgave();
+  aspTegnOpg();
+  aspFokus('aspQ');
+  aspMeld(`Opgave ${ASP.i+1} af ${ASP.liste.length}: ${ASP_TYPER[ASP.liste[ASP.i].t].navn}`);
+}
+/* PhET's endLevel: én gang, når den sidste opgave er afgjort */
+function aspAfslutNiveau(){
+  if(ASP.slut) return;
+  aspStopUr();
+  const rekordTxt = aspGemBedst();
+  [...new Set(ASP.res.filter(Boolean).map(r => r.komp))].forEach(k => aspLogKomp(k));
+  const t = aspTitel(ASP.point);
+  ASP.slut = {niv:ASP.niv, point:ASP.point, titel:t.titel, opmuntring:t.opmuntring, rekordTxt,
+              perfekt:ASP.point===10, res:ASP.res.slice(), regnet:false};
+}
+/* resultatet tegnes kun ud fra ASP.slut — så kan det tegnes igen uden at ændre noget */
+function aspVisSlut(){
+  const S = ASP.slut;
+  if(!S) return;
+  const n = ASP_NIV[S.niv-1], stj = String(S.point/2).replace('.', ',');
+  const recap = S.res.map((r, i) =>
+    `<li><span>${i+1}. ${r.q} — <b>${atNoBrk(r.navn)}</b></span> <span class="tag ${r.point===2 ? 'ok' : r.point===1 ? 'warn' : 'bad'}">${r.point} point</span></li>`).join('');
+  const drillede = [...new Set(S.res.filter(r => r.point===0).map(r => r.t))].map(t => `<li>${ASP_TYPER[t].drillede}</li>`).join('');
+  aspId('aspSlut').innerHTML = `
+    <div class="card quiz-card asp-slut">
+      <div style="text-align:center">
+        <div class="result-ring" style="--pct:${S.point*10}%"><span>${S.point}/10</span></div>
+        <h2 id="aspTitel" tabindex="-1" style="font-size:24px;margin:14px 0 4px">${S.titel}</h2>
+        <span class="asp-stjerner asp-stor" role="img" aria-label="${stj} af 5 stjerner">${aspStjerner(S.point)}</span>
+        <p class="sub" style="margin:6px auto">Du fik ${S.point} af 10 point på niveau ${S.niv} »${n.navn}«.</p>
+        <p class="hint" id="aspRekord">${S.rekordTxt}</p>
+        <p class="sub" id="aspOpmuntring" style="margin:6px auto 0">${S.opmuntring}</p>
+      </div>
+      <h3 class="qz-h3">Sådan gik det</h3>
+      <ol class="asp-recap">${recap}</ol>
+      ${drillede ? `<h3 class="qz-h3">Det drillede</h3><ul class="asp-drillede">${drillede}</ul>` : ''}
+      <div class="row" style="justify-content:center;margin-top:18px">
+        <button type="button" class="btn primary" data-asp="igenniv">Spil niveau ${S.niv} igen</button>
+        ${S.niv<4 ? '<button type="button" class="btn" data-asp="naesteniv">Næste niveau →</button>' : ''}
+        <button type="button" class="btn" data-asp="tilvalg">Til niveauerne</button>
+        ${S.point<=4 ? '<button type="button" class="btn" data-asp="byg">Øv dig i Byg selv</button>' : ''}
+      </div>
+    </div>`;
+  aspSkaerm('slut');
+  aspFokus('aspTitel');
+  aspMeld(`Niveauet er slut: ${S.point} af 10 point.`);
+  if(S.perfekt && !S.regnet){ S.regnet = true; aspRegn(); }
+}
+/* belønningen for fuldt hus: protoner, neutroner og elektroner regner ned over kortet */
+function aspRegn(){
+  if(aspReduceret()) return;
+  const kort = document.querySelector('#aspSlut .asp-slut');
+  if(!kort) return;
+  const r = document.createElement('div');
+  r.className = 'asp-regn';
+  r.setAttribute('aria-hidden', 'true');
+  let h = '';
+  for(let i = 0; i < 30; i++)    // placering og forsinkelse ud fra nummeret, så billedet er det samme hver gang
+    h += `<i class="${'pne'[i%3]}" style="left:${(i*37)%100}%;animation-delay:${(i*7)%12/10}s;animation-duration:${(2.4 + (i%13)/10).toFixed(1)}s"></i>`;
+  r.innerHTML = h;
+  kort.appendChild(r);
+  setTimeout(() => r.remove(), 5000);
+}
+function aspTilValg(){
+  if(ASP.skaerm==='opg' && !ASP.slut) aspFlushMaal();     // et afbrudt spil giver ingen bedste score
+  aspStopUr();
+  aspSkaerm('valg');
+  aspTegnValg();
+  const b = document.querySelector(`#aspValg .asp-niv[data-niv="${ASP.niv}"]`);
+  if(b) b.focus();
+}
+
+/* ---------- Atomspillet: input ---------- */
+function aspKlikZ(z){
+  if(ASP.fase!=='svar' || ASP.laast.includes('Z') || (ASP.ude.Z || []).includes(z)) return;
+  ASP.svar.Z = z;
+  aspTegnHoejre();                                         // symbol, navn og atom-nummer følger valget
+  const c = document.querySelector(`#aspOpg .asp-cell[data-sz="${z}"]`);
+  if(c) c.focus();
+  aspKlar();
+}
+/* − og + på et svarfelt. Fra tomt giver + 1 og − 0 (ladningen −1). */
+function aspFelt(k, dd){
+  if(ASP.fase!=='svar' || ASP.laast.includes(k)) return;
+  const q = k==='Q', lo = q ? -9 : 0, hi = k==='A' ? 99 : k==='skal' ? 20 : 9;
+  let v = aspLaesTal(ASP.svar[k], q);
+  v = v===null || Number.isNaN(v) ? (dd>0 ? 1 : q ? -1 : 0) : Math.max(lo, Math.min(hi, v + dd));
+  ASP.svar[k] = q ? atQ(v) : String(v);
+  const inp = aspId('aspF-' + k);
+  if(inp){ inp.value = ASP.svar[k]; inp.removeAttribute('aria-invalid'); }
+  aspKlar();
+}
+/* det, der følger tællerne: billedet, og i "Byg den fornuftige ion" også ladning og yderste skal */
+function aspLive(){
+  aspTegnBillede();
+  if(ASP.liste[ASP.i].t==='ion') aspTegnHoejre();
+}
+function aspVisGraense(ja){ ASP.graense = ja; const g = aspId('aspGraense'); if(g) g.hidden = !ja; }
+function aspTrin(k, dd){
+  const d = ASP.liste[ASP.i];
+  if(ASP.fase!=='svar' || ASP.laast.includes(k) || (d.t==='ion' && k!=='e')) return;
+  let v = (ASP.byg[k] || 0) + dd;
+  const loft = v>ASP_GRAENSE[k];
+  v = Math.max(0, Math.min(ASP_GRAENSE[k], v));
+  ASP.byg[k] = v;
+  const inp = aspId('aspN-' + k);
+  if(inp){ inp.value = v; inp.removeAttribute('aria-invalid'); }
+  aspVisGraense(loft);
+  aspLive();
+  aspKlar();
+}
+function aspNulstil(){
+  const d = ASP.liste[ASP.i];
+  if(ASP.fase!=='svar') return;
+  ['p','n','e'].forEach(k => {
+    if(ASP.laast.includes(k) || (d.t==='ion' && k!=='e')) return;
+    ASP.byg[k] = d.t==='ion' ? d.s.p : 0;
+    const inp = aspId('aspN-' + k);
+    if(inp){ inp.value = ASP.byg[k]; inp.removeAttribute('aria-invalid'); }
+  });
+  aspVisGraense(false);
+  aspLive();
+  aspKlar();
+}
+function aspKlik(e){
+  const b = e.target.closest('[data-asp]');
+  if(!b || b.disabled || !e.currentTarget.contains(b)) return;
+  switch(b.dataset.asp){
+    case 'niv':      aspStart(+b.dataset.niv); break;
+    case 'ur':       ASP.gemt.ur = !ASP.gemt.ur; aspGem(); aspTegnValg(); aspFokus('aspUrKnap'); break;
+    case 'z':        aspKlikZ(+b.dataset.sz); break;
+    case 'felt':     aspFelt(b.dataset.felt, +b.dataset.d); break;
+    case 'trin':     aspTrin(b.dataset.type, +b.dataset.d); break;
+    case 'nulstil':  aspNulstil(); break;
+    case 'igen':     aspIgen(); break;
+    case 'vis':      aspVisSvar(); break;
+    case 'naeste':   aspNaeste(); break;
+    case 'slut':     aspVisSlut(); break;
+    case 'tilvalg':  aspTilValg(); break;
+    case 'igenniv':  aspStart(ASP.slut ? ASP.slut.niv : ASP.niv); break;
+    case 'naesteniv':aspStart(Math.min(4, (ASP.slut ? ASP.slut.niv : ASP.niv) + 1)); break;
+    case 'byg':      if(typeof visUnderfane==='function') visUnderfane('build','byg',true); break;
+  }
+}
+function aspInput(e){
+  const t = e.target;
+  if(ASP.fase!=='svar') return;
+  if(t.name==='aspValg'){ ASP.svar[t.dataset.felt] = t.value; aspKlar(); return; }
+  if(t.classList.contains('asp-ind')){
+    const k = t.dataset.felt;
+    ASP.svar[k] = t.value;
+    if(Number.isNaN(aspLaesTal(t.value, k==='Q'))) t.setAttribute('aria-invalid', 'true'); else t.removeAttribute('aria-invalid');
+    aspKlar();
+    return;
+  }
+  if(t.classList.contains('num') && t.id.indexOf('aspN-')===0){
+    const k = t.id.slice(5);
+    let v = aspLaesTal(t.value, false);
+    if(v===null || Number.isNaN(v)){ ASP.byg[k] = null; t.setAttribute('aria-invalid', 'true'); aspVisGraense(false); }
+    else {
+      const loft = v>ASP_GRAENSE[k];
+      if(loft){ v = ASP_GRAENSE[k]; t.value = v; }
+      ASP.byg[k] = v;
+      t.removeAttribute('aria-invalid');
+      aspVisGraense(loft);
+    }
+    aspLive();
+    aspKlar();
+  }
+}
+/* piletasterne i spillets periodiske system: inden for 8 × 4, uden om tomme og spærrede felter */
+function aspTast(e){
+  const c = e.target.closest && e.target.closest('.asp-cell');
+  const ret = {ArrowLeft:[0,-1], ArrowRight:[0,1], ArrowUp:[-1,0], ArrowDown:[1,0]}[e.key];
+  if(!c || !ret) return;
+  e.preventDefault();
+  const z = +c.dataset.sz;
+  let r = ASP_PT.findIndex(x => x.includes(z)), k = ASP_PT[r].indexOf(z);
+  for(;;){
+    r += ret[0]; k += ret[1];
+    if(r<0 || r>=ASP_PT.length || k<0 || k>=8) return;
+    const b = ASP_PT[r][k] && document.querySelector(`#aspOpg .asp-cell[data-sz="${ASP_PT[r][k]}"]`);
+    if(b && !b.disabled){ c.tabIndex = -1; b.tabIndex = 0; b.focus(); return; }
+  }
+}
+/* Kaldes fra showTab('build') — også hver gang et afsnit skiftes. Første gang sættes spillet op;
+   bagefter tegnes kun niveauskærmen igen (for de bedste scorer). En opgave eller et resultat
+   tegnes aldrig om herfra, og fokus og rulning bliver, hvor de er. */
+function aspInit(){
+  const rod = aspId('atomSpil');
+  if(!rod) return;
+  if(!ASP.klar){
+    aspHent();
+    rod.addEventListener('click', aspKlik);
+    rod.addEventListener('input', aspInput);
+    /* uden preventDefault ville formularen uden action hente index.html?… og genstarte appen */
+    rod.addEventListener('submit', e => { e.preventDefault(); if(ASP.klarTilTjek) aspTjek(); });
+    rod.addEventListener('keydown', aspTast);
+    aspTegnValg();
+    ASP.klar = true;
+    return;
+  }
+  if(ASP.skaerm==='valg') aspTegnValg();
+}
+
 buildPT();
 atRenderTasks();
 render();
@@ -5468,6 +6801,7 @@ function showTab(name){
   if(name==='mol'){ mbInit(); kbInit(); }
   if(name==='fridge'){ initFridge(); initRnr(); if(curRefr) renderMol(curRefr); }
   if(name==='ptable') buildBigPT();
+  if(name==='build' && typeof aspInit==='function') aspInit();
   if(name==='tewi') initTEWI();
   if(name==='gw') initGW();
   if(name==='elev' && typeof initElev==='function') initElev();
@@ -10075,7 +11409,7 @@ function rxRender(){
    c = index på det rigtige svar i o[] (svarene blandes ved visning)
 ============================================================ */
 const QZ_EMNE = {
-  atom:   {navn:"Atomets opbygning",     kort:"Atomet",      fane:"build",  fanenavn:"Byg et atom",
+  atom:   {navn:"Atomets opbygning",     kort:"Atomet",      fane:"build",  uf:"byg", fanenavn:"Byg et atom",
            raad:"Øv dig i fanen <b>Byg et atom</b>: sæt protoner, neutroner og elektroner og se, hvornår atomet er neutralt, og hvornår det bliver til en ion. Kompendiet kapitel 1."},
   pt:     {navn:"Det periodiske system", kort:"Periodesystem", fane:"ptable", fanenavn:"Periodisk system",
            raad:"Klik rundt i fanen <b>Periodisk system</b> og læs felterne. Husk de to nøgler: <b>perioden = antal skaller</b>, <b>hovedgruppen = elektroner i yderste skal</b>. Kompendiet kapitel 2."},
@@ -11158,7 +12492,7 @@ function qzResultat(){
         `<div class="qz-ff">
            <div class="qz-ff-h">${qzEmne(t).navn} <span>${pr[t].r} ud af ${pr[t].i}</span></div>
            <p>${qzEmne(t).raad}</p>
-           ${qzEmne(t).fane?`<button class="btn" onclick="showTab('${qzEmne(t).fane}')">Gå til ${qzEmne(t).fanenavn} →</button>`:''}
+           ${qzEmne(t).fane?`<button class="btn" onclick="${qzEmne(t).uf ? `if(window.visUnderfane)visUnderfane('${qzEmne(t).fane}','${qzEmne(t).uf}');` : ''}showTab('${qzEmne(t).fane}')">Gå til ${qzEmne(t).fanenavn} →</button>`:''}
            <button class="btn" onclick="qzKunEmne('${t}')">Øv kun dette emne →</button>
          </div>`).join('')
     : `<div class="qz-ff" style="border-color:rgba(90,209,154,.5)">
@@ -26673,7 +28007,7 @@ QZ.push(
 /* ---------- datablokke indsættes her af byggescriptet ---------- */
 /* ---------- de 13 områder: fanerne, set med elevens øjne ---------- */
 const LR_OMR = {
-  atom:    {navn:"Atomets opbygning", kort:"Atomet", fane:"build", fanenavn:"Byg et atom"},
+  atom:    {navn:"Atomets opbygning", kort:"Atomet", fane:"build", uf:"byg", fanenavn:"Byg et atom"},
   pt:      {navn:"Det periodiske system", kort:"Periodesystem", fane:"ptable", fanenavn:"Periodisk system"},
   bind:    {navn:"Bindinger og polaritet", kort:"Bindinger", fane:"mol", uf:"kov", fanenavn:"Byg molekyler"},
   mol:     {navn:"Molekyler og mol", kort:"Molmasse", fane:"mol", uf:"byg", fanenavn:"Byg molekyler"},
@@ -26877,8 +28211,8 @@ const PAK_OMRNAVN = {};   /* fyldes ud lige efter LR_OMR er defineret */
    lander på selve opgaven og ikke bare et sted på den rigtige fane.
    Mangler en kompetence her, står der kun "Øv" på rækken. */
 const LR_STED = {
-  "atom-opbygning": {fane:'build',                  navn:'Byg et atom'},
-  "atom-tal":       {fane:'build',                  navn:'Byg et atom'},
+  "atom-opbygning": {fane:'build',  uf:'byg',       navn:'Byg et atom'},
+  "atom-tal":       {fane:'build',  uf:'byg',       navn:'Byg et atom'},
   "atom-ion":       {fane:'salt',   uf:'byg',       navn:'Ioner og salte'},
   "pt-plads":       {fane:'ptable',                 navn:'Periodisk system'},
   "pt-grupper":     {fane:'ptable',                 navn:'Periodisk system'},
@@ -27712,6 +29046,15 @@ function pakInd(){
     };
   }
 
+  /* --- Atomspillet: én hændelse pr. kompetence pr. spil (id = "niveau:kompetence") --- */
+  if(typeof window.aspMaal === 'function'){
+    const org = window.aspMaal;
+    window.aspMaal = function(id, komp, ok, f, s){
+      try{ log('atomspil:' + id, komp, ok, {f: f, s: s}); }catch(e){}
+      return org.apply(this, arguments);
+    };
+  }
+
   /* --- modelleringsopgaverne under Den kovalente binding --- */
   if(typeof window.kbSvar === 'function'){
     const org = window.kbSvar;
@@ -28186,6 +29529,9 @@ function beskrivAktivitet(a){
   if(a.startsWith('atom:')) return 'Byg-opgave i Byg et atom';
   if(a.startsWith('rx:'))   return 'Afstemning: ' + a.slice(3);
   if(a.startsWith('salt:')) return 'Salt-opgave i Ioner og salte';
+  if(a.startsWith('atomspil:')){ const niv = +a.split(':')[1];
+    const nv = (typeof ASP_NIV !== 'undefined' && ASP_NIV[niv-1]) ? ' »' + ASP_NIV[niv-1].navn + '«' : '';
+    return 'Atomspillet, niveau ' + niv + nv + ' — spil niveauet igen under Byg et atom → Atomspillet'; }
   return a;
 }
 
@@ -28960,6 +30306,13 @@ window.visSpor = function(s){
    ikke er nævnt, bliver stående øverst og er synligt hele tiden — det
    gælder introteksten og de vælgere, resten af fanen retter sig efter. */
 const UNDERFANER = {
+  /* Byg et atom: [0] er introteksten (bliver stående), [1] værkstedet med infoboksen,
+     [2] Atomspillet. Tallene er indeks blandt sektionens børn — kommer der et kort til,
+     skal numrene rykke med. */
+  build: [
+    ['byg',  'Byg selv',    [1]],
+    ['spil', 'Atomspillet', [2]]
+  ],
   /* Byg molekyler: forklaringen af den kovalente binding først, bordet
      bagefter. [1] er paletten, [2] bordet og analysen, [3] det nye afsnit. */
   mol: [
