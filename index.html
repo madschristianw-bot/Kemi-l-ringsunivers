@@ -274,6 +274,9 @@
   @media(max-width:900px){
     .asp-handling{position:sticky;bottom:0;z-index:5;background:var(--panel);border-top:1px solid var(--line);padding:10px 4px}
     #aspFb{scroll-margin-bottom:112px}
+    /* i byg-opgaverne skal eleven se, hvad der skal bygges, før tællerne — ellers skal der
+       rulles frem og tilbage for hvert klik */
+    .asp-bygform #aspHoejre{order:-1}
   }
   /* resultatet */
   .asp-slut{position:relative;overflow:hidden}
@@ -6408,7 +6411,7 @@ function aspTegnOpg(){
       <h3 class="quiz-q" id="aspQ" tabindex="-1">${T.navn}</h3>
       <p class="hint" id="aspPrompt" style="margin:0">${T.prompt(d)}</p>
     </div>
-    <form class="grid" id="aspForm" novalidate autocomplete="off" style="margin-top:18px">
+    <form class="grid${d.vis==='byg' ? ' asp-bygform' : ''}" id="aspForm" novalidate autocomplete="off" style="margin-top:18px">
       <div id="aspVenstre">${aspVenstre(d)}</div>
       <div id="aspHoejre">${aspHoejre(d)}</div>
     </form>
