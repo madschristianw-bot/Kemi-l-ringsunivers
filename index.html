@@ -224,7 +224,9 @@
   .asp-pt{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:3px;max-width:420px}
   .asp-pt .cell{font:inherit;font-size:10px;color:var(--muted);min-height:36px;width:auto}
   .asp-pt .cell .z{font-size:9px}
-  .asp-pt .cell.asp-valgt{outline:2px solid var(--gold);background:#2a3f5e}
+  /* valget er en indvendig ramme, så fokusringen ses udenom — i tvungne farver viser en tyk kant valget */
+  .asp-pt .cell.asp-valgt{box-shadow:inset 0 0 0 2px var(--gold);background:#2a3f5e}
+  @media(forced-colors:active){.asp-pt .cell.asp-valgt{border:3px solid Highlight}}
   .asp-pt .cell.asp-forkert{border-color:var(--proton)}
   .asp-pt .cell.asp-forkert .s{text-decoration:line-through}
   .asp-pt .cell:disabled{opacity:.45;cursor:not-allowed;transform:none}
@@ -238,12 +240,29 @@
   .asp .counter button:disabled{opacity:.35;cursor:not-allowed}
   .asp-num{display:block;font-size:26px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:4px}
   .bin .asp-laast{display:block;font-size:11px;color:var(--muted);margin-top:4px}
+  /* 901–1100 px: tre tællere i et smalt kort med to kolonner */
+  @media(min-width:901px) and (max-width:1100px){
+    .asp .bin{padding:12px 8px}
+    .asp .counter{gap:4px}
+    .asp .counter input.num{width:34px}
+  }
   @media(max-width:560px){
     .asp .bin{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px 10px;padding:8px 12px;text-align:left}
     .asp .bin .dot{width:22px;height:22px;margin:0}
     .asp .counter{margin-top:0}
     .asp .counter button{width:40px;height:40px}
     .asp .bin .asp-num{margin:0}
+  }
+  /* smalle telefoner (360–380 px): to svarfelter med − og + side om side, og tællerne på én linje */
+  .asp .read{grid-template-columns:repeat(2,minmax(0,1fr))}
+  @media(max-width:380px){
+    .asp .stat.asp-svar{padding-left:8px;padding-right:8px}
+    .asp-trin{gap:3px}
+    .asp-ind{width:36px}
+    .asp .bin{gap:4px 8px;padding:8px 10px}
+    .asp .counter{gap:6px}
+    .asp .counter button{width:36px;height:36px}
+    .asp .counter input.num{width:34px}
   }
   /* knaplinjen: Tjek, Prøv igen, Vis svaret og Næste — klæber til bunden på mobil */
   .asp-handling{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:18px}
@@ -5880,6 +5899,9 @@ function aspHint(d, svar){ return ASP_TYPER[d.t].hint(d, svar); }
 /* ét felts tip ved første forkerte forsøg — de bruges også inde i "Udfyld infoboksen" */
 function aspHintZ(d, v){
   const s = d.s, pic = d.vis==='billede';
+  if(v===s.e && v===s.n && s.e!==s.p) return pic
+    ? 'Du har vist talt neutronerne (de grå kugler) eller elektronerne — der er lige mange af dem. Det er protonerne, der bestemmer grundstoffet. Tæl de røde kugler med + i kernen.'
+    : 'Du har valgt efter neutronerne eller elektronerne — der er lige mange af dem. Det er protonerne, der bestemmer grundstoffet.';
   if(v===s.e && s.e!==s.p) return 'Du har valgt efter elektronerne. Det er protonerne, der bestemmer grundstoffet — elektroner kan atomet afgive og optage.';
   if(v===s.n && s.n!==s.p) return pic ? 'Du har vist talt neutronerne — de grå kugler. Det er protonerne, der bestemmer grundstoffet.'
                                       : 'Du har valgt efter neutronerne. Det er protonerne, der bestemmer grundstoffet.';
@@ -5998,8 +6020,8 @@ const ASP_TYPER = {
     },
     vis(d){ const s = d.s, L = {
         sym:`Grundstof: ${aspPel(s.p)} giver ${aspStof(s.p)} (${byZ(s.p)[1]}).`,
-        A:`Massetal: ${s.p} + ${s.n} = ${s.p+s.n}`,
-        Q:`Ladning: ${s.p} − ${s.e} = ${atQ(s.p-s.e)}`,
+        A:`Massetal: ${s.p} + ${s.n} = ${s.p+s.n}.`,
+        Q:`Ladning: ${s.p} − ${s.e} = ${atQ(s.p-s.e)}.`,
         skal:'Yderste skal: ' + aspSkalTxt(d, false)};
       return '<ul class="asp-facit">' + d.felter.map(f => `<li>${L[f]}</li>`).join('') + '</ul>'; },
     drillede:'Atom-nummer = protoner, massetal = protoner + neutroner, ladning = protoner − elektroner.'},
@@ -6236,7 +6258,7 @@ function aspSvarFelt(k){
 /* valgbrikkerne bærer boksens egne mærkater — en radiogruppe, så piletasterne virker */
 function aspChips(k, valg){
   const aktiv = ASP.fase==='svar' && !ASP.laast.includes(k), mk = aspMaerke(k), ude = ASP.ude[k] || [];
-  return `<fieldset class="asp-valg"${aktiv ? '' : ' disabled'}><legend class="asp-sr">Hvad siger infoboksen?</legend>`
+  return `<fieldset class="asp-valg"${aktiv ? '' : ' disabled'}><legend class="asp-sr">${k==='valg' ? 'Er det et neutralt atom eller en ion?' : k==='kerne' ? 'Hvad siger infoboksen om kernen?' : 'Hvad siger infoboksen om ionen?'}</legend>`
     + valg.map(([v, cls, txt]) => {
         const valgt = ASP.svar[k]===v, udelukket = ude.includes(v);
         const kl = udelukket ? ' asp-ude asp-forkert' : valgt && mk ? ' asp-' + mk : '';
@@ -6411,7 +6433,7 @@ function aspKlar(){
     const fl = ASP_TYPER[d.t].felter(d).filter(k => !ASP.laast.includes(k));
     const TAELLER = {p:'Protoner', n:'Neutroner', e:'Elektroner'};
     for(const k of fl){
-      if((k==='A' || k==='skal') && Number.isNaN(aspLaesTal(ASP.svar[k], false))){ h = `Skriv et helt tal i feltet ${ASP_FELTNAVN[k]}, fx 12.`; break; }
+      if((k==='A' || k==='skal') && Number.isNaN(aspLaesTal(ASP.svar[k], false))){ h = `Skriv et helt tal i feltet ${ASP_FELTNAVN[k]}, fx ${k==='skal' ? 4 : 12}.`; break; }
       if(k==='Q' && Number.isNaN(aspLaesTal(ASP.svar[k], true))){ h = 'Skriv ladningen som et helt tal, fx +2, 0 eller −1.'; break; }
       if(TAELLER[k] && ASP.byg[k]==null){ h = `Skriv et helt tal i feltet ${TAELLER[k]}.`; break; }
     }
@@ -6434,7 +6456,15 @@ function aspRulFb(){
   const fb = aspId('aspFb'), bar = aspId('aspHandling');
   if(!fb) return;
   const glat = aspReduceret() ? 'auto' : 'smooth', r = fb.getBoundingClientRect();
-  const kant = bar && getComputedStyle(bar).position==='sticky' ? Math.min(innerHeight, bar.getBoundingClientRect().top) : innerHeight;
+  /* bred skærm: knaplinjen står under gitteret og klæber ikke — rul, så både feedbacken og
+     knappen med fokus (Næste, Prøv igen, Vis svaret) er fremme */
+  if(bar && getComputedStyle(bar).position!=='sticky'){
+    const bund = bar.getBoundingClientRect().bottom + 12;
+    if(r.top >= 0 && bund <= innerHeight) return;
+    window.scrollBy({top: Math.min(bund - innerHeight, r.top - 12), behavior: glat});
+    return;
+  }
+  const kant = bar ? Math.min(innerHeight, bar.getBoundingClientRect().top) : innerHeight;
   if(r.top >= 0 && r.bottom <= innerHeight){
     if(r.bottom > kant - 8) window.scrollBy({top: Math.min(r.bottom - kant + 20, r.top), behavior: glat});
     return;

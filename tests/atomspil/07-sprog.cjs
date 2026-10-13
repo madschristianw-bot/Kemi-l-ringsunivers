@@ -23,6 +23,7 @@ const L = require('./lib.cjs');
     const ekstra = [{t:'skal', vis:'tal', s:{p:3, n:4, e:2}}, {t:'udfyld', vis:'tal', felter:['sym','A','Q','skal'], s:{p:1, n:0, e:0}},
                     {t:'udfyld', vis:'tal', felter:['A','skal'], s:{p:2, n:2, e:2}}, {t:'masse', vis:'billede', s:{p:1, n:0, e:0}},
                     {t:'ladning', vis:'tal', s:{p:1, n:0, e:0}}, {t:'grundstof', vis:'billede', s:{p:1, n:0, e:0}},
+                    {t:'grundstof', vis:'billede', s:{p:9, n:10, e:10}}, {t:'grundstof', vis:'tal', s:{p:17, n:18, e:18}},
                     {t:'byg', vis:'byg', s:{p:4, n:5, e:2}}, {t:'ion', vis:'byg', s:{p:3, n:4, e:2}}, {t:'ion', vis:'byg', s:{p:17, n:18, e:18}}];
     ekstra.forEach(d => fundet[d.t].push(Object.assign({nr:1, kat:null}, d)));
     Object.keys(fundet).sort().forEach(type => fundet[type].forEach(d => {
