@@ -1510,6 +1510,34 @@
 
   .lr-aflever{border-color:rgba(90,209,154,.4)}
 
+  /* progressionsfilen: øverst til højre på alle faner — på en smal skærm over titlen */
+  .lr-fil{margin-left:auto;align-self:flex-start;display:flex;flex-direction:column;align-items:flex-end;
+    gap:6px;max-width:100%;padding-top:4px}
+  .lr-fil-knapper{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+  .lr-fil .btn{white-space:nowrap}
+  .lr-fil .btn:focus-visible,.lr-hentfil .btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .lr-fil-besked{font-size:12.5px;line-height:1.45;color:var(--muted);max-width:46ch;text-align:right}
+  .lr-fil-besked:empty{display:none}
+  .lr-fil-besked.god{color:var(--ok)}
+  .lr-fil-besked.bad{color:#ff8a76}
+  @media(max-width:640px){
+    .lr-fil{order:-1;width:100%;padding-top:0}
+  }
+  .lr-sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0,0,0,0);white-space:nowrap;border:0;opacity:0}
+  .lr-hentfil{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;
+    margin-top:22px;padding:14px 16px;border:1.5px dashed #3a5f8f;border-radius:12px;background:rgba(14,29,49,.5)}
+  .lr-hentfil-txt{flex:1 1 260px;font-size:14px}
+  .lr-hentfil-txt span{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+  .lr-hentfil .lr-fil-besked{flex:1 1 100%;text-align:left;max-width:none}
+  .lr-slip{position:fixed;top:0;right:0;bottom:0;left:0;z-index:1000;display:flex;align-items:center;
+    justify-content:center;padding:24px;background:rgba(13,27,42,.88)}
+  .lr-slip[hidden]{display:none}
+  .lr-slip-boks{pointer-events:none;width:100%;max-width:540px;padding:40px 26px;text-align:center;
+    border:2px dashed var(--gold);border-radius:18px;background:rgba(19,36,58,.92)}
+  .lr-slip-boks b{display:block;font-family:var(--serif);font-size:24px;font-weight:600;color:var(--ink)}
+  .lr-slip-boks span{display:block;margin-top:8px;color:var(--muted);font-size:14px}
+
   /* ---- missioner ---- */
   .mis-arter{margin-bottom:16px}
   .mis-arter button{font-size:13.5px;padding:9px 16px}
@@ -2728,7 +2756,23 @@
       <h1>Atomet og kølemidler</h1>
       <div class="byline">Af Mads Christian Søgaard Wendelboe</div>
     </div>
+    <!-- progressionsfilen: gem alt i en fil, og hent det ind igen (læringslaget, afsnit 1b og 8b) -->
+    <div class="lr-fil" role="group" aria-label="Din progressionsfil">
+      <div class="lr-fil-knapper">
+        <button type="button" class="btn" onclick="LR.gemFil()"
+          title="Gem alt, hvad du har lavet, i en fil. Sletter browseren din progression, henter du den ind igen med filen."><span aria-hidden="true">&#128190;</span> Gem min progression</button>
+        <button type="button" class="btn" onclick="LR.vaelgFil()"
+          title="Hent en progressionsfil, du har gemt før. Du kan også trække filen ind på siden."><span aria-hidden="true">&#128194;</span> Hent progression</button>
+      </div>
+      <div class="lr-fil-besked" id="lrFilBesked" role="status" aria-live="polite"></div>
+      <input type="file" id="lrFilVaelg" class="lr-sr" tabindex="-1" aria-hidden="true"
+             accept=".json,.html,application/json,text/html" onchange="LR.filValgt(this)">
+    </div>
   </header>
+  <div class="lr-slip" id="lrSlip" hidden aria-hidden="true">
+    <div class="lr-slip-boks"><b>Slip filen for at hente din progression</b>
+      <span>Den fil, du gemte med »Gem min progression« — eller din afleveringsfil</span></div>
+  </div>
   <nav class="nv-spor" aria-label="Hovedområder">
     <button type="button" class="nv-spor-knap on" id="spor-forloeb" aria-pressed="true" onclick="visSpor('forloeb')">
       <span class="nv-ikon" aria-hidden="true">&#129517;</span>
@@ -28921,6 +28965,275 @@ function hent(){
 }
 
 /* ============================================================
+   1b. PROGRESSIONSFILEN — lageret i én fil, og tilbage igen
+
+   Browseren kan slette det hele: en skolecomputer, der rydder op,
+   en anden browser, en ny maskine. Derfor kan eleven gemme alt i
+   en fil og hente den ind igen. Filen rummer de tre nøgler, som de
+   står i lageret: lagets egen og de to, Ellære og Atomspillet
+   holder for sig selv.
+
+   En fil, der hentes, lægges SAMMEN med det, der står i forvejen —
+   det, eleven har lavet, siden browseren slettede, må ikke gå tabt.
+   Kun en anden elevs fil erstatter, og det spørges der om først.
+
+   Filen kommer udefra, og siden skriver felterne direkte ind i sin
+   HTML. Derfor tjekkes alt i den, før det bruges.
+============================================================ */
+const FIL_ELL = 'kemikoel.ellaere.v1';      // = ELL_NOEGLE i Ellære
+const FIL_ASP = 'kemikoel.atomspil.v1';     // = ASP_NOEGLE i Atomspillet
+
+function andenNoegle(n){
+  try{ const r = localStorage.getItem(n); return r ? JSON.parse(r) : null; }catch(e){ return null; }
+}
+/* Ellære og Atomspillet læser først deres nøgle, når fanen åbnes. Det, de har i
+   hukommelsen, tages med — det er det eneste sted, det står, hvis browseren ikke
+   vil gemme noget. */
+function ellNu(){
+  const l = rensEll(andenNoegle(FIL_ELL)) || [];
+  try{ ellLoest.forEach(i => { if(!l.includes(i)) l.push(i); }); }catch(e){}
+  return l.length ? l.sort((a,b) => a - b) : null;
+}
+function aspNu(){
+  try{ if(ASP.klar) return rensAsp(ASP.gemt); }catch(e){}
+  return rensAsp(andenNoegle(FIL_ASP));
+}
+
+function filData(){
+  gem();                                    // det, der kun står i hukommelsen, skal med
+  return {app:'kemikoel', type:'progression', version:1, gemt:new Date().toISOString(),
+          elev:{navn:S.elev.navn, hold:S.elev.hold},
+          data:{[NOEGLE]:JSON.parse(JSON.stringify(S)), [FIL_ELL]:ellNu(), [FIL_ASP]:aspNu()}};
+}
+
+/* ---------- tjek af det, der kommer udefra ---------- */
+const erTal = (x, min, maks) => typeof x === 'number' && isFinite(x) && x >= min && x <= maks;
+const erHeltal = (x, min, maks) => Number.isInteger(x) && x >= min && x <= maks;
+const erRentId = x => typeof x === 'string' && x.length > 0 && x.length <= 120 && !/[<>&"'`\\\u0000-\u001f]/.test(x);
+const rensTekst = (x, maks) => typeof x === 'string' ? x.replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, maks) : '';
+const sidsteTs = s => s.h.length ? s.h[s.h.length-1].ts : 0;
+
+function rensHaendelse(e){
+  if(!e || typeof e !== 'object' || !erTal(e.ts, 1, 1e13) || !erRentId(e.a) || !erRentId(e.k)) return null;
+  if(e.ok !== 0 && e.ok !== 1 && typeof e.ok !== 'boolean') return null;
+  const r = {ts:e.ts, a:e.a, k:e.k, ok:e.ok ? 1 : 0, f:erHeltal(e.f, 1, 999) ? e.f : 1};
+  if(erTal(e.s, 0, 1e7)) r.s = Math.round(e.s);
+  return r;
+}
+function rensMissioner(m){
+  const ud = {};
+  if(!m || typeof m !== 'object') return ud;
+  MISSIONER.forEach(x => {                  // kun de missioner, der findes
+    const t = m[x.id];
+    if(!t || typeof t !== 'object' || !erHeltal(t.trin, 0, x.trin.length)) return;
+    ud[x.id] = {trin:t.trin, forsoeg:erHeltal(t.forsoeg, 0, 99) ? t.forsoeg : 0,
+                ok:erHeltal(t.ok, 0, x.trin.length) ? t.ok : 0,
+                startet:erTal(t.startet, 0, 1e13) ? t.startet : 0, faerdig:t.faerdig === true};
+  });
+  return ud;
+}
+/* en opgavepakke bygges op igen fra sin kode — så er resten af felterne også i orden */
+function rensPakker(l){
+  const ud = [];
+  (Array.isArray(l) ? l : []).forEach(p => {
+    const q = p && typeof p === 'object' && pakLaes(p.kode);
+    if(!q || ud.some(x => x.kode === q.kode)) return;
+    q.hentet = erTal(p.hentet, 0, 1e13) ? p.hentet : 0;
+    q.resultater = (Array.isArray(p.resultater) ? p.resultater : [])
+      .filter(r => r && erTal(r.ts, 1, 1e13) && erHeltal(r.rigtige, 0, 999) && erHeltal(r.antal, 0, 999))
+      .map(r => {
+        const x = {ts:r.ts, rigtige:r.rigtige, antal:r.antal};
+        if(erHeltal(r.f1, 0, 999)) x.f1 = r.f1;
+        x.hjaelp = erHeltal(r.hjaelp, 0, 999) ? r.hjaelp : 0;
+        return x;
+      });
+    ud.push(q);
+  });
+  return ud;
+}
+function rensS(d){
+  if(!d || typeof d !== 'object' || !d.elev || typeof d.elev !== 'object' || !Array.isArray(d.h)) return null;
+  const sidst = d.sidst && typeof d.sidst === 'object' ? d.sidst : {};
+  /* fanen havner i et onclick — derfor kun et navn, der står på en fane */
+  const fane = typeof sidst.fane === 'string' && /^[a-z]{1,20}$/.test(sidst.fane) && sidst.fane !== 'elev'
+            && document.getElementById('tab-' + sidst.fane) ? sidst.fane : null;
+  return {
+    elev:{navn:rensTekst(d.elev.navn, 80), hold:rensTekst(d.elev.hold, 80),
+          oprettet:erTal(d.elev.oprettet, 0, 1e13) ? d.elev.oprettet : 0},
+    h:d.h.map(rensHaendelse).filter(Boolean).sort((a,b) => a.ts - b.ts).slice(-MAKS_HAENDELSER),
+    sidst:{fane:fane, ts:fane && erTal(sidst.ts, 0, 1e13) ? sidst.ts : 0},
+    aktivTid:erTal(d.aktivTid, 0, 1e8) ? d.aktivTid : 0,
+    pakker:rensPakker(d.pakker),
+    missioner:rensMissioner(d.missioner)
+  };
+}
+function rensEll(x){
+  if(!Array.isArray(x)) return null;
+  let n = 999;
+  try{ n = ELL_OPG.length - 1; }catch(e){}
+  return x.filter((i, j) => erHeltal(i, 0, n) && x.indexOf(i) === j);
+}
+function rensAsp(x){                        // som aspHent i Atomspillet
+  if(!x || typeof x !== 'object') return null;
+  const ud = {v:1, ur:x.ur === true, niv:{}};
+  if(x.niv && typeof x.niv === 'object') ['1','2','3','4'].forEach(k => {
+    const n = x.niv[k];
+    if(n && erHeltal(n.bedst, 0, 10)) ud.niv[k] = {bedst:n.bedst, tid:erHeltal(n.tid, 1, 1e7) ? n.tid : null};
+  });
+  return ud;
+}
+
+/* Afleveringsfilen har hændelserne, opgavepakkerne og missionernes trin med —
+   men ikke Ellære og Atomspillets bedste scorer. */
+function fraAflevering(d){
+  if(!d || typeof d !== 'object' || !d.elev || !Array.isArray(d.haendelser)) return null;
+  const mis = {};
+  (Array.isArray(d.missioner) ? d.missioner : []).forEach(m => {
+    if(m && MISSIONER.some(x => x.id === m.id))
+      mis[m.id] = {trin:m.trin, forsoeg:0, ok:m.ok, startet:0, faerdig:m.faerdig === true};
+  });
+  return rensS({elev:d.elev, h:d.haendelser, aktivTid:d.tid, pakker:d.pakker, missioner:mis});
+}
+
+/* Svarer {fejl:'…'} — eller filens indhold, renset: {s, ell, asp, gemt, aflevering}.
+   Det er indholdet, der afgør, hvad filen er, ikke dens navn. */
+function fraFil(tekst){
+  const t = String(tekst || '').replace(/^﻿/, '');
+  if(!t.trim()) return {fejl:'Filen er tom.'};
+  let d = null;
+  try{ d = JSON.parse(t); }catch(e){}
+  if(d === null){
+    let r = null;
+    if(t.indexOf('kemikoel-data') >= 0){
+      try{
+        const el = new DOMParser().parseFromString(t, 'text/html').getElementById('kemikoel-data');
+        if(el) r = JSON.parse(el.textContent);
+      }catch(e){}
+    }
+    const s = r && fraAflevering(r);
+    if(s) return {s:s, ell:null, asp:null, aflevering:true,
+                  gemt:erTal(Date.parse(r.lavet), 1, 1e13) ? Date.parse(r.lavet) : sidsteTs(s)};
+    if(/<title>KEMI KØL — Atomet/.test(t))
+      return {fejl:'Det er selve siden, du har valgt — ikke din progressionsfil. Vælg den fil, du gemte med »Gem min progression«.'};
+    if(/kemikoel|kemi køl/i.test(t))
+      return {fejl:'Filen er ikke hel — den er nok ikke blevet gemt færdig. Prøv en anden kopi af den.'};
+    return {fejl:'Den fil kan jeg ikke bruge. Vælg den fil, du gemte med »Gem min progression« — eller din afleveringsfil.'};
+  }
+  if(!d || typeof d !== 'object' || d.app !== 'kemikoel' || d.type !== 'progression')
+    return {fejl:'Filen er ikke en progressionsfil fra Kemi KØL. Vælg den fil, du gemte med »Gem min progression«.'};
+  if(d.version !== 1)
+    return {fejl: d.version > 1 ? 'Filen er gemt med en nyere udgave af siden. Åbn den nyeste udgave, og prøv igen.'
+                                : 'Filen er beskadiget, så den kan ikke hentes ind. Prøv en anden kopi af den.'};
+  const data = d.data && typeof d.data === 'object' ? d.data : {};
+  const s = rensS(data[NOEGLE]);
+  if(!s) return {fejl:'Filen er beskadiget, så den kan ikke hentes ind. Prøv en anden kopi af den.'};
+  return {s:s, ell:rensEll(data[FIL_ELL]), asp:rensAsp(data[FIL_ASP]), aflevering:false,
+          gemt:erTal(Date.parse(d.gemt), 1, 1e13) ? Date.parse(d.gemt) : sidsteTs(s)};
+}
+
+/* ---------- at lægge sammen ----------
+   Er der intet nyt i filen, kommer det, der står nu, uændret tilbage. */
+const hNoegle = e => e.ts + '|' + e.a + '|' + e.k + '|' + e.ok + '|' + e.f;
+const navnNorm = n => String(n || '').trim().replace(/\s+/g, ' ').toLowerCase();
+
+function flet(nu, ny){
+  const kendt = new Set(nu.h.map(hNoegle)), nye = [];
+  ny.h.forEach(e => { const k = hNoegle(e); if(!kendt.has(k)){ kendt.add(k); nye.push(e); } });
+  let h = nu.h;
+  if(nye.length) h = nu.h.concat(nye).sort((a,b) => a.ts - b.ts).slice(-MAKS_HAENDELSER);
+
+  /* uden navn er det filens elev; med samme navn beholdes det, der er skrevet her */
+  let elev = nu.elev;
+  if(!nu.elev.navn){ if(ny.elev.navn) elev = ny.elev; }
+  else {
+    const hold = (!nu.elev.hold || nu.elev.hold === 'Uden hold') && ny.elev.hold ? ny.elev.hold : nu.elev.hold;
+    const opr = [nu.elev.oprettet, ny.elev.oprettet].filter(x => x > 0);
+    const oprettet = opr.length ? Math.min.apply(null, opr) : 0;
+    if(hold !== nu.elev.hold || oprettet !== nu.elev.oprettet) elev = {navn:nu.elev.navn, hold:hold, oprettet:oprettet};
+  }
+
+  /* missionerne: den, der er nået længst */
+  const missioner = Object.assign({}, nu.missioner);
+  Object.keys(ny.missioner).forEach(id => {
+    const a = nu.missioner[id], b = ny.missioner[id];
+    if(!a || (b.faerdig && !a.faerdig) || (b.faerdig === !!a.faerdig && b.trin > a.trin)) missioner[id] = b;
+  });
+
+  /* opgavepakkerne: efter kode, med begges resultater */
+  const pakker = nu.pakker.slice();
+  let nyPakke = false;
+  ny.pakker.forEach(q => {
+    const i = pakker.findIndex(p => p.kode === q.kode);
+    if(i < 0){ pakker.push(q); nyPakke = true; return; }
+    const p = pakker[i], har = new Set((p.resultater || []).map(r => r.ts));
+    const mere = q.resultater.filter(r => !har.has(r.ts));
+    if(mere.length) pakker[i] = Object.assign({}, p, {resultater:(p.resultater || []).concat(mere).sort((a,b) => a.ts - b.ts)});
+  });
+  if(nyPakke) pakker.sort((a,b) => (b.hentet || 0) - (a.hentet || 0));   // nyeste først, som i S
+
+  return {s:{elev:elev, h:h, sidst:ny.sidst.ts > nu.sidst.ts ? ny.sidst : nu.sidst,
+             aktivTid:Math.max(nu.aktivTid, ny.aktivTid), pakker:pakker, missioner:missioner},
+          nye:nye.length};
+}
+function fletEll(a, b){
+  if(!b) return a;
+  if(!a) return b;
+  const l = a.slice();
+  b.forEach(i => { if(!l.includes(i)) l.push(i); });
+  return l.length === a.length ? a : l.sort((x,y) => x - y);
+}
+/* som aspGemBedst: højeste score, og ved lige score den korteste tid */
+function fletAsp(a, b, filNyest){
+  if(!b) return a;
+  if(!a) return b;
+  const ud = {v:1, ur:filNyest ? b.ur : a.ur, niv:{}};
+  ['1','2','3','4'].forEach(k => {
+    const x = a.niv[k], y = b.niv[k];
+    if(!x || !y){ if(x || y) ud.niv[k] = x || y; return; }
+    const yBedre = y.bedst > x.bedst
+                || (y.bedst === x.bedst && y.tid !== null && (x.tid === null || y.tid < x.tid));
+    ud.niv[k] = yBedre ? y : x;
+  });
+  return ud;
+}
+
+/* Lægger filen ind — eller erstatter med den, når erstat er sand. Alle tre nøgler
+   skrives og læses tilbage, og først når de står der, sættes S: det er S, som
+   gem() skriver, når siden lukkes eller genindlæses, så det gamle må ikke stå i
+   hukommelsen bagefter. Svarer null, hvis browseren ikke ville gemme — så er
+   intet ændret. */
+function hentProgression(f, erstat){
+  const nu = {elev:S.elev, h:S.h, sidst:S.sidst, aktivTid:S.aktivTid, pakker:S.pakker, missioner:S.missioner};
+  const ellFoer = ellNu(), aspFoer = aspNu();
+  let s, nye, ell, asp;
+  if(erstat){ s = f.s; nye = f.s.h.length; ell = f.ell || ellFoer; asp = f.asp || aspFoer; }
+  else {
+    const r = flet(nu, f.s);
+    s = r.s; nye = r.nye;
+    ell = fletEll(ellFoer, f.ell);
+    asp = fletAsp(aspFoer, f.asp, Math.max(f.gemt, sidsteTs(f.s)) > Math.max(sidsteTs(nu), nu.sidst.ts || 0));
+  }
+  const ens = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const nyEll = !ens(ell, ellFoer), nyAsp = !ens(asp, aspFoer);
+  if(ens(s, nu) && !nyEll && !nyAsp) return {aendret:false, nye:0};
+
+  const skriv = [[NOEGLE, s], [FIL_ELL, ell], [FIL_ASP, asp]].filter(x => x[1] != null);
+  const foer = {};
+  try{
+    skriv.forEach(x => { foer[x[0]] = localStorage.getItem(x[0]); });
+    skriv.forEach(x => localStorage.setItem(x[0], JSON.stringify(x[1])));
+    if(!skriv.every(x => localStorage.getItem(x[0]) === JSON.stringify(x[1]))) throw new Error('ikke gemt');
+  }catch(e){
+    try{ Object.keys(foer).forEach(k => foer[k] == null ? localStorage.removeItem(k) : localStorage.setItem(k, foer[k])); }
+    catch(e2){}
+    return null;
+  }
+  S.elev = s.elev; S.h = s.h; S.sidst = s.sidst;
+  S.aktivTid = s.aktivTid; S.pakker = s.pakker; S.missioner = s.missioner;
+  return {aendret:true, nye:nye, ell:nyEll, asp:nyAsp};
+}
+
+/* ============================================================
    2. HÆNDELSER
    a = aktivitet-id, k = kompetence, ok = 1/0,
    f = hvilket forsøg det var, s = sekunder brugt
@@ -29436,6 +29749,12 @@ function velkomst(){
     </div>
     <button class="btn primary" style="margin-top:16px" onclick="LR.opret()">Kom i gang →</button>
     <div class="hint" id="lrFejl" style="color:var(--proton);margin-top:8px"></div>
+    <div class="lr-hentfil">
+      <div class="lr-hentfil-txt"><b>Har du en gemt progressionsfil?</b>
+        <span>Træk den herind eller vælg den — så får du det hele tilbage.</span></div>
+      <button type="button" class="btn" onclick="LR.vaelgFil()"><span aria-hidden="true">📂</span> Vælg filen</button>
+      <div class="lr-fil-besked" id="lrHentBesked"></div>
+    </div>
   </div>`;
 }
 
@@ -30123,6 +30442,88 @@ Den indeholder besvarelser fra ${new Date(d.elev.oprettet).toLocaleDateString('d
 </body></html>`;
 }
 
+function hentNed(indhold, type, navn){
+  const b = new Blob([indhold], {type:type});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = navn;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+}
+
+/* ============================================================
+   8b. PROGRESSIONSFILEN — knapperne og træk og slip
+   Gem-knappen sidder øverst til højre på alle faner, så den er
+   lige ved hånden. Filen hentes ind igen ved at trække den ind
+   på siden — eller med knappen ved siden af og den på velkomsten,
+   for træk og slip findes ikke på en iPad.
+============================================================ */
+const FIL_MAKS = 5*1024*1024;        // en progressionsfil fylder højst et par hundrede kB
+const BESKED = 'kemikoel.besked';     // beskeden efter en hentning skal overleve genindlæsningen
+let filIGang = false, beskedTimer = null;
+
+function filBesked(txt, art){
+  ['lrFilBesked', 'lrHentBesked'].forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.textContent = txt;
+    el.classList.toggle('god', art === 'god');
+    el.classList.toggle('bad', art === 'bad');
+  });
+  clearTimeout(beskedTimer);
+  if(txt && art !== 'bad') beskedTimer = setTimeout(() => filBesked(''), 25000);
+}
+
+function filNavn(){
+  const d = new Date();
+  const dato = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  return 'KEMI-KOEL_progression_' + (S.elev.navn || 'elev').replace(/[^\wÆØÅæøå-]+/g,'-') + '_' + dato + '.json';
+}
+
+function laesTekst(fil){
+  return new Promise((ja, nej) => {
+    const r = new FileReader();
+    r.onload = () => ja(String(r.result || ''));
+    r.onerror = () => nej(r.error);
+    r.readAsText(fil);
+  });
+}
+
+const besvarelser = n => n + (n === 1 ? ' besvarelse' : ' besvarelser');
+const ejefald = n => /[sxz]$/i.test(n) ? n + '’' : n + 's';      // Mads’, Emils
+
+function hentFil(fil){
+  if(!fil || filIGang) return;
+  if(fil.size > FIL_MAKS){ filBesked('Filen er for stor til at være en progressionsfil. Vælg den fil, du gemte med »Gem min progression«.', 'bad'); return; }
+  if(/^(image|video|audio)\//.test(fil.type || '')){
+    filBesked('Den fil kan jeg ikke bruge. Vælg den fil, du gemte med »Gem min progression« — eller din afleveringsfil.', 'bad'); return; }
+  filIGang = true;
+  laesTekst(fil).then(tekst => {
+    const f = fraFil(tekst);
+    if(f.fejl){ filBesked(f.fejl, 'bad'); return; }
+    const navn = f.s.elev.navn, hold = f.s.elev.hold;
+    /* en fil uden navn er elevens egen fra før navnet — den lægges bare til */
+    const erstat = !!(S.elev.navn && navn && navnNorm(S.elev.navn) !== navnNorm(navn));
+    if(erstat && !confirm('Filen tilhører ' + navn + (hold && hold !== 'Uden hold' ? ' (hold ' + hold + ')' : '') + '.\n\n'
+        + 'Vil du skifte til ' + ejefald(navn) + ' progression? Det, der står nu, bliver erstattet. '
+        + 'Gem din egen først, hvis du vil beholde den.')){
+      filBesked('Ingenting er ændret.'); return;
+    }
+    const r = hentProgression(f, erstat);
+    if(!r){ filBesked('Browseren vil ikke gemme noget lige nu, så filen blev ikke hentet ind. Prøv igen — eller i en anden browser.', 'bad'); return; }
+    const fra = f.gemt ? ' fra ' + new Date(f.gemt).toLocaleDateString('da-DK', {day:'numeric', month:'short', year:'numeric'}) : '';
+    if(!r.aendret){ filBesked('Alt i filen' + fra + ' var her i forvejen — der er ikke noget nyt at hente.', 'god'); return; }
+    let txt = erstat ? 'Hentet: ' + ejefald(navn) + ' progression' + fra + ' — ' + besvarelser(f.s.h.length) + '.'
+                     : 'Hentet: ' + besvarelser(f.s.h.length) + fra + ' — ' + (r.nye ? r.nye + (r.nye === 1 ? ' ny' : ' nye') : 'ingen nye') + '.';
+    if(r.ell || r.asp) txt += ' ' + (r.ell && r.asp ? 'Ellære og Atomspillet' : r.ell ? 'Ellære' : 'Atomspillet') + ' er også opdateret.';
+    if(f.aflevering) txt += ' Afleveringsfilen har ikke Ellære og Atomspillet med.';
+    /* Alle faner skal læse det nye — det gør de bedst ved at starte forfra.
+       S er allerede sat, så gem() ved genindlæsningen skriver det nye. */
+    try{ sessionStorage.setItem(BESKED, txt); }catch(e){}
+    location.reload();
+  }).catch(() => filBesked('Filen kunne ikke læses. Prøv igen.', 'bad'))
+    .then(() => { filIGang = false; });
+}
+
 /* ============================================================
    9. OFFENTLIGT API
 ============================================================ */
@@ -30332,11 +30733,22 @@ window.LR = {
     const navn = 'KEMI_' + (S.elev.hold||'hold').replace(/[^\wÆØÅæøå-]+/g,'-')
                + '_' + S.elev.navn.replace(/[^\wÆØÅæøå-]+/g,'-')
                + '_' + new Date().toISOString().slice(0,10) + '.html';
-    const b = new Blob([rapportHTML()], {type:'text/html;charset=utf-8'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(b); a.download = navn;
-    document.body.appendChild(a); a.click();
-    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+    hentNed(rapportHTML(), 'text/html;charset=utf-8', navn);
+  },
+
+  /* --- progressionsfilen --- */
+  gemFil(){
+    hentNed(JSON.stringify(filData()), 'application/json', filNavn());
+    filBesked('Gemt. Læg filen et sikkert sted, fx i OneDrive — så kan du altid hente din progression ind igen.', 'god');
+  },
+  vaelgFil(){
+    const v = document.getElementById('lrFilVaelg');
+    if(v) v.click();
+  },
+  filValgt(v){
+    const fil = v.files && v.files[0];
+    v.value = '';                     /* så den samme fil kan vælges igen */
+    hentFil(fil);
   },
   /* til lærerens kontrolboard og til fejlsøgning */
   OMR: LR_OMR, KOMP: LR_KOMP, FANE: LR_FANE, STED: LR_STED,
@@ -30359,6 +30771,53 @@ pakInd();
 document.addEventListener('DOMContentLoaded', tegnElev);
 if(document.readyState !== 'loading') tegnElev();
 window.addEventListener('beforeunload', gem);
+
+/* beskeden fra en hentning, der lige har genindlæst siden */
+function visHentetBesked(){
+  try{
+    const b = sessionStorage.getItem(BESKED);
+    if(b){ sessionStorage.removeItem(BESKED); setTimeout(() => filBesked(b, 'god'), 300); }
+  }catch(e){}
+}
+if(document.readyState !== 'loading') visHentetBesked();
+else document.addEventListener('DOMContentLoaded', visHentetBesked);
+
+/* ---------- træk og slip: hele vinduet tager imod en progressionsfil ----------
+   Kun filer. Tekst og links, der trækkes rundt på siden, gør det, de plejer.
+   En fil, der slippes et forkert sted, åbner heller ikke sig selv i fanen
+   længere — så ville appen være væk. Fladen over siden fanger alle træk,
+   mens den står fremme; vagten tager den væk, hvis browseren glemmer at
+   sige, at trækket er slut. */
+let slipDybde = 0, slipVagt = null;
+const erFilTraek = e => {
+  const t = e.dataTransfer && e.dataTransfer.types;
+  return !!t && Array.prototype.indexOf.call(t, 'Files') >= 0;
+};
+function visSlip(ja){
+  const o = document.getElementById('lrSlip');
+  if(o) o.hidden = !ja;
+  if(!ja){ slipDybde = 0; clearTimeout(slipVagt); }
+}
+window.addEventListener('dragenter', e => {
+  if(!erFilTraek(e)) return;
+  e.preventDefault(); slipDybde++; visSlip(true);
+});
+window.addEventListener('dragover', e => {
+  if(!erFilTraek(e)) return;
+  e.preventDefault(); e.dataTransfer.dropEffect = 'copy';
+  slipDybde = Math.max(slipDybde, 1); visSlip(true);
+  clearTimeout(slipVagt); slipVagt = setTimeout(() => visSlip(false), 1000);
+});
+window.addEventListener('dragleave', e => {
+  if(!erFilTraek(e)) return;
+  if(--slipDybde <= 0) visSlip(false);
+});
+window.addEventListener('drop', e => {
+  if(!erFilTraek(e)) return;
+  e.preventDefault(); visSlip(false);
+  const f = e.dataTransfer.files;
+  if(f && f.length) hentFil(f[0]);
+});
 
 })();
 
