@@ -7511,8 +7511,8 @@ function renderMol(r){
       const slot=host.querySelector(`.fr-comp-canvas[data-comp="${comp.r}"]`);
       makeViewer(slot, halo3D(comp.atoms), {w:150,h:140,scale:26});
     });
-    const harHFO=r.blend.some(k=>k.r==='R1234yf');
-    angleEl.innerHTML='Bindingsvinkel pr. carbon: <b>109,5°</b> (tetraedrisk)'+(harHFO?' · men <b>120°</b> ved dobbeltbindingen i R1234yf':'')+' · træk for at rotere';
+    const harHFO=r.blend.some(k=>k.r==='R1234yf'), harCO2=r.blend.some(k=>k.r==='R744');
+    angleEl.innerHTML='Bindingsvinkel pr. carbon: <b>109,5°</b> (tetraedrisk)'+(harHFO?' · men <b>120°</b> ved dobbeltbindingen i R1234yf':'')+(harCO2?' · og <b>180°</b> i CO₂, der er lineært':'')+' · træk for at rotere';
     return;
   }
 
@@ -14684,8 +14684,8 @@ QZ.push(
 {t:'koel',d:3,k:'koel-egenskaber',type:'sandt',q:"En zeotrop blanding skal altid fyldes på anlægget som væske.", c:true,
  e:"Ja. Komponenterne fordamper ved forskellige temperaturer, så fylder man damp på, kommer der mest af den mest flygtige komponent i — og sammensætningen skrider. En azeotrop må gerne fyldes som damp."},
 {t:'koel',d:2,k:'koel-egenskaber',type:'par',q:"Sæt blandingen sammen med dens temperatur-glid.",
- par:[["R507A","Azeotrop — glid 0,0 K"],["R404A","Næsten azeotrop — glid 0,7 K"],["R452A","Zeotrop — glid ca. 4 K"],["R407F","Zeotrop — glid ca. 6 K"]],
- e:"Glidet vokser, jo mere komponenternes kogepunkter afviger fra hinanden. Jo større glid, jo mere skal man tage hensyn til det ved påfyldning og ved indstilling af overhedningen."}
+ par:[["R507A","Azeotrop — glid 0,0 K"],["R404A","Næsten azeotrop — glid 0,7 K"],["R452A","Zeotrop — glid ca. 4 K"],["R407F","Zeotrop — glid ca. 6 K"],["R455A","Zeotrop — glid ca. 13 K"]],
+ e:"Glidet vokser, jo mere komponenternes kogepunkter afviger fra hinanden. R455A topper listen: den rummer både CO₂, der er langt mere flygtig end resten, og R1234yf, der først koger ved −29 °C. Jo større glid, jo mere skal man tage hensyn til det ved påfyldning og ved indstilling af overhedningen."}
 );
 const GLID_KURVE = {"R404A":{"-30":[-30.66,-30.59,-30.5,-30.38,-30.23,-30.0],"-20":[-20.61,-20.54,-20.45,-20.34,-20.2,-20.0],"-10":[-10.56,-10.49,-10.41,-10.31,-10.17,-10.0],"0":[-0.51,-0.45,-0.37,-0.27,-0.15,-0.0],"10":[9.53,9.59,9.67,9.76,9.87,10.0],"20":[19.57,19.63,19.7,19.79,19.88,20.0],"30":[29.62,29.67,29.74,29.81,29.9,30.0]},"R407A":{"-30":[-36.26,-35.31,-34.17,-32.86,-31.44,-30.0],"-20":[-26.07,-25.12,-24.01,-22.75,-21.39,-20.0],"-10":[-15.87,-14.93,-13.84,-12.63,-11.33,-10.0],"0":[-5.65,-4.72,-3.67,-2.51,-1.27,0.0],"10":[4.59,5.5,6.51,7.62,8.8,10.0],"20":[14.86,15.74,16.71,17.76,18.87,20.0],"30":[25.16,26.01,26.93,27.91,28.95,30.0]},"R407F":{"-30":[-36.23,-35.35,-34.27,-32.99,-31.53,-30.0],"-20":[-26.04,-25.17,-24.11,-22.86,-21.47,-20.0],"-10":[-15.85,-14.98,-13.94,-12.74,-11.4,-10.0],"0":[-5.64,-4.77,-3.76,-2.61,-1.34,-0.0],"10":[4.59,5.44,6.42,7.53,8.73,10.0],"20":[14.85,15.68,16.62,17.67,18.81,20.0],"30":[25.14,25.95,26.84,27.83,28.89,30.0]},"R410A":{"-30":[-30.09,-30.07,-30.06,-30.04,-30.02,-30.0],"-20":[-20.09,-20.08,-20.06,-20.04,-20.02,-20.0],"-10":[-10.1,-10.08,-10.06,-10.04,-10.02,-10.0],"0":[-0.1,-0.09,-0.07,-0.05,-0.02,0.0],"10":[9.89,9.91,9.93,9.95,9.97,10.0],"20":[19.88,19.9,19.93,19.95,19.97,20.0],"30":[29.88,29.9,29.92,29.95,29.97,30.0]},"R449A":{"-30":[-35.97,-35.06,-33.96,-32.7,-31.35,-30.0],"-20":[-25.88,-24.96,-23.87,-22.63,-21.31,-20.0],"-10":[-15.78,-14.85,-13.77,-12.56,-11.28,-10.0],"0":[-5.66,-4.73,-3.66,-2.49,-1.24,0.0],"10":[4.48,5.41,6.46,7.6,8.8,10.0],"20":[14.66,15.58,16.6,17.7,18.85,20.0],"30":[24.89,25.78,26.77,27.81,28.9,30.0]},"R452A":{"-30":[-34.13,-33.52,-32.8,-31.98,-31.03,-30.0],"-20":[-24.18,-23.54,-22.81,-21.97,-21.03,-20.0],"-10":[-14.2,-13.55,-12.8,-11.96,-11.02,-10.0],"0":[-4.2,-3.53,-2.77,-1.93,-1.0,0.0],"10":[5.84,6.52,7.28,8.11,9.03,10.0],"20":[15.93,16.61,17.36,18.18,19.06,20.0],"30":[26.08,26.75,27.48,28.27,29.11,30.0]},"R507A":{"-30":[-30.01,-30.0,-30.0,-30.0,-30.0,-30.0],"-20":[-20.01,-20.01,-20.01,-20.0,-20.0,-20.0],"-10":[-10.02,-10.01,-10.01,-10.01,-10.0,-10.0],"0":[-0.02,-0.02,-0.01,-0.01,-0.0,-0.0],"10":[9.97,9.98,9.98,9.99,9.99,10.0],"20":[19.97,19.98,19.98,19.99,19.99,20.0],"30":[29.97,29.97,29.98,29.99,29.99,30.0]},"R513A":{"-30":[-30.11,-30.09,-30.07,-30.05,-30.03,-30.0],"-20":[-20.07,-20.06,-20.05,-20.03,-20.02,-20.0],"-10":[-10.04,-10.04,-10.03,-10.02,-10.01,-10.0],"0":[-0.02,-0.02,-0.01,-0.01,-0.01,-0.0],"10":[9.99,9.99,9.99,10.0,10.0,10.0],"20":[20.0,20.0,20.0,20.0,20.0,20.0],"30":[30.0,30.0,30.0,30.0,30.0,30.0]}};
 const KOMP_KP = {"R32":-51.7,"R125":-48.1,"R134a":-26.1,"R143a":-47.2,"R1234yf":-29.5};
@@ -14750,7 +14750,9 @@ function renderGlid(rcode){
   const azeo = /^R5\d\d/.test(rcode);     // kun 500-serien er azeotrop
   const naer = !azeo && glid < 1;          // næsten-azeotrop: R410A, R404A
 
-  const kp = komp.map(([k])=>KOMP_KP[k]).filter(v=>v!==undefined);
+  /* CO₂ (R744) har intet kogepunkt ved 1 atm — det sublimerer — så det tæller ikke med i spredningen */
+  const harCO2 = komp.some(([k])=>k==='R744');
+  const kp = komp.filter(([k])=>k!=='R744').map(([k])=>KOMP_KP[k]).filter(v=>v!==undefined);
   const spredning = Math.max(...kp)-Math.min(...kp);
 
   host.innerHTML = `
@@ -14760,9 +14762,13 @@ function renderGlid(rcode){
       <div class="gl-komp">
         ${komp.map(([k,pct])=>`<div class="gl-k">
             <span class="gl-navn">${k}</span><span class="gl-pct">${pct}</span>
-            <span class="gl-kp">koger ved <b>${mbNum(KOMP_KP[k],1)} °C</b></span></div>`).join('')}
+            <span class="gl-kp">${k==='R744'?'sublimerer':'koger'} ved <b>${mbNum(KOMP_KP[k],1)} °C</b></span></div>`).join('')}
       </div>
-      <p class="gl-spred">Komponenternes kogepunkter ligger <b>${mbNum(spredning,1)} K</b> fra hinanden.</p>
+      <p class="gl-spred">Komponenternes kogepunkter ligger <b>${mbNum(spredning,1)} K</b> fra hinanden${harCO2
+        ? ` — CO₂ (R744) er ikke regnet med. Ved 1 atm har CO₂ slet ikke noget kogepunkt: tøris går direkte
+           fra fast stof til gas. Opløst i de andre er det den mest flygtige komponent, så selv en lille mængde
+           trækker boblepunktet ned og gør glidet større.`
+        : '.'}</p>
 
       ${glidSVG(kurve)}
 
@@ -14806,6 +14812,79 @@ function renderGlid(rcode){
   showRefr = function(rcode){ org(rcode); renderGlid(rcode); };
   const orgT = setVapT;
   setVapT = function(t){ orgT(t); if(typeof curRefr!=='undefined' && curRefr) renderGlid(curRefr.r); };
+})();
+
+/* ---- R454B (afløser for R410A) og R455A (afløser for R404A) — begge A2L ----
+   R454B = R32/R1234yf 68,9/31,1 masse-%, R455A = R744/R32/R1234yf 3/21,5/75,5 masse-%.
+   Data beregnet med CoolProp på samme måde som R452A. GWP er AR4 (R1234yf = 4).
+   Blokken står efter glid-kortet, fordi GLID_KURVE, KOMP_KP og BLEND_KOMP skal findes. */
+Object.assign(VAPT, {"R454B":[[295.8,0.1213,2.462],[285.1,0.08314,3.655],[273.7,0.05853,5.249],[261.3,0.04211,7.324],[247.7,0.03084,9.97],[232.7,0.02287,13.28],[215.9,0.0171,17.36]],"R455A":[[218.2,0.1464,1.499],[210.9,0.09871,2.274],[203.1,0.06862,3.328],[194.7,0.04891,4.725],[185.6,0.03558,6.531],[175.7,0.0263,8.821],[164.6,0.01967,11.679]]});
+/* Tc er her blandingens kritiske temperatur */
+Object.assign(PH, {"R454B":{"Tc":78.3,"dome":[[1.341,130.7,441.2],[1.4454,133.0,442.1],[1.6196,136.7,443.4],[1.8498,141.1,444.9],[2.1388,146.1,446.6],[2.4933,151.6,448.4],[2.9228,157.5,450.3],[3.4384,163.8,452.2],[4.053,170.6,454.1],[4.7817,177.6,456.1],[5.641,185.1,457.9],[6.6497,192.9,459.8],[7.8284,201.0,461.5],[9.1998,209.5,463.1],[10.7889,218.5,464.5],[12.6232,227.8,465.7],[14.7324,237.5,466.6],[17.1494,247.7,467.2],[19.9097,258.5,467.3],[23.0525,269.8,466.8],[26.6209,281.9,465.6],[30.6627,294.8,463.4],[35.2316,309.0,459.7],[40.3894,324.9,453.7],[46.2095,344.2,443.1],[52.741,379.3,410.8]],"cyc":{"-30|20":[448.9,507.3,233.5,0.12133,2.462,13.846,[462.2,476.4,491.5],55.4,109.2],"-30|30":[448.9,517.4,251.3,0.12133,2.462,18.048,[464.3,481.0,498.7],70.5,131.4],"-30|40":[448.9,527.1,270.1,0.12133,2.462,23.136,[466.4,485.3,505.6],85.4,152.3],"-30|50":[448.9,536.4,290.3,0.12133,2.462,29.227,[468.3,489.4,512.2],99.9,172.2],"-20|20":[453.5,497.8,233.5,0.08314,3.655,13.846,[463.9,474.7,486.0],46.9,87.3],"-20|30":[453.5,507.5,251.3,0.08314,3.655,18.048,[466.0,479.2,493.0],62.1,109.4],"-20|40":[453.5,516.7,270.1,0.08314,3.655,23.136,[468.0,483.4,499.7],76.9,130.4],"-20|50":[453.5,525.6,290.3,0.08314,3.655,29.227,[469.9,487.5,506.1],91.5,150.2],"-10|20":[457.7,489.3,233.5,0.05853,5.249,13.846,[465.3,473.1,481.1],39.7,67.8],"-10|30":[457.7,498.6,251.3,0.05853,5.249,18.048,[467.4,477.4,487.8],54.8,89.9],"-10|40":[457.7,507.5,270.1,0.05853,5.249,23.136,[469.4,481.6,494.3],69.6,110.8],"-10|50":[457.7,516.0,290.3,0.05853,5.249,29.227,[471.2,485.5,500.5],84.2,130.7],"0|20":[461.3,481.7,233.5,0.04211,7.324,13.846,[466.2,471.3,476.4],33.3,50.7],"0|30":[461.3,490.5,251.3,0.04211,7.324,18.048,[468.3,475.6,483.0],48.3,72.6],"0|40":[461.3,499.0,270.1,0.04211,7.324,23.136,[470.3,479.6,489.2],63.1,93.4],"0|50":[461.3,507.2,290.3,0.04211,7.324,29.227,[472.2,483.5,495.2],77.8,113.3],"10|20":[464.2,474.5,233.5,0.03084,9.97,13.846,[466.7,469.3,471.9],27.5,35.8],"10|30":[464.2,483.0,251.3,0.03084,9.97,18.048,[468.8,473.5,478.2],42.5,57.4],"10|40":[464.2,491.1,270.1,0.03084,9.97,23.136,[470.7,477.4,484.2],57.4,78.0],"10|50":[464.2,498.9,290.3,0.03084,9.97,29.227,[472.6,481.2,490.0],72.0,97.7],"20|30":[466.3,475.7,251.3,0.02287,13.28,18.048,[468.6,471.0,473.3],37.2,44.2],"20|40":[466.3,483.5,270.1,0.02287,13.28,23.136,[470.5,474.8,479.1],52.0,64.4],"20|50":[466.3,491.0,290.3,0.02287,13.28,29.227,[472.3,478.4,484.7],66.7,84.0],"30|40":[467.2,475.9,270.1,0.0171,17.36,23.136,[469.4,471.5,473.7],47.0,52.7],"30|50":[467.2,483.0,290.3,0.0171,17.36,29.227,[471.1,475.0,479.0],61.7,71.8]}},"R455A":{"Tc":85.6,"dome":[[1.4013,138.5,367.0],[1.5079,140.7,368.1],[1.6854,144.2,369.8],[1.919,148.3,371.8],[2.211,153.0,374.1],[2.5675,158.2,376.5],[2.9972,163.7,379.1],[3.5101,169.7,381.9],[4.1181,176.0,384.7],[4.8344,182.7,387.6],[5.6736,189.7,390.6],[6.6519,197.1,393.6],[7.7868,204.8,396.6],[9.0974,212.9,399.6],[10.6041,221.3,402.5],[12.3287,230.1,405.4],[14.2943,239.3,408.2],[16.5254,248.9,410.7],[19.0477,259.0,413.1],[21.8876,269.7,415.0],[25.0721,280.9,416.5],[28.6276,293.0,417.4],[32.5769,306.1,417.2],[36.9318,320.6,415.5],[41.6571,338.0,410.5],[46.0835,369.4,391.7]],"cyc":{"-30|20":[376.6,426.8,229.6,0.14637,1.499,12.226,[388.5,400.8,413.7],46.0,92.1],"-30|30":[376.6,433.0,245.1,0.14637,1.499,15.633,[389.9,403.8,418.2],56.8,106.6],"-30|40":[376.6,438.7,261.4,0.14637,1.499,19.669,[391.2,406.6,422.6],67.4,120.3],"-30|50":[376.6,444.1,278.6,0.14637,1.499,24.388,[392.5,409.2,426.6],78.0,133.1],"-20|20":[382.9,422.9,229.6,0.09871,2.274,12.226,[392.5,402.4,412.6],42.5,79.2],"-20|30":[382.9,429.0,245.1,0.09871,2.274,15.633,[393.9,405.4,417.1],53.4,93.9],"-20|40":[382.9,434.6,261.4,0.09871,2.274,19.669,[395.3,408.1,421.3],64.1,107.7],"-20|50":[382.9,439.9,278.6,0.09871,2.274,24.388,[396.5,410.8,425.3],74.8,120.7],"-10|20":[388.9,419.8,229.6,0.06862,3.328,12.226,[396.4,404.1,411.9],39.7,67.8],"-10|30":[388.9,425.7,245.1,0.06862,3.328,15.633,[397.9,407.0,416.4],50.7,82.7],"-10|40":[388.9,431.3,261.4,0.06862,3.328,19.669,[399.2,409.8,420.5],61.5,96.7],"-10|50":[388.9,436.4,278.6,0.06862,3.328,24.388,[400.5,412.4,424.4],72.3,109.9],"0|20":[394.7,417.2,229.6,0.04891,4.725,12.226,[400.3,405.8,411.5],37.4,57.6],"0|30":[394.7,423.0,245.1,0.04891,4.725,15.633,[401.7,408.8,415.9],48.4,72.7],"0|40":[394.7,428.5,261.4,0.04891,4.725,19.669,[403.0,411.5,420.0],59.3,86.9],"0|50":[394.7,433.5,278.6,0.04891,4.725,24.388,[404.3,414.1,423.8],70.2,100.3],"10|20":[400.2,414.9,229.6,0.03558,6.531,12.226,[403.9,407.5,411.2],35.5,48.5],"10|30":[400.2,420.7,245.1,0.03558,6.531,15.633,[405.3,410.4,415.6],46.5,63.8],"10|40":[400.2,426.0,261.4,0.03558,6.531,19.669,[406.6,413.1,419.6],57.5,78.2],"10|50":[400.2,431.0,278.6,0.03558,6.531,24.388,[407.9,415.6,423.4],68.4,91.8],"20|30":[405.3,418.6,245.1,0.0263,8.821,15.633,[408.6,411.9,415.2],44.8,55.8],"20|40":[405.3,423.8,261.4,0.0263,8.821,19.669,[409.9,414.6,419.2],55.8,70.4],"20|50":[405.3,428.7,278.6,0.0263,8.821,24.388,[411.2,417.1,422.9],66.8,84.2],"30|40":[409.8,421.7,261.4,0.01967,11.679,19.669,[412.8,415.7,418.7],54.2,63.3],"30|50":[409.8,426.5,278.6,0.01967,11.679,24.388,[414.0,418.2,422.4],65.3,77.3]}}});
+
+const NYE_REFR3 = [
+  {r:"R454B", name:"HFO/HFC-blanding", formula:"blanding", type:"hfo",
+   atoms:{C:1,H:2,F:2}, gwp:466, odp:0, bp:-51, safety:"A2L", ped:1,
+   blend:[
+     {r:"R32",  name:"difluormethan", formula:"CH2F2", pct:"68,9 %", atoms:{C:1,H:2,F:2}},
+     Object.assign({pct:"31,1 %"}, R1234yf_KOMP)
+   ],
+   tags:[["HFO/HFC-blanding",""],["Svagt brandbart","danger"],["Lavere GWP","safe"]],
+   desc:"En afløser for R410A i <b>nye</b> varmepumper, chillere og aircondition — den sælges bl.a. som Opteon XL41. I R410A dæmper R125 brandbarheden hos R32, men R125 har selv et GWP på 3.500. I R454B er R125 skiftet ud med HFO'en R1234yf: tryk og kogepunkt ligger stadig tæt på R410A's, og GWP falder fra 2.088 til 466. Men R1234yf er selv svagt brandbar, så blandingen bliver <b>A2L</b> og er ikke et drop-in i et R410A-anlæg, der er bygget til et A1-kølemiddel. Glidet er kun ca. 1,4 K, fordi 83 % af molekylerne er R32 — men blandingen er zeotrop og skal fyldes på som væske. Med GWP 466 går den fri af servicestoppet, men den ligger over 150 — den grænse, F-gasforordningen sætter for mange typer nye anlæg."},
+  {r:"R455A", name:"HFO/HFC-blanding med CO₂", formula:"blanding", type:"hfo",
+   atoms:{C:3,H:2,F:4}, gwp:148, odp:0, bp:-52, safety:"A2L", ped:1,
+   blend:[
+     {r:"R744", name:"kuldioxid",     formula:"CO2",   pct:"3 %",    atoms:{C:1,O:2}},
+     {r:"R32",  name:"difluormethan", formula:"CH2F2", pct:"21,5 %", atoms:{C:1,H:2,F:2}},
+     Object.assign({pct:"75,5 %"}, R1234yf_KOMP)
+   ],
+   tags:[["GWP under 150","safe"],["Svagt brandbart","danger"],["Stort temperatur-glid","danger"]],
+   desc:"Lavet til <b>nye</b> anlæg i butikskøl — plug-in-kølemøbler og kondenseringsaggregater til både køl og frost — som afløser for R404A. Den sælges bl.a. som Solstice L40X. GWP er kun <b>148</b>, lige under den grænse på 150, som F-gasforordningen sætter for mange typer nye køleanlæg. Prisen er, at den er svagt brandbar (A2L), og at glidet er stort: omkring <b>13 K</b>. Læg mærke til de 3 % CO₂ — de er den mest flygtige del og gør glidet ca. 5 K større, end R32 og R1234yf ville give alene. Kogepunktet på −52 °C er boblepunktet, hvor den første damp dannes; dugpunktet ligger først ved ca. −39 °C. Den skal altid fyldes på som væske, og overhedningen måles i forhold til dugpunktet."}
+];
+(function(){
+  const i = REFR.findIndex(r=>r.r==='R22');
+  REFR.splice(i<0?REFR.length:i, 0, ...NYE_REFR3);
+})();
+
+Object.assign(VAP, {
+  R454B:{M: 62.61, h:261, pol:2, f:['d','l'],
+         note:"Zeotrop blanding, men glidet er kun ca. 1,4 K. Skal alligevel fyldes på som væske. Læg mærke til fordampningsvarmen: pr. kg er den højere end R410A's, men pr. mol er de to næsten ens — molekylerne i R454B er bare lettere i gennemsnit."},
+  R455A:{M: 87.45, h:195, pol:2, f:['d','l'],
+         note:"Zeotrop blanding med stort glid — ca. 13 K gennem fordamperen. Skal fyldes på som væske, og overhedningen måles i forhold til dugpunktet."}
+});
+Object.assign(KOEL_GLID, {R454B:1.4, R455A:13.1});
+Object.assign(KOEL_OLIE, {R454B:"POE", R455A:"POE"});
+
+/* de to er selv afløsere — R454B for R410A og R455A for R404A */
+(function(){
+  const a=ERSTAT.R410A;
+  if(a){
+    const i=a.alt.findIndex(x=>x[0]==='R32');
+    a.alt.splice(i<0?0:i+1, 0, ["R454B","nyt","Blandingen af R32 og R1234yf, lavet til nye anlæg i R410A's klasse. Trykket og driftsbilledet ligger tæt på R410A's, og GWP falder til 466 — lavere end R32's 675. Men også R454B er A2L, så anlægget skal være bygget og godkendt til et svagt brandbart kølemiddel. Glidet er lille, ca. 1,4 K, men blandingen er zeotrop og fyldes på som væske."]);
+  }
+  const b=ERSTAT.R404A;
+  if(b){
+    const i=b.alt.findIndex(x=>x[0]==='R744');
+    b.alt.splice(i<0?b.alt.length:i, 0, ["R455A","nyt","Lavet til nye plug-in-kølemøbler og kondenseringsaggregater, der ellers ville have kørt med R404A. GWP falder fra 3.922 til 148 — under 150. Men den er svagt brandbar (A2L), så den kan ikke bare fyldes på et R404A-anlæg; anlægget skal bygges til det. Glidet er stort, ca. 13 K, så den fyldes altid på som væske, og overhedningen måles fra dugpunktet."]);
+  }
+})();
+
+Object.assign(GLID_KURVE, {"R454B":{"-30":[-31.31,-31.18,-31.03,-30.81,-30.5,-30.0],"-20":[-21.36,-21.23,-21.05,-20.82,-20.5,-20.0],"-10":[-11.41,-11.27,-11.08,-10.83,-10.5,-10.0],"0":[-1.46,-1.3,-1.1,-0.84,-0.49,-0.0],"10":[8.5,8.68,8.89,9.16,9.52,10.0],"20":[18.49,18.67,18.89,19.17,19.53,20.0],"30":[28.49,28.68,28.91,29.2,29.55,30.0]},"R455A":{"-30":[-43.45,-39.29,-36.4,-33.88,-31.72,-30.0],"-20":[-33.32,-29.32,-26.45,-23.93,-21.76,-20.0],"-10":[-23.15,-19.32,-16.47,-13.97,-11.8,-10.0],"0":[-12.92,-9.26,-6.46,-3.98,-1.82,0.0],"10":[-2.63,0.85,3.59,6.03,8.17,10.0],"20":[7.74,11.03,13.7,16.08,18.18,20.0],"30":[18.22,21.3,23.87,26.16,28.21,30.0]}});
+Object.assign(BLEND_KOMP, {
+  R454B:[["R32","68,9 %"],["R1234yf","31,1 %"]],
+  R455A:[["R744","3 %"],["R32","21,5 %"],["R1234yf","75,5 %"]]
+});
+/* CO₂ har intet kogepunkt ved 1 atm — tøris sublimerer ved −78,5 °C.
+   renderGlid skriver derfor "sublimerer ved" og regner det ikke med i spredningen. */
+KOMP_KP.R744 = -78.5;
+
+/* CO₂ som komponent i en blanding: {C:1,O:2} har hverken H, F eller Cl og ville
+   blive tegnet som ét ensomt carbon. Samme greb som for R1234yf. */
+(function(){
+  const h3=halo3D, fh=flatHalo;
+  const erCO2 = a => a && a.C===1 && a.O===2 && !a.H && !a.F && !a.Cl;
+  halo3D   = a => erCO2(a) ? co2_3D() : h3(a);
+  flatHalo = a => erCO2(a) ? flat2D({r:'R744'}) : fh(a);
 })();
 
 /* ============================================================
@@ -17474,6 +17553,7 @@ const RNR_BLAND = {
   '449A':{dele:'R32 24,3 % · R125 24,7 % · R1234yf 25,3 % · R134a 25,7 %'},
   '452A':{dele:'R32 11 % · R125 59 % · R1234yf 30 %'},
   '454B':{dele:'R32 68,9 % · R1234yf 31,1 %'},
+  '455A':{dele:'R744 3 % · R32 21,5 % · R1234yf 75,5 %'},
   '513A':{dele:'R1234yf 56 % · R134a 44 %'},
   '500' :{dele:'R12 73,8 % · R152a 26,2 %'},
   '502' :{dele:'R22 48,8 % · R115 51,2 %'},
@@ -27837,8 +27917,8 @@ QZ.push(
  e:"Bogstavet er giftighed (A lav, B høj), tallet brandbarhed (1 ingen, 2L svag, 3 høj). A1 er sikrest. Ammoniak er den eneste B her — giftig, men kun svagt brandbar."},
 {t:'koel',d:3,k:'koel-egenskaber',type:'sorter',q:"Sortér blandingerne: azeotrop (intet glid) eller zeotrop (temperaturglid)?",
  kasser:['Azeotrop — opfører sig som ét stof','Zeotrop — koger over et interval'],
- brikker:[['R507A',0],['R513A',0],['R407A',1],['R407F',1],['R449A',1],['R452A',1]],
- e:"500-serien er de azeotrope blandinger — uden glid, som ét stof. 400-serien er zeotrop: kogepunktet glider gennem fordamperen, sammensætningen kan ændre sig ved en lækage, og flasken skal tømmes som væske."},
+ brikker:[['R507A',0],['R513A',0],['R407A',1],['R407F',1],['R449A',1],['R452A',1],['R454B',1],['R455A',1]],
+ e:"500-serien er de azeotrope blandinger — uden glid, som ét stof. 400-serien er zeotrop: kogepunktet glider gennem fordamperen, sammensætningen kan ændre sig ved en lækage, og flasken skal tømmes som væske. Det gælder også R454B, selvom glidet kun er ca. 1,4 K — nummeret afslører den."},
 {t:'koel',d:2,k:'koel-sikkerhed',type:'udfyld',q:"Udfyld: sikkerhedsgruppens to tegn.",
  tekst:"I sikkerhedsgruppen står bogstavet for ___ (A lav, B høj), og tallet står for ___ (1, 2L, 2, 3 — fra ingen til høj).",
  huller:[['giftighed','giftigheden','toksicitet','giftig','giftighedsgrad','toksiciteten','giftvirkning','giftvirkningen'],['brandbarhed','brandbarheden','brændbarhed','brandfare','brandfarlighed','antændelighed','brændbarheden','brandfarligheden','antændeligheden','brandbar','brændbar']],
