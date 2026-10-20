@@ -2493,6 +2493,49 @@
     margin:0 0 4px}
   .ell-vaerk-und{font-size:12.5px;color:var(--muted);margin:0 0 14px;line-height:1.55}
 
+  /* ---- fasediagrammer: vand og CO₂ ----
+     Diagrammet tegnes i den bredde, det får, så det gule punkt er et
+     HTML-element oven på SVG'en — det kan få fokus og trækkes med en
+     finger. Infoboksen får samme farve som den fase, punktet står i. */
+  .fase-en{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:20px;align-items:start;margin-top:14px}
+  .fase-begge{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start;margin-top:14px}
+  @media(max-width:900px){.fase-en,.fase-begge{grid-template-columns:minmax(0,1fr)}}
+  .fase-fig-h{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink);margin:0 0 8px}
+  .fase-plot{position:relative;touch-action:pan-y;-webkit-user-select:none;user-select:none}
+  .fase-svg{display:block;width:100%;height:auto;background:#0b1726;border:1px solid var(--line);
+    border-radius:12px;cursor:crosshair}
+  .fase-zoomsvg{cursor:default}
+  /* stort nok til en finger; selve prikken er tegnet indeni */
+  .fase-haand{position:absolute;width:36px;height:36px;margin:-18px 0 0 -18px;border-radius:50%;
+    touch-action:none;cursor:grab;outline:none;-webkit-tap-highlight-color:transparent}
+  .fase-haand::before{content:'';position:absolute;inset:9px;border-radius:50%;background:var(--gold);
+    border:2px solid #0b1726;box-shadow:0 0 0 2px rgba(241,199,94,.45)}
+  .fase-haand:focus-visible::before{box-shadow:0 0 0 3px #0b1726,0 0 0 5px var(--gold)}
+  .fase-haand.traek{cursor:grabbing}
+  .fase-side > .fase-ud .verdict{margin-top:0}
+  .verdict.fase-fast{background:rgba(79,134,230,.1);border-color:rgba(79,134,230,.55)}
+  .verdict.fase-vaeske{background:rgba(22,163,122,.1);border-color:rgba(22,163,122,.55)}
+  .verdict.fase-gas{background:rgba(189,128,25,.1);border-color:rgba(189,128,25,.55)}
+  .verdict.fase-superkrit{background:rgba(196,92,192,.1);border-color:rgba(196,92,192,.55)}
+  .verdict.fase-kurve{background:rgba(234,242,255,.05);border-color:rgba(234,242,255,.4)}
+  .verdict.fase-tripel,.verdict.fase-kritisk{background:rgba(241,199,94,.08);border-color:rgba(241,199,94,.5)}
+  .tag.fase-fast{background:#9dbdf5;color:#0b2350}
+  .tag.fase-vaeske{background:#6fd3b0;color:#053524}
+  .tag.fase-gas{background:#e2b35e;color:#3d2800}
+  .tag.fase-superkrit{background:#dd9ad9;color:#3b0d39}
+  .tag.fase-kurve{background:#eaf2ff;color:#13243a}
+  .tag.fase-tripel,.tag.fase-kritisk{background:var(--gold);color:#5a4400}
+  .fase-vej{margin-top:16px}
+  .fase-styr[hidden],.fase-pktfod[hidden]{display:none}
+  .fase-pktfod b{color:var(--ink);font-weight:600}
+  .fase-trin{border-left:3px solid var(--gold);padding:2px 0 2px 13px;margin-top:12px;
+    font-size:13.5px;line-height:1.6;color:var(--muted)}
+  .fase-trin-nr{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--gold);font-weight:600;margin-bottom:3px}
+  .fase-zoom{margin:16px 0 0}
+  .fase-tabel td:first-child{color:var(--ink);font-weight:600;white-space:nowrap}
+  @media(max-width:560px){.fase-tabel td:first-child{white-space:normal}}
+
   /* ---- sikkerhed ---- */
   .sik-ikon{display:block;flex:none;height:auto;user-select:none;
     -webkit-user-drag:none}
@@ -2826,6 +2869,7 @@
     <button class="tab" data-spor="koel" id="tab-tewi" onclick="showTab('tewi')">TEWI</button>
 
     <button class="tab" data-spor="ekstra" id="tab-el" onclick="showTab('el')">Ellære</button>
+    <button class="tab" data-spor="ekstra" id="tab-fase" onclick="showTab('fase')">Fasediagrammer</button>
   </nav>
 
   <!-- ===================== ELEVENS EGEN SIDE ===================== -->
@@ -4847,6 +4891,85 @@
     </div>
   </section>
 
+  <!-- ===================== FASEDIAGRAMMER (EKSTRA MATERIALER) ===================== -->
+  <section id="view-fase" style="display:none">
+    <p class="sub">Det her er <b>ekstra materiale</b>. Det er ikke kemi F-pensum, og det tæller
+      ikke med i din progression. Det bygger videre på noget, du allerede kender:
+      <b>mætningstrykket</b> fra <b>Idealgasloven</b> — trykket, hvor væske og damp er i
+      ligevægt — er én af kurverne i et fasediagram.</p>
+
+    <div class="card">
+      <h2>Hvad et fasediagram viser</h2>
+      <p class="sub">Et fasediagram er et kort over, hvilken tilstand et stof er i — fast stof, væske
+        eller gas — ved en bestemt temperatur og et bestemt tryk. Kurverne er grænserne: på en kurve
+        er to faser i ligevægt, og krydser du en kurve, skifter stoffet tilstand. Vælg et stof, og flyt
+        det gule punkt rundt.</p>
+      <div class="mb-tasks" id="faseStofRk" role="group" aria-label="Vælg stof"></div>
+      <div id="faseFigurer"></div>
+      <p class="ell-fod">Akserne viser rigtige værdier, regnet med de internationale tilstandsligninger
+        for vand (IAPWS) og CO₂ (Span og Wagner). Mange lærebøger tegner fasediagrammet som en skitse
+        uden tal — det her kan du aflæse. Trykaksen er logaritmisk: hver streg op er 10 gange så meget tryk.</p>
+    </div>
+
+    <div class="card">
+      <h2>Vand og CO₂ side om side</h2>
+      <p class="sub">De to diagrammer har de samme dele, men de ligger meget forskellige steder — og
+        smeltekurverne hælder hver sin vej.</p>
+      <div class="ell-afsnit">
+      <div class="ell-blok-tabel"><table class="fase-tabel">
+        <thead><tr><th></th><th>Vand (H₂O)</th><th>CO₂ (R744)</th></tr></thead>
+        <tbody>
+          <tr><td>Tripelpunkt</td><td>0,01&nbsp;°C og 0,00612&nbsp;bar (611,657&nbsp;Pa)</td><td>−56,6&nbsp;°C og 5,18&nbsp;bar</td></tr>
+          <tr><td>Kritisk punkt</td><td>373,9&nbsp;°C og 220,6&nbsp;bar</td><td>31,0&nbsp;°C og 73,8&nbsp;bar</td></tr>
+          <tr><td>Ved 1&nbsp;atm (1,013&nbsp;bar)</td><td>Is smelter ved 0&nbsp;°C, og vand koger ved 100&nbsp;°C. 1&nbsp;atm ligger
+            over tripelpunktet, så der er flydende vand imellem.</td><td>Tøris sublimerer ved −78,5&nbsp;°C.
+            1&nbsp;atm ligger under tripelpunktet, så der findes ingen flydende CO₂ ved 1&nbsp;atm.</td></tr>
+          <tr><td>Smeltekurven</td><td>Hælder mod venstre: mere tryk giver lavere smeltepunkt
+            (−0,75&nbsp;°C ved 100&nbsp;bar, −8,9&nbsp;°C ved 1.000&nbsp;bar).</td><td>Hælder mod højre: mere tryk giver
+            højere smeltepunkt (−54,5&nbsp;°C ved 100&nbsp;bar, −37,1&nbsp;°C ved 1.000&nbsp;bar).</td></tr>
+          <tr><td>Hvorfor</td><td>Is fylder ca. 9&nbsp;% mere end vand (916,7 mod 999,8&nbsp;kg/m³ ved
+            tripelpunktet). Hydrogen-bindingerne låser molekylerne fast i et åbent gitter med hulrum.</td>
+            <td>Fast CO₂ er tungere end flydende CO₂. CO₂ har ingen hydrogen-bindinger, der holder
+            molekylerne på afstand, så de pakker tættere i krystallen end i væsken.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="ell-blok-pointe"><div class="ell-h3">Tryk hjælper den fase, der fylder mindst</div>
+        <p>Når du trykker på et stof, skubber du det mod den fase, der fylder mindst. For CO₂ — og for
+        næsten alle andre stoffer — er det det faste stof, så smeltepunktet stiger med trykket. For vand
+        er det væsken, fordi isen fylder mere. Derfor er det vands smeltekurve, der hælder den »forkerte« vej.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>I køleteknikken</h2>
+      <p class="sub">Begge diagrammer har betydning i maskinrummet — CO₂ som kølemiddel, vand som fugt,
+        der ikke må være i anlægget.</p>
+      <div class="ell-afsnit">
+      <div class="ell-blok-tekst"><div class="ell-h3">R744: det kritiske punkt ligger ved 31&nbsp;°C</div>
+        <p>Et kølemiddel kan kun kondensere, hvis det kan køles ned under sin kritiske temperatur. For R744
+        er den kun <b>31,0&nbsp;°C</b> (73,8&nbsp;bar). På en varm dag kan luften ikke køle CO₂ så langt ned, og så
+        kører anlægget <b>transkritisk</b>: højtrykssiden ligger over det kritiske tryk, og varmeveksleren
+        er en <b>gaskøler</b> i stedet for en kondensator. Gassen bliver kølet ned, men den kondenserer ikke.</p></div>
+      <div class="ell-blok-fejl"><div class="ell-h3">Tøris i anlægget: tripelpunktet ved 5,2&nbsp;bar</div>
+        <p>Under <b>5,18&nbsp;bar</b> kan der ikke findes flydende CO₂ — kun tøris og gas. Fylder du flydende CO₂
+        på et anlæg, der står under vakuum, falder trykket under tripelpunktet, og en del af væsken bliver
+        til tøris, der kan stoppe ventiler og rør. Derfor fylder man først <b>damp</b> på, til trykket i
+        anlægget er over tripelpunktet, og først derefter væske.</p>
+        <p>Det samme sker, når flydende CO₂ lukkes ud til fri luft — ved aftapning, eller hvis en
+        sikkerhedsventil blæser af fra væskesiden: trykket falder under 5,2&nbsp;bar, og noget af væsken bliver
+        til tøris-sne.</p></div>
+      <div class="ell-blok-tekst"><div class="ell-h3">Vand: fugt, der fryser</div>
+        <p>Fugt i et køleanlæg følger vands eget fasediagram. Er fordampningstemperaturen under 0&nbsp;°C, kan
+        fugten fryse til is i ekspansionsventilen, hvor kølemidlet bliver koldt, og stoppe den. Det er en af
+        grundene til, at der sidder en <b>filtertørrer</b> i væskeledningen: den binder fugten, før den når
+        så langt.</p>
+        <p>Vakuumpumpen bruger den samme kurve: ved 20&nbsp;°C koger vand, når trykket kommer
+        under 0,023&nbsp;bar (23&nbsp;mbar). Derfor kan man koge fugten ud af et anlæg ved stuetemperatur, når man
+        evakuerer det.</p></div>
+      </div>
+    </div>
+  </section>
+
 
 </div>
 
@@ -6854,6 +6977,7 @@ function showTab(name){
   document.getElementById('view-tewi').style.display   = name==='tewi'?'block':'none';
   document.getElementById('view-gw').style.display     = name==='gw'?'block':'none';
   { const _v=document.getElementById('view-el'); if(_v) _v.style.display = name==='el'?'block':'none'; }
+  { const _v=document.getElementById('view-fase'); if(_v) _v.style.display = name==='fase'?'block':'none'; }
   document.getElementById('tab-elev').classList.toggle('active', name==='elev');
   document.getElementById('tab-mis').classList.toggle('active', name==='mis');
   document.getElementById('tab-build').classList.toggle('active', name==='build');
@@ -6864,6 +6988,7 @@ function showTab(name){
   document.getElementById('tab-sb').classList.toggle('active', name==='sb');
   document.getElementById('tab-phlogp').classList.toggle('active', name==='phlogp');
   { const _t=document.getElementById('tab-el'); if(_t) _t.classList.toggle('active', name==='el'); }
+  { const _t=document.getElementById('tab-fase'); if(_t) _t.classList.toggle('active', name==='fase'); }
   document.getElementById('tab-olie').classList.toggle('active', name==='olie');
   document.getElementById('tab-korr').classList.toggle('active', name==='korr');
   document.getElementById('tab-gas').classList.toggle('active', name==='gas');
@@ -6880,6 +7005,7 @@ function showTab(name){
   if(name==='gas'){ initGas(); initRegne(); }
   if(name==='sik'){ initSik(); }
   if(name==='el'){ initEl(); }
+  if(name==='fase'){ initFase(); }
   if(name==='flaske'){ initIG(); if(typeof gaetInit==='function') gaetInit('flaske'); }
   if(name==='quiz') resetQuizScreens();
   if(name==='mol'){ mbInit(); kbInit(); }
@@ -17540,6 +17666,914 @@ function initEl(){
   if(!ellLedRaf){ ellLedSidst = 0; ellLedRaf = requestAnimationFrame(ellLedLoop); }
   if(!ellDriftRaf){ ellDriftSidst = 0; ellDriftRaf = requestAnimationFrame(ellDriftLoop); }
 }
+
+/* ===== nyt modul: fase.js ===== */
+
+/* ============================================================
+   FASEDIAGRAMMER — vand og CO₂ (ekstra materiale)
+   ------------------------------------------------------------
+   Et p-T-diagram er et kort over, hvilken tilstand et stof er i
+   ved en given temperatur og et givet tryk. Kurverne her er ikke
+   tegnet på øjemål: de er regnet ud af de samme tilstandsligninger,
+   som tabellerne bygger på. Trykaksen er logaritmisk — ellers kunne
+   vands tripelpunkt ved 0,006 bar og det kritiske punkt ved 221 bar
+   ikke stå i samme billede.
+
+   Fanen står ligesom Ellære uden for læringssystemet. Den logger
+   intet og gemmer intet; punktet starter samme sted hver gang.
+============================================================ */
+
+/* Faseovergangs-data til p-T-fasediagrammer (T i °C, p i bar absolut).
+   Hver kurve: [[T, p], ...] sorteret efter stigende p.
+   H2O: sublimation + smeltning (is Ih) efter IAPWS R14-08(2011); damptryk efter IAPWS-95 (CoolProp 8.0).
+   CO2: sublimation + smeltning efter Span & Wagner (1996) lign. 3.12 og 3.10; damptryk efter Span-Wagner-EOS (CoolProp 8.0). */
+const FASE_DATA = {
+ H2O: {
+  sub: [[-60,1.081e-5],[-59,1.237e-5],[-58,1.414e-5],[-57,1.613e-5],[-56,1.839e-5],[-55,2.094e-5],[-54,2.381e-5],[-53,2.705e-5],[-52,3.069e-5],[-51,3.478e-5],[-50,3.938e-5],[-49,4.453e-5],[-48,5.03e-5],[-47,5.675e-5],[-46,6.397e-5],[-45,7.203e-5],[-44,8.102e-5],[-43,9.105e-5],[-42,.0001022],[-41,.0001146],[-40,.0001284],[-39,.0001437],[-38,.0001607],[-37,.0001795],[-36,.0002004],[-35,.0002234],[-34,.0002489],[-33,.0002771],[-32,.0003081],[-31,.0003423],[-30,.0003801],[-29,.0004215],[-28,.0004672],[-27,.0005173],[-26,.0005724],[-25,.0006327],[-24,.0006989],[-23,.0007714],[-22,.0008508],[-21,.0009376],[-20,.001032],[-19,.001136],[-18,.001249],[-17,.001372],[-16,.001507],[-15,.001653],[-14,.001812],[-13,.001985],[-12,.002173],[-11,.002377],[-10,.002599],[-9,.002839],[-8,.0031],[-7,.003382],[-6,.003687],[-5,.004017],[-4,.004375],[-3,.00476],[-2,.005177],[-1,.005627],[.01,.00611657]],  // is Ih -> damp; -60 °C .. tripelpunkt
+  smelt: [[.01,.00611657],[.01,.010192],[.0099,.016984],[.0098,.028301],[.0097,.047158],[.0095,.078582],[.0091,.13094],[.0084,.2182],[.0073,.36359],[.0055,.60586],[.0025,1.0096],[-.0025,1.6823],[-.0108,2.8032],[-.0247,4.6711],[-.0479,7.7837],[-.0865,12.97],[-.1512,21.613],[-.2595,36.014],[-.4413,60.012],[-.7483,100],[-1,132.3],[-2,256.77],[-3,375.72],[-4,489.88],[-5,599.83],[-6,706.04],[-7,808.87],[-8,908.65],[-9,1005.6],[-10,1100],[-11,1192.1],[-12,1281.9],[-13,1369.7],[-14,1455.6],[-15,1539.7],[-16,1622.1],[-17,1703],[-18,1782.3],[-19,1860.3],[-20,1937],[-21,2012.5],[-21.985,2085.67]],  // is Ih -> væske; tripelpunkt .. Ih-III-væske-tripelpunkt (kurven SLUTTER her; is III/V/VI fortsætter ved højere p)
+  damp: [[.01,.00611657],[5,.008726],[10,.01228],[15,.01706],[20,.02339],[25,.0317],[30,.04247],[35,.05629],[40,.07385],[45,.09595],[50,.1235],[55,.1576],[60,.1995],[65,.2504],[70,.312],[75,.386],[80,.4741],[85,.5787],[90,.7018],[95,.8461],[100,1.014],[105,1.209],[110,1.434],[115,1.692],[120,1.987],[125,2.322],[130,2.703],[135,3.132],[140,3.615],[145,4.157],[150,4.762],[155,5.435],[160,6.182],[165,7.009],[170,7.922],[175,8.926],[180,10.03],[185,11.23],[190,12.55],[195,13.99],[200,15.55],[205,17.24],[210,19.08],[215,21.06],[220,23.2],[225,25.5],[230,27.97],[235,30.63],[240,33.47],[245,36.51],[250,39.76],[255,43.23],[260,46.92],[265,50.85],[270,55.03],[275,59.46],[280,64.17],[285,69.15],[290,74.42],[295,79.99],[300,85.88],[305,92.09],[310,98.65],[315,105.6],[320,112.8],[325,120.5],[330,128.6],[335,137.1],[340,146],[345,155.4],[350,165.3],[355,175.7],[360,186.7],[365,198.2],[370,210.4],[372,215.5],[373,218.1],[373.5,219.5],[373.946,220.64]],  // væske -> damp; tripelpunkt .. kritisk punkt (kurven SLUTTER)
+  pkt: {
+   tripel: {T: .01, p: .00611657},        // 273,16 K, 611,657 Pa
+   kritisk: {T: 373.946, p: 220.64},       // 647,096 K, 22,064 MPa
+   kog1atm: {T: 99.974, p: 1.01325},     // normalkogepunkt 373,124 K
+   smelt1atm: {T: 0.0025, p: 1.01325},  // normalsmeltepunkt 273,152519 K
+   IhIIIL: {T: -21.985, p: 2085.67}    // is Ih - is III - væske, 251,165 K, 208,566 MPa
+  }
+ },
+ CO2: {
+  sub: [[-120,.01302],[-118.5,.01591],[-117,.01936],[-115.5,.02347],[-114,.02834],[-112.5,.03408],[-111,.04084],[-109.5,.04877],[-108,.05803],[-106.5,.06883],[-105,.08137],[-103.5,.0959],[-102,.1127],[-100.5,.132],[-99,.1542],[-97.5,.1796],[-96,.2087],[-94.5,.2419],[-93,.2796],[-91.5,.3224],[-90,.3708],[-88.5,.4256],[-87,.4874],[-85.5,.5569],[-84,.635],[-82.5,.7226],[-81,.8207],[-79.5,.9303],[-78,1.053],[-76.5,1.189],[-75,1.34],[-73.5,1.508],[-72,1.695],[-70.5,1.902],[-69,2.13],[-67.5,2.383],[-66,2.661],[-64.5,2.968],[-63,3.306],[-61.5,3.678],[-60,4.086],[-58.5,4.534],[-57,5.026],[-56.558,5.1795]],  // tøris -> gas; -120 °C .. tripelpunkt
+  smelt: [[-56.558,5.1795],[-56.537,6.173],[-56.511,7.356],[-56.481,8.767],[-56.445,10.45],[-56.403,12.45],[-56.352,14.84],[-56.291,17.69],[-56.219,21.08],[-56.133,25.12],[-56.03,29.94],[-55.908,35.68],[-55.763,42.52],[-55.59,50.67],[-55.384,60.39],[-55.139,71.97],[-55,78.59],[-54.849,85.77],[-54.503,102.2],[-54.093,121.8],[-53.606,145.2],[-53.029,173],[-52.346,206.2],[-52,223],[-51.536,245.7],[-51,272.1],[-50.58,292.9],[-50,321.6],[-49.45,349],[-49,371.6],[-48.12,416],[-47,472.9],[-46.554,495.7],[-46,524.2],[-45,576],[-44,628.2],[-43,680.9],[-42,734.1],[-41,787.7],[-40.048,839.1],[-39,896.2],[-38,951.2],[-37.119,1000]],  // fast -> væske; tripelpunkt .. 1000 bar (FORTSÆTTER opad uden for diagrammet)
+  damp: [[-56.558,5.1795],[-56,5.306],[-54,5.78],[-52,6.286],[-50,6.823],[-48,7.395],[-46,8.002],[-44,8.644],[-42,9.325],[-40,10.04],[-38,10.81],[-36,11.61],[-34,12.45],[-32,13.34],[-30,14.28],[-28,15.26],[-26,16.29],[-24,17.37],[-22,18.51],[-20,19.7],[-18,20.94],[-16,22.24],[-14,23.59],[-12,25.01],[-10,26.49],[-8,28.03],[-6,29.63],[-4,31.3],[-2,33.04],[0,34.85],[2,36.73],[4,38.69],[6,40.72],[8,42.83],[10,45.02],[12,47.3],[14,49.66],[16,52.11],[18,54.65],[20,57.29],[22,60.03],[24,62.88],[26,65.84],[28,68.92],[30,72.14],[30.5,72.97],[30.8,73.47],[30.978,73.773]],  // væske -> gas; tripelpunkt .. kritisk punkt (kurven SLUTTER)
+  pkt: {
+   tripel: {T: -56.558, p: 5.1795},        // 216,592 K, 0,51795 MPa
+   kritisk: {T: 30.978, p: 73.773},        // 304,1282 K, 7,3773 MPa
+   sub1atm: {T: -78.46, p: 1.01325},   // tøris sublimerer ved 1 atm
+   damp20: {T: 20, p: 57.29}           // flaske-/anlægstryk ved 20 °C
+  }
+ }
+};
+
+const FASE_ATM = 1.01325;   // 1 atm i bar
+const FASE_DLG = 0.02;      // ét piletast-skridt på trykaksen: 1/50 dekade, knap 5 %
+
+/* Farverne følger fasen — ikke stoffet — så "væske" ser ens ud i begge diagrammer.
+   Firkløveret er tjekket for farveblindhed; superkritisk har desuden skravering,
+   og alle områder har navnet skrevet på. */
+const FASE_FARVE = {fast:'#4f86e6', vaeske:'#16a37a', gas:'#bd8019', superkrit:'#c45cc0'};
+
+/* Akser og etiketter. Akserne er valgt, så alle tre kurver, tripelpunktet og det
+   kritiske punkt står inde i billedet, og så der er plads til at skrive
+   "superkritisk" i hjørnet over det kritiske punkt. Begge går op til 1.000 bar:
+   over omkring 2.000 bar får vand andre former for is, og dem viser vi ikke. */
+const FASE_STOF = {
+  H2O: {
+    titel:'Vand (H₂O)', navn:'vand',
+    fast:'fast stof (is)', vaeske:'væske', gas:'gas (vanddamp)',
+    isen:'isen', fastKort:'is', vaeskeKort:'vand', gasKort:'vanddamp',
+    tre:'is, vand og vanddamp', rimTil:'is (rim)',
+    dT:1,
+    T:[-50, 500], p:[1e-4, 1e3],
+    Tstreg:[-50, 0, 100, 200, 300, 400, 500],
+    tripelTxt:'0,01 °C og 0,00612 bar', kritTxt:'373,9 °C og 220,6 bar',
+    TcTxt:'373,9 °C', pcTxt:'220,6 bar', ptTxt:'0,00612 bar',
+    omr:{
+      fast:     {T:-25, p:0.03, lodret:true, tekst:[['fast stof','is']]},
+      vaeske:   {T:95,  p:20,   tekst:[['væske','vand']]},
+      gas:      {T:250, p:0.002, tekst:[['gas','vanddamp']]},
+      superkrit:{T:437, p:470,  tekst:[['superkritisk fluid'], ['superkritisk','fluid'], ['super-','kritisk','fluid'], ['super-','kritisk']]}
+    },
+    kurve:{sub:{T:-22}, smelt:{p:30}, damp:{T:215}},
+    pktEt:{tripel:{dx:9, dy:6, anker:'start'}, kritisk:{dx:-9, dy:-20, anker:'end'}},
+    atm:[{k:'smelt1atm', tekst:'0 °C', anker:'start', dx:5}, {k:'kog1atm', tekst:'100 °C', anker:'middle', dx:0}],
+    haeldning:'Smeltekurven går næsten lodret op og hælder svagt mod venstre.'
+  },
+  CO2: {
+    titel:'Kuldioxid (CO₂, R744)', navn:'CO₂',
+    fast:'fast stof (tøris)', vaeske:'væske', gas:'gas',
+    isen:'tørisen', fastKort:'tøris', vaeskeKort:'flydende CO₂', gasKort:'CO₂-gas',
+    tre:'tøris, flydende CO₂ og CO₂-gas', rimTil:'tøris',
+    dT:0.5,
+    T:[-120, 80], p:[1e-2, 1e3],
+    Tstreg:[-120, -80, -40, 0, 40, 80],
+    tripelTxt:'−56,6 °C og 5,18 bar', kritTxt:'31,0 °C og 73,8 bar',
+    TcTxt:'31,0 °C', pcTxt:'73,8 bar', ptTxt:'5,18 bar',
+    omr:{
+      fast:     {T:-95, p:60,  tekst:[['fast stof','tøris']]},
+      vaeske:   {T:-15, p:350, tekst:[['væske','flydende CO₂']], smal:{T:-15, p:350, tekst:[['væske']]}},
+      gas:      {T:15,  p:0.25, tekst:[['gas']]},
+      superkrit:{T:55.5, p:272, tekst:[['superkritisk fluid'], ['superkritisk','fluid'], ['super-','kritisk','fluid'], ['super-','kritisk']]}
+    },
+    kurve:{sub:{T:-98}, smelt:{p:200}, damp:{T:-12}},
+    pktEt:{tripel:{dx:9, dy:8, anker:'start'}, kritisk:{dx:-9, dy:-20, anker:'end'}},
+    atm:[{k:'sub1atm', tekst:'−78,5 °C', anker:'middle', dx:0}],
+    haeldning:'Smeltekurven går stejlt op og hælder mod højre.'
+  }
+};
+
+/* Følg en vej. Hvert trin er et punkt (T, p) og en kort tekst. via:'damp' betyder,
+   at punktet følger kurven derhen i stedet for at gå i lige linje. Et trin uden
+   ny position er bare mere forklaring. */
+const FASE_VEJE = [
+  {id:'opvarm', navn:'Opvarm ved 1 atm',
+   H2O:[
+    {T:-40, p:FASE_ATM, t:'Du starter med is ved −40 °C og 1 atm — almindeligt lufttryk. Nu varmer du op, mens trykket holdes fast.'},
+    {T:0,   p:FASE_ATM, t:'Ved 0 °C rammer du smeltekurven, og isen smelter. Is og vand er i ligevægt, og temperaturen står stille, indtil al isen er smeltet.'},
+    {T:50,  p:FASE_ATM, t:'Nu er det flydende vand. Den varme, du tilfører, får igen temperaturen til at stige.'},
+    {T:100, p:FASE_ATM, t:'Ved 100 °C rammer du fordampningskurven, og vandet koger. Vand og damp er i ligevægt, og temperaturen står stille, indtil alt vandet er fordampet.'},
+    {T:150, p:FASE_ATM, t:'Nu er det vanddamp — en gas. Ved 1 atm har vand både et smeltepunkt og et kogepunkt, fordi 1 atm ligger over tripelpunktets 0,00612 bar.'}
+   ],
+   CO2:[
+    {T:-110, p:FASE_ATM, t:'Du starter med tøris ved −110 °C og 1 atm. Nu varmer du op, mens trykket holdes fast.'},
+    {T:-78.5,p:FASE_ATM, t:'Ved −78,5 °C rammer du sublimationskurven. Tørisen sublimerer: den går direkte fra fast stof til gas uden at blive flydende.'},
+    {T:-30,  p:FASE_ATM, t:'Nu er det gas. Der var aldrig flydende CO₂ undervejs: 1 atm ligger under tripelpunktets 5,18 bar, så vejen går uden om det område, hvor væsken findes.'},
+    {T:20,   p:FASE_ATM, t:'Ved stuetemperatur og 1 atm er CO₂ en gas — den samme, du ånder ud.'}
+   ]},
+  {id:'tryk', navn:'Tryk på ved samme temperatur',
+   H2O:[
+    {T:-5, p:FASE_ATM, t:'Du starter med is ved −5 °C og 1 atm. Nu trykker du på, mens temperaturen holdes fast.'},
+    {T:-5, p:599.83,   t:'Ved ca. 600 bar rammer du smeltekurven, og isen smelter — uden at du har varmet den op. Trykket har sænket smeltepunktet fra 0 °C til −5 °C.'},
+    {T:-5, p:1000,     t:'Nu er det flydende vand ved −5 °C. Det kan kun lade sig gøre, fordi vands smeltekurve hælder mod venstre: jo højere tryk, jo lavere smeltepunkt.'},
+    {T:-5, p:1000,     t:'Hvorfor? Is fylder ca. 9 % mere end vand, fordi hydrogen-bindingerne låser molekylerne fast i et åbent gitter. Tryk skubber altid stoffet mod den fase, der fylder mindst — her vandet. (Det er i øvrigt ikke trykket fra skøjterne, der gør is glat: is er også glat ved stærk frost, og ved −20 °C skal der omkring 1.900 bar til at smelte den.)'}
+   ],
+   CO2:[
+    {T:20, p:FASE_ATM, t:'Du starter med CO₂-gas ved 20 °C og 1 atm. Nu trykker du på, mens temperaturen holdes fast.'},
+    {T:20, p:57.29,    t:'Ved 57,3 bar rammer du fordampningskurven, og gassen kondenserer. Væske og gas er i ligevægt — det er trykket i en CO₂-flaske ved 20 °C, så længe der er væske i den.'},
+    {T:20, p:100,      t:'Nu er det flydende CO₂. Trykker du videre, forbliver det væske: smeltekurven ved 20 °C ligger højere oppe, end diagrammet går.'},
+    {T:20, p:100,      t:'CO₂’s smeltekurve hælder den anden vej end vands. Fast CO₂ er tungere end flydende CO₂, så tryk hjælper det faste stof: ved −50 °C fryser flydende CO₂ til tøris, når trykket kommer over ca. 320 bar.'}
+   ]},
+  {id:'kritisk', navn:'Uden om det kritiske punkt',
+   H2O:[
+    {T:300, p:10,  t:'Du starter med vanddamp ved 300 °C og 10 bar. Målet er at gøre dampen til vand, uden at den kondenserer.'},
+    {T:450, p:10,  t:'Varm op til 450 °C. Stadig gas — men nu er du over den kritiske temperatur, 373,9 °C.'},
+    {T:450, p:400, t:'Tryk op til 400 bar. Over 220,6 bar er det superkritisk fluid. Du krydser kun de stiplede linjer, og de er ikke fasegrænser: der sker ingen kogning og ingen kondensation.'},
+    {T:300, p:400, t:'Køl ned til 300 °C ved 400 bar. Nu er det flydende vand — og du har ikke krydset en eneste kurve.'},
+    {T:300, p:400, t:'Dampen er blevet til vand, uden at der på noget tidspunkt var to faser eller en væskeoverflade. Den direkte vej — tryk på ved 300 °C — havde krydset fordampningskurven ved 85,9 bar, og så var dampen kondenseret.'}
+   ],
+   CO2:[
+    {T:0,  p:20,  t:'Du starter med CO₂-gas ved 0 °C og 20 bar. Målet er at gøre gassen flydende, uden at den kondenserer.'},
+    {T:50, p:20,  t:'Varm op til 50 °C. Stadig gas — men nu er du over den kritiske temperatur, 31,0 °C.'},
+    {T:50, p:100, t:'Tryk op til 100 bar. Over 73,8 bar er det superkritisk fluid — sådan har CO₂ det i gaskøleren på et transkritisk anlæg. Du krydser kun de stiplede linjer, og de er ikke fasegrænser.'},
+    {T:0,  p:100, t:'Køl ned til 0 °C ved 100 bar. Nu er det flydende CO₂ — og du har ikke krydset en eneste kurve.'},
+    {T:0,  p:100, t:'Gassen er blevet til væske, uden at der på noget tidspunkt var to faser. Den direkte vej — tryk på ved 0 °C — havde krydset fordampningskurven ved 34,9 bar, og så var gassen kondenseret.'}
+   ]},
+  {id:'tripel', navn:'Tripelpunktet',
+   H2O:[
+    {T:20,   p:FASE_ATM,   t:'Du starter med vand ved 20 °C og 1 atm. Nu pumper du trykket ned, som med en vakuumpumpe.'},
+    {T:20,   p:0.02339,    t:'Ved 0,0234 bar (23 mbar) rammer du fordampningskurven: vandet koger ved stuetemperatur.'},
+    {T:0.01, p:0.00611657, via:'damp', t:'Fordampningen tager varme fra vandet, så det køler sig selv ned. Pumper du videre, følger det kurven ned til tripelpunktet ved 0,01 °C og 0,00612 bar.'},
+    {T:0.01, p:0.00611657, t:'I tripelpunktet er is, vand og vanddamp i ligevægt på én gang. Det er det eneste punkt, hvor alle tre faser kan findes sammen — alle tre kurver mødes her.'}
+   ],
+   CO2:[
+    {T:-20,     p:30,     t:'Du starter med flydende CO₂ ved −20 °C og 30 bar. Nu lukker du langsomt trykket af.'},
+    {T:-20,     p:19.7,   t:'Ved 19,7 bar rammer du fordampningskurven, og CO₂ koger ved −20 °C.'},
+    {T:-56.558, p:5.1795, via:'damp', t:'Fordampningen tager varme fra væsken, så den køler sig selv ned langs kurven til tripelpunktet ved −56,6 °C og 5,18 bar: tøris, flydende CO₂ og gas på én gang.'},
+    {T:-60,     p:4.086,  via:'sub',  t:'Under 5,18 bar kan der ikke være flydende CO₂ — resten bliver til tøris og gas. Det er derfor, flydende CO₂, der lukkes ud i det fri, bliver til tøris-sne.'}
+   ]}
+];
+
+const FASE = {
+  valg:'H2O',                                          // 'H2O', 'CO2' eller 'begge'
+  pkt:{H2O:{T:20, p:FASE_ATM}, CO2:{T:20, p:FASE_ATM}}, // det gule punkt — ét pr. stof
+  geo:{},                                              // akserne, som de blev tegnet
+  vej:null,                                            // Følg en vej, mens den kører
+  traek:null                                           // et træk med mus eller finger
+};
+const faseStoffer = () => FASE.valg === 'begge' ? ['H2O','CO2'] : [FASE.valg];
+const faseRoligt = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+/* ---------- tal ---------- */
+function faseMinus(s){ return String(s).replace(/-/g, '−'); }
+function faseFmtT(T){
+  const r = Math.round(T);
+  const d = Math.abs(T - r) < 0.005 ? 0 : (Math.abs(T) < 1 ? 2 : 1);
+  return faseMinus(mbNum((d ? T : r) || 0, d)) + ' °C';
+}
+/* tal på trykaksen: 0,0001 · 0,01 · 1 · 1.000 */
+function faseDekade(p){ return mbNum(p, Math.max(0, -Math.round(Math.log10(p)))); }
+/* tre betydende cifre: 0,00612 · 1,01 · 57,3 · 221 · 1.000 */
+function fasePtal(p){
+  const q = +p.toPrecision(3);
+  return mbNum(q, Math.max(0, 2 - Math.floor(Math.log10(q) + 1e-9)));
+}
+function faseFmtP(p){ return Math.abs(p - FASE_ATM) < 1e-9 ? '1 atm (1,013 bar)' : fasePtal(p) + ' bar'; }
+/* tal og enhed må ikke skilles ad ved et linjeskift ("0" sidst på én linje, "°C" først på den næste) */
+function faseFast(s){ return s.replace(/(\d) (?=(°C|bar|mbar|Pa|%|kg|atm)(?![A-Za-zæøå]))/g, '$1&nbsp;'); }
+
+/* ---------- kurverne ----------
+   Interpolationen sker på log p, for det er på den skala, kurverne er glatte.
+   Uden for kurvens eget stykke er svaret null. */
+function faseKurveP(k, T){
+  for(let i = 0; i < k.length - 1; i++){
+    const T1 = k[i][0], T2 = k[i+1][0];
+    if(T1 === T2 || (T - T1) * (T - T2) > 0) continue;
+    const f = (T - T1) / (T2 - T1), l1 = Math.log10(k[i][1]), l2 = Math.log10(k[i+1][1]);
+    return Math.pow(10, l1 + f * (l2 - l1));
+  }
+  return null;
+}
+function faseKurveT(k, p){
+  if(p < k[0][1] || p > k[k.length-1][1]) return null;
+  const lp = Math.log10(p);
+  for(let i = 0; i < k.length - 1; i++){
+    const p1 = k[i][1], p2 = k[i+1][1];
+    if(p < p1 || p > p2) continue;
+    if(p1 === p2) return k[i][0];
+    const f = (lp - Math.log10(p1)) / (Math.log10(p2) - Math.log10(p1));
+    return k[i][0] + f * (k[i+1][0] - k[i][0]);
+  }
+  return null;
+}
+
+/* Hvor ligger (T, p)? En af faserne — eller en kurve, tripelpunktet eller det
+   kritiske punkt, hvis punktet ligger på dem. "På" betyder inden for et halvt
+   piletast-skridt, så man også kan ramme en kurve med tastaturet. */
+function faseHvor(stof, T, p){
+  const d = FASE_DATA[stof], S = FASE_STOF[stof], tp = d.pkt.tripel, kp = d.pkt.kritisk;
+  const eT = S.dT / 2, eL = FASE_DLG / 2, lp = Math.log10(p);
+  const naer = q => Math.abs(T - q.T) <= eT && Math.abs(lp - Math.log10(q.p)) <= eL;
+  if(naer(tp)) return 'tripel';
+  if(naer(kp)) return 'kritisk';
+  let bedst = null, afst = 1;
+  ['sub','smelt','damp'].forEach(n => {
+    const Tk = faseKurveT(d[n], p), pk = faseKurveP(d[n], T);
+    const a = Math.min(Tk == null ? Infinity : Math.abs(T - Tk) / eT,
+                       pk == null ? Infinity : Math.abs(lp - Math.log10(pk)) / eL);
+    if(a <= afst){ bedst = n; afst = a; }
+  });
+  if(bedst) return bedst;
+  if(T > kp.T) return p > kp.p ? 'superkrit' : 'gas';
+  if(p < tp.p){
+    if(T > tp.T) return 'gas';
+    const ps = faseKurveP(d.sub, T);
+    return ps != null && p > ps ? 'fast' : 'gas';
+  }
+  const Tm = faseKurveT(d.smelt, p);
+  if(Tm != null && T < Tm) return 'fast';
+  const pv = faseKurveP(d.damp, T);
+  if(pv == null) return 'vaeske';     // vand under 0,01 °C, men højre for smeltekurven
+  return p > pv ? 'vaeske' : 'gas';
+}
+
+/* ---------- infoboksen ---------- */
+const FASE_TAG = {fast:'Fast stof', vaeske:'Væske', gas:'Gas', superkrit:'Superkritisk',
+                  sub:'To faser', smelt:'To faser', damp:'To faser', tripel:'Tre faser', kritisk:'Kritisk punkt'};
+const FASE_KURVENAVN = {sub:'sublimationskurven', smelt:'smeltekurven', damp:'fordampningskurven'};
+
+function faseTekst(stof, T, p){
+  const S = FASE_STOF[stof], d = FASE_DATA[stof], tp = d.pkt.tripel, kp = d.pkt.kritisk;
+  const hvor = faseHvor(stof, T, p), ved = 'Ved ' + faseFmtT(T) + ' og ' + faseFmtP(p);
+  let saet = '', forkl = '', kort = '';
+  if(hvor === 'tripel'){
+    saet = 'Ved ' + S.tripelTxt + ' er du i tripelpunktet: ' + S.tre + ' er i ligevægt på én gang.';
+    forkl = 'Det er det eneste punkt, hvor alle tre faser kan være til stede samtidig. Alle tre kurver mødes her. ' +
+      (stof === 'CO2' ? 'Under 5,18 bar kan der aldrig være flydende CO₂.'
+                      : 'Vands tripelpunkt ligger så præcist fast, at det bruges til at kalibrere termometre.');
+    kort = 'tripelpunktet';
+  } else if(hvor === 'kritisk'){
+    saet = 'Ved ' + S.kritTxt + ' er du i det kritiske punkt.';
+    forkl = 'Her slutter fordampningskurven. Over ' + S.TcTxt + ' kan ' + S.navn + ' ikke gøres flydende, uanset trykket, ' +
+      'og forskellen på væske og gas forsvinder.' +
+      (stof === 'CO2' ? ' Derfor kører et R744-anlæg transkritisk på varme dage.' : '');
+    kort = 'det kritiske punkt';
+  } else if(FASE_KURVENAVN[hvor]){
+    const par = hvor === 'sub' ? S.fastKort + ' og ' + S.gasKort
+              : hvor === 'smelt' ? S.fastKort + ' og ' + S.vaeskeKort
+              : S.vaeskeKort + ' og ' + S.gasKort;
+    saet = ved + ' ligger punktet på ' + FASE_KURVENAVN[hvor] + ': ' + par + ' er i ligevægt.';
+    if(hvor === 'sub'){
+      forkl = 'Tilfører du varme, sublimerer ' + S.isen + ' direkte til gas. Fjerner du varme, fortættes gassen direkte til ' + S.rimTil + '.';
+      if(stof === 'CO2' && Math.abs(p - FASE_ATM) < 0.05)
+        forkl += ' Det er derfor, tøris i en kasse holder sig på −78,5 °C, mens den forsvinder.';
+    } else if(hvor === 'smelt'){
+      forkl = 'Tilfører du varme, smelter stoffet; fjerner du varme, fryser det. Temperaturen står stille, indtil det hele er smeltet eller frosset. ' +
+        (stof === 'H2O' ? 'Kurven hælder mod venstre: jo højere tryk, jo lavere smeltepunkt.'
+                        : 'Kurven hælder mod højre: jo højere tryk, jo højere smeltepunkt.');
+    } else {
+      forkl = 'Væsken koger ved netop ' + faseFmtT(T) + ', når trykket er ' + faseFmtP(p) + ' — og gassen kondenserer ved det samme. ' +
+        'Det er sammenhængen mellem tryk og mætningstemperatur, du kender fra kølemiddeltabellen.';
+    }
+    kort = 'på ' + FASE_KURVENAVN[hvor];
+  } else {
+    const fase = hvor === 'superkrit' ? 'superkritisk fluid' : S[hvor];
+    saet = ved + ' er ' + S.navn + ' ' + fase + '.';
+    if(hvor === 'fast'){
+      forkl = 'Kræfterne mellem molekylerne holder dem på plads i en krystal, hvor de kun kan svinge. ';
+      if(p < tp.p){
+        const Ts = faseKurveT(d.sub, p);
+        forkl += 'Trykket er under tripelpunktets ' + S.ptTxt + ', så ' + S.isen + ' kan ikke smelte her' +
+          (Ts != null ? ' — varmer du op, sublimerer den direkte til gas ved ' + faseFmtT(Ts) + '.' : '.');
+      } else {
+        const Tm = faseKurveT(d.smelt, p);
+        if(Tm != null) forkl += 'Varmer du op ved det her tryk, smelter ' + S.isen + ' ved ' + faseFmtT(Tm) + '.';
+      }
+    } else if(hvor === 'vaeske'){
+      forkl = 'Molekylerne hænger sammen, men kan glide forbi hinanden. ';
+      const pv = faseKurveP(d.damp, T);
+      if(pv == null) forkl += 'Det er under 0 °C, men trykket holder vandet flydende — vands smeltekurve hælder mod venstre.';
+      else if(p > kp.p) forkl += 'Trykket er over det kritiske tryk (' + S.pcTxt + '), men temperaturen er under den kritiske (' + S.TcTxt + '), så det er stadig en væske.';
+      else forkl += 'Trykket er over damptrykket ved ' + faseFmtT(T) + ', som er ' + faseFmtP(pv) + ', så væsken koger ikke. Sænker du trykket dertil, begynder den at koge.';
+    } else if(hvor === 'gas'){
+      forkl = 'Molekylerne er langt fra hinanden og farer frit rundt. ';
+      if(T > kp.T){
+        forkl += 'Temperaturen er over den kritiske temperatur (' + S.TcTxt + '). Her kan gassen ikke gøres flydende, uanset hvor meget du trykker — over ' + S.pcTxt + ' bliver den til superkritisk fluid.';
+      } else {
+        const pv = faseKurveP(d.damp, T), ps = faseKurveP(d.sub, T);
+        if(pv != null) forkl += 'Trykket er under damptrykket ved ' + faseFmtT(T) + ', som er ' + faseFmtP(pv) + '. Øger du trykket dertil, begynder gassen at kondensere til væske.';
+        else if(ps != null) forkl += 'Trykket er under sublimationstrykket ved ' + faseFmtT(T) + ', som er ' + faseFmtP(ps) + '. Øger du trykket dertil, fortættes gassen direkte til ' + S.rimTil + '.';
+      }
+    } else {
+      forkl = 'Både temperaturen og trykket er over det kritiske punkt (' + S.kritTxt + '). Her er der ingen grænse mellem væske og gas: ' +
+        'stoffet er én fase med egenskaber midt imellem, uden overflade og uden kogning. De stiplede linjer er ikke fasegrænser — du kan krydse dem, uden at der sker et faseskift.';
+    }
+    kort = fase;
+  }
+  const kl = FASE_KURVENAVN[hvor] ? 'kurve' : hvor;
+  return {hvor, kl, tag:FASE_TAG[hvor], saet, forkl,
+          kort:faseFmtT(T) + ' og ' + faseFmtP(p) + ': ' + kort};
+}
+
+function faseUdTekst(stof){
+  const ud = document.getElementById('faseUd-' + stof);
+  if(!ud) return;
+  const q = FASE.pkt[stof], t = faseTekst(stof, q.T, q.p);
+  ud.innerHTML = '<div class="verdict fase-' + t.kl + '"><span class="tag fase-' + t.kl + '">' + t.tag + '</span>' +
+    '<b>' + faseFast(t.saet) + '</b> ' + faseFast(t.forkl) + '</div>';
+  const h = document.getElementById('faseHaand-' + stof);
+  if(h) h.setAttribute('aria-valuetext', t.kort);
+}
+
+/* ---------- akserne ---------- */
+function faseGeo(stof, W, H){
+  const S = FASE_STOF[stof], smal = W < 480;
+  const mL = smal ? 50 : 58, mR = smal ? 10 : 16, mT = 12, mB = smal ? 36 : 40;
+  const lo = Math.log10(S.p[0]), hi = Math.log10(S.p[1]), b = W - mL - mR, h = H - mT - mB;
+  return {W, H, mL, mR, mT, mB, smal,
+    X: T => mL + (T - S.T[0]) / (S.T[1] - S.T[0]) * b,
+    Y: p => H - mB - (Math.log10(p) - lo) / (hi - lo) * h,
+    iT: x => S.T[0] + (x - mL) / b * (S.T[1] - S.T[0]),
+    iP: y => Math.pow(10, lo + (H - mB - y) / h * (hi - lo))};
+}
+
+/* tekst med en mørk kant, så den kan læses oven på farverne */
+function faseTxt(x, y, s, a){
+  a = a || {};
+  return '<text x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '"' +
+    (a.anker ? ' text-anchor="' + a.anker + '"' : '') + (a.rot != null ? ' transform="rotate(' + a.rot.toFixed(1) + ' ' + x.toFixed(1) + ' ' + y.toFixed(1) + ')"' : '') +
+    ' dominant-baseline="central" font-size="' + (a.str || 11) + '" fill="' + (a.farve || '#eaf2ff') + '"' +
+    (a.vaegt ? ' font-weight="' + a.vaegt + '"' : '') + (a.ls ? ' letter-spacing="' + a.ls + '"' : '') +
+    (a.kant === false ? '' : ' stroke="#0b1726" stroke-width="3.5" stroke-linejoin="round" paint-order="stroke"') + '>' + s + '</text>';
+}
+
+/* Etiketten på et område: navnet med versaler, og evt. stoffets eget navn under.
+   Er der flere bud på linjer, tages det første, der kan være i feltet. */
+function faseOmrEtiket(g, spec, fs, felt){
+  const bred = l => l.length * fs * 0.76;          // versaler med lidt luft imellem
+  let linjer = spec.tekst[0];
+  if(felt) linjer = spec.tekst.find(v => Math.max(...v.map(bred)) <= felt.b && v.length * fs * 1.2 <= felt.h)
+                    || spec.tekst[spec.tekst.length - 1];
+  const x = g.X(spec.T), y = g.Y(spec.p);
+  const hoved = (felt ? linjer : [linjer[0]]).map(l => l.toUpperCase());
+  const under = felt ? [] : linjer.slice(1);
+  const alle = hoved.map(l => ({l, str:fs, vaegt:600, ls:'.06em', farve:'#eaf2ff'}))
+    .concat(under.map(l => ({l, str:fs - 1.5, farve:'#b8c8de'})));
+  const lh = fs * 1.2, y0 = -(alle.length - 1) * lh / 2;
+  return alle.map((a, i) => spec.lodret
+    ? faseTxt(x + y0 + i * lh, y, a.l, {anker:'middle', rot:-90, str:a.str, vaegt:a.vaegt, ls:a.ls, farve:a.farve})
+    : faseTxt(x, y + y0 + i * lh, a.l, {anker:'middle', str:a.str, vaegt:a.vaegt, ls:a.ls, farve:a.farve})).join('');
+}
+
+/* navnet på en kurve, skrevet langs kurven og skubbet lidt ud til siden */
+function faseKurveEtiket(g, k, spec, tekst, fs){
+  let T, p, T1, p1, T2, p2;
+  if(spec.T != null){
+    T = spec.T; p = faseKurveP(k, T);
+    const dT = 1.5; T1 = T - dT; T2 = T + dT; p1 = faseKurveP(k, T1); p2 = faseKurveP(k, T2);
+  } else {
+    p = spec.p; T = faseKurveT(k, p);
+    p1 = p / 1.08; p2 = p * 1.08; T1 = faseKurveT(k, p1); T2 = faseKurveT(k, p2);
+  }
+  if(p == null || T == null || p1 == null || p2 == null || T1 == null || T2 == null) return '';
+  let tx = g.X(T2) - g.X(T1), ty = g.Y(p2) - g.Y(p1);
+  if(ty > 0){ tx = -tx; ty = -ty; }               // pil opad: højre side er "næste" fase
+  const L = Math.hypot(tx, ty) || 1, nx = -ty / L, ny = tx / L;
+  let rot = Math.atan2(ty, tx) * 180 / Math.PI;
+  if(rot > 90) rot -= 180; if(rot < -90) rot += 180;
+  const x = g.X(T) + nx * (fs * 1.05), y = g.Y(p) + ny * (fs * 1.05);
+  return faseTxt(x, y, tekst, {anker:'middle', rot, str:fs, farve:'#eaf2ff'});
+}
+
+function faseSvg(stof, W, H){
+  const S = FASE_STOF[stof], d = FASE_DATA[stof], g = faseGeo(stof, W, H);
+  FASE.geo[stof] = g;
+  const {X, Y, mL, smal} = g, f = v => v.toFixed(1), P = q => f(X(q[0])) + ',' + f(Y(q[1]));
+  const x0 = X(S.T[0]), x1 = X(S.T[1]), yT = Y(S.p[1]), yB = Y(S.p[0]);
+  const tp = d.pkt.tripel, kp = d.pkt.kritisk, id = stof;
+  const xa = x0 - 30, xb = x1 + 30, ya = yT - 30, yb = yB + 30, sidst = d.smelt[d.smelt.length - 1];
+  const sub = d.sub.map(P), sm = d.smelt.map(P), da = d.damp.map(P);
+  const hjoerne = (x, y) => f(x) + ',' + f(y);
+
+  /* områderne: polygonerne går ud over kanten og klippes af rammen */
+  const fast = [hjoerne(xa, Y(d.sub[0][1]))].concat(sub, sm.slice(1), [hjoerne(X(sidst[0]), ya), hjoerne(xa, ya)]);
+  const vaeske = sm.concat([hjoerne(X(sidst[0]), ya), hjoerne(X(kp.T), ya)], da.slice().reverse());
+  const gas = [hjoerne(xa, Y(d.sub[0][1]))].concat(sub, da.slice(1), [hjoerne(xb, Y(kp.p)), hjoerne(xb, yb), hjoerne(xa, yb)]);
+
+  let s = '<title id="faseTi-' + id + '">Fasediagram for ' + S.titel.replace(/^./, c => c.toLowerCase()) + '</title>' +
+    '<desc id="faseBe-' + id + '">Tryk fra ' + faseDekade(S.p[0]) + ' til ' + faseDekade(S.p[1]) + ' bar på en logaritmisk akse mod temperatur fra ' +
+    faseMinus(S.T[0]) + ' til ' + S.T[1] + ' °C. Områderne er fast stof, væske, gas og superkritisk fluid. ' +
+    'Sublimationskurven og fordampningskurven stiger mod højre. ' + S.haeldning + ' Tripelpunktet ligger ved ' + S.tripelTxt +
+    ', det kritiske punkt ved ' + S.kritTxt + '. Den stiplede vandrette linje er 1 atm.</desc>';
+  s += '<defs><clipPath id="faseKlip-' + id + '"><rect x="' + f(x0) + '" y="' + f(yT) + '" width="' + f(x1 - x0) + '" height="' + f(yB - yT) + '"/></clipPath>' +
+    '<pattern id="faseSkr-' + id + '" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">' +
+    '<line x1="0" y1="0" x2="0" y2="7" stroke="' + FASE_FARVE.superkrit + '" stroke-width="2" stroke-opacity=".42"/></pattern></defs>';
+
+  /* gitter og tal på akserne */
+  for(let e = Math.log10(S.p[0]); e <= Math.log10(S.p[1]) + 1e-9; e++){
+    const p = Math.pow(10, e), y = Y(p);
+    s += '<line x1="' + f(x0) + '" y1="' + f(y) + '" x2="' + f(x1) + '" y2="' + f(y) + '" stroke="#1e3554"/>';
+    s += '<text x="' + (mL - 6) + '" y="' + f(y) + '" text-anchor="end" dominant-baseline="central" font-size="' + (smal ? 9.5 : 10.5) + '" fill="#8fa6c6">' + faseDekade(p) + '</text>';
+  }
+  S.Tstreg.forEach(T => {
+    const x = X(T);
+    s += '<line x1="' + f(x) + '" y1="' + f(yT) + '" x2="' + f(x) + '" y2="' + f(yB) + '" stroke="#1e3554"/>';
+    s += '<text x="' + f(x) + '" y="' + f(yB + 14) + '" text-anchor="middle" font-size="' + (smal ? 9.5 : 10.5) + '" fill="#8fa6c6">' + faseMinus(T) + '</text>';
+  });
+
+  s += '<g clip-path="url(#faseKlip-' + id + ')">' +
+    '<polygon points="' + fast.join(' ') + '" fill="' + FASE_FARVE.fast + '" fill-opacity=".24"/>' +
+    '<polygon points="' + vaeske.join(' ') + '" fill="' + FASE_FARVE.vaeske + '" fill-opacity=".22"/>' +
+    '<polygon points="' + gas.join(' ') + '" fill="' + FASE_FARVE.gas + '" fill-opacity=".2"/>' +
+    '<rect x="' + f(X(kp.T)) + '" y="' + f(ya) + '" width="' + f(xb - X(kp.T)) + '" height="' + f(Y(kp.p) - ya) + '" fill="' + FASE_FARVE.superkrit + '" fill-opacity=".16"/>' +
+    '<rect x="' + f(X(kp.T)) + '" y="' + f(ya) + '" width="' + f(xb - X(kp.T)) + '" height="' + f(Y(kp.p) - ya) + '" fill="url(#faseSkr-' + id + ')"/>';
+  /* det superkritiske hjørne har stiplede kanter — de er ikke fasegrænser */
+  s += '<path d="M' + P([kp.T, kp.p]) + ' V' + f(yT) + ' M' + P([kp.T, kp.p]) + ' H' + f(x1) + '" stroke="#d9a3d6" stroke-width="1.4" stroke-dasharray="5 4" fill="none"/>';
+  /* 1 atm */
+  s += '<line x1="' + f(x0) + '" y1="' + f(Y(FASE_ATM)) + '" x2="' + f(x1) + '" y2="' + f(Y(FASE_ATM)) + '" stroke="#cbd8ea" stroke-opacity=".6" stroke-width="1.2" stroke-dasharray="6 5"/>';
+  /* de tre kurver */
+  ['sub','smelt','damp'].forEach(n => {
+    s += '<polyline points="' + d[n].map(P).join(' ') + '" fill="none" stroke="#eaf2ff" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>';
+  });
+  s += '</g>';
+
+  s += faseTxt(x1 - 4, Y(FASE_ATM) - 8, '1 atm', {anker:'end', str:smal ? 9.5 : 10.5, farve:'#cbd8ea'});
+  S.atm.forEach(a => {
+    const x = X(d.pkt[a.k].T);
+    s += '<circle cx="' + f(x) + '" cy="' + f(Y(FASE_ATM)) + '" r="3.2" fill="#0b1726" stroke="#cbd8ea" stroke-width="1.5"/>';
+    s += faseTxt(x + a.dx, Y(FASE_ATM) + 12, a.tekst, {anker:a.anker, str:smal ? 9.5 : 10, farve:'#cbd8ea'});
+  });
+
+  /* navnene på kurverne og områderne */
+  const fsK = smal ? 10 : 11, fsO = smal ? 10.5 : 12.5;
+  s += faseKurveEtiket(g, d.sub, S.kurve.sub, 'sublimation', fsK);
+  s += faseKurveEtiket(g, d.smelt, S.kurve.smelt, smal ? 'smeltning' : 'smeltning / frysning', fsK);
+  s += faseKurveEtiket(g, d.damp, S.kurve.damp, smal ? 'fordampning' : 'fordampning / kondensation', fsK);
+  ['fast','vaeske','gas'].forEach(o => { s += faseOmrEtiket(g, smal && S.omr[o].smal || S.omr[o], fsO); });
+  s += faseOmrEtiket(g, S.omr.superkrit, fsO, {b:x1 - X(kp.T) - 8, h:Y(kp.p) - yT - 4});
+
+  /* tripelpunktet og det kritiske punkt */
+  [['tripel', 'tripelpunkt', S.tripelTxt], ['kritisk', 'kritisk punkt', S.kritTxt]].forEach(([k, navn, txt]) => {
+    const q = d.pkt[k], e = S.pktEt[k], x = X(q.T), y = Y(q.p);
+    const dy = smal ? (e.dy < 0 ? -12 : 4) : e.dy;
+    s += '<circle cx="' + f(x) + '" cy="' + f(y) + '" r="4.6" fill="#eaf2ff" stroke="#0b1726" stroke-width="1.6"/>';
+    s += faseTxt(x + e.dx, y + dy, navn, {anker:e.anker, str:smal ? 10 : 11, vaegt:600});
+    if(!smal) s += faseTxt(x + e.dx, y + dy + 13, txt.replace(' og ', ' · '), {anker:e.anker, str:10.5, farve:'#b8c8de'});
+  });
+
+  /* vejen, når "Følg en vej" kører — oven på etiketterne, for det er den, man skal se */
+  s += '<g id="faseSpor-' + id + '"></g>';
+  /* hjælpelinjer ned til akserne fra det gule punkt */
+  s += '<line id="faseGV-' + id + '" stroke="#f1c75e" stroke-opacity=".55" stroke-dasharray="3 4" pointer-events="none"/>' +
+       '<line id="faseGH-' + id + '" stroke="#f1c75e" stroke-opacity=".55" stroke-dasharray="3 4" pointer-events="none"/>';
+
+  s += '<text x="' + f((x0 + x1) / 2) + '" y="' + (H - 7) + '" text-anchor="middle" font-size="11" fill="#eaf2ff">temperatur [°C]</text>';
+  s += '<text x="12" y="' + f((yT + yB) / 2) + '" text-anchor="middle" font-size="11" fill="#eaf2ff" transform="rotate(-90 12 ' + f((yT + yB) / 2) + ')">tryk [bar abs.], logaritmisk</text>';
+  return '<svg class="fase-svg" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" role="img" aria-labelledby="faseTi-' + id + ' faseBe-' + id + '">' + s + '</svg>';
+}
+
+/* ---------- forstørrelsen af vands smeltekurve ----------
+   I det store diagram er hældningen der, men den er lille: 9 grader over
+   1.000 bar på en akse, der er 550 grader bred. Her er trykket lineært, og
+   der er kun 12 grader i bredden. */
+const FASE_ZOOM = {T:[-10, 2], p:1000};
+function faseZoomSvg(W){
+  const H = 200, mL = 44, mR = 10, mT = 10, mB = 34, Z = FASE_ZOOM, k = FASE_DATA.H2O.smelt;
+  const X = T => mL + (T - Z.T[0]) / (Z.T[1] - Z.T[0]) * (W - mL - mR);
+  const Y = p => H - mB - p / Z.p * (H - mT - mB);
+  FASE.geo.zoom = {X, Y};
+  const f = v => v.toFixed(1), P = q => f(X(q[0])) + ',' + f(Y(q[1]));
+  const x0 = X(Z.T[0]), x1 = X(Z.T[1]), yT = Y(Z.p), yB = Y(0);
+  const del = k.filter(q => q[1] <= 1100).map(P), sidst = k.find(q => q[1] > 1100) || k[k.length - 1];
+  const kurve = del.concat([P(sidst)]);
+  let s = '<defs><clipPath id="faseKlip-zoom"><rect x="' + f(x0) + '" y="' + f(yT) + '" width="' + f(x1 - x0) + '" height="' + f(yB - yT) + '"/></clipPath></defs>';
+  [0, 200, 400, 600, 800, 1000].forEach(p => {
+    s += '<line x1="' + f(x0) + '" y1="' + f(Y(p)) + '" x2="' + f(x1) + '" y2="' + f(Y(p)) + '" stroke="#1e3554"/>';
+    s += '<text x="' + (mL - 6) + '" y="' + f(Y(p)) + '" text-anchor="end" dominant-baseline="central" font-size="10" fill="#8fa6c6">' + mbNum(p, 0) + '</text>';
+  });
+  for(let T = Z.T[0]; T <= Z.T[1]; T += 2){
+    s += '<line x1="' + f(X(T)) + '" y1="' + f(yT) + '" x2="' + f(X(T)) + '" y2="' + f(yB) + '" stroke="#1e3554"/>';
+    s += '<text x="' + f(X(T)) + '" y="' + f(yB + 14) + '" text-anchor="middle" font-size="10" fill="#8fa6c6">' + faseMinus(T) + '</text>';
+  }
+  s += '<g clip-path="url(#faseKlip-zoom)">' +
+    '<polygon points="' + [f(x0 - 20) + ',' + f(yB + 20), f(X(0.01)) + ',' + f(yB + 20)].concat(kurve, [f(x0 - 20) + ',' + f(yT - 20)]).join(' ') + '" fill="' + FASE_FARVE.fast + '" fill-opacity=".24"/>' +
+    '<polygon points="' + [f(X(0.01)) + ',' + f(yB + 20)].concat(kurve, [f(x1 + 20) + ',' + f(yT - 20), f(x1 + 20) + ',' + f(yB + 20)]).join(' ') + '" fill="' + FASE_FARVE.vaeske + '" fill-opacity=".22"/>' +
+    '<polyline points="' + kurve.join(' ') + '" fill="none" stroke="#eaf2ff" stroke-width="2.2"/>' +
+    '<line x1="' + f(X(-5)) + '" y1="' + f(Y(0)) + '" x2="' + f(X(-5)) + '" y2="' + f(Y(1000)) + '" stroke="#cbd8ea" stroke-opacity=".5" stroke-dasharray="4 4"/>' +
+    '</g>';
+  s += '<circle cx="' + f(X(-5)) + '" cy="' + f(Y(599.83)) + '" r="3.4" fill="#0b1726" stroke="#cbd8ea" stroke-width="1.5"/>';
+  s += faseTxt(X(-5) - 7, Y(599.83), '−5 °C: 600 bar', {anker:'end', str:10, farve:'#cbd8ea'});
+  s += faseTxt(X(-7.5), Y(300), 'IS', {anker:'middle', str:11.5, vaegt:600, ls:'.06em'});
+  s += faseTxt((X(-1) + x1) / 2, Y(280), 'VAND', {anker:'middle', str:11.5, vaegt:600, ls:'.06em'});
+  s += '<circle id="faseZP" r="5.5" fill="#f1c75e" stroke="#0b1726" stroke-width="2" visibility="hidden"/>';
+  s += '<text x="' + f((x0 + x1) / 2) + '" y="' + (H - 7) + '" text-anchor="middle" font-size="10.5" fill="#eaf2ff">temperatur [°C]</text>';
+  s += '<text x="11" y="' + f((yT + yB) / 2) + '" text-anchor="middle" font-size="10.5" fill="#eaf2ff" transform="rotate(-90 11 ' + f((yT + yB) / 2) + ')">tryk [bar], lineært</text>';
+  return '<svg class="fase-svg fase-zoomsvg" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" role="img" ' +
+    'aria-label="Vands smeltekurve forstørret: tryk fra 0 til 1.000 bar på en lineær akse mod temperatur fra −10 til 2 °C. Kurven starter ved 0,01 °C og hælder mod venstre; ved 1.000 bar smelter is ved −8,9 °C.">' + s + '</svg>';
+}
+
+/* ---------- punktet ---------- */
+function faseVisPunkt(stof){
+  const g = FASE.geo[stof], q = FASE.pkt[stof], h = document.getElementById('faseHaand-' + stof);
+  if(!g || !h) return;
+  const x = g.X(q.T), y = g.Y(q.p);
+  h.style.left = 'calc(1px + (100% - 2px) * ' + (x / g.W).toFixed(5) + ')';
+  h.style.top = 'calc(1px + (100% - 2px) * ' + (y / g.H).toFixed(5) + ')';
+  h.setAttribute('aria-valuenow', (+q.T.toFixed(2)).toString());
+  const gv = document.getElementById('faseGV-' + stof), gh = document.getElementById('faseGH-' + stof);
+  if(gv){ gv.setAttribute('x1', x); gv.setAttribute('x2', x); gv.setAttribute('y1', y); gv.setAttribute('y2', g.Y(FASE_STOF[stof].p[0])); }
+  if(gh){ gh.setAttribute('x1', g.X(FASE_STOF[stof].T[0])); gh.setAttribute('x2', x); gh.setAttribute('y1', y); gh.setAttribute('y2', y); }
+  const zp = stof === 'H2O' && document.getElementById('faseZP'), z = FASE.geo.zoom;
+  if(zp && z){
+    const inde = q.T >= FASE_ZOOM.T[0] && q.T <= FASE_ZOOM.T[1] && q.p <= FASE_ZOOM.p;
+    zp.setAttribute('visibility', inde ? 'visible' : 'hidden');
+    if(inde){ zp.setAttribute('cx', z.X(q.T).toFixed(1)); zp.setAttribute('cy', z.Y(q.p).toFixed(1)); }
+  }
+}
+
+/* raa: præcis den værdi (en kurve, et punkt eller et trin på en vej);
+   ellers rundes T til et piletast-skridt og p til tre cifre.
+   stille: kun billedet — infoboksen venter, til punktet er fremme. */
+function faseSaet(stof, T, p, o){
+  o = o || {};
+  const S = FASE_STOF[stof];
+  if(!o.raa){
+    T = +(Math.round(T / S.dT) * S.dT).toFixed(2);
+    if(!o.atm) p = +p.toPrecision(3);
+  }
+  T = Math.min(S.T[1], Math.max(S.T[0], T));
+  p = Math.min(S.p[1], Math.max(S.p[0], p));
+  FASE.pkt[stof] = {T, p};
+  faseVisPunkt(stof);
+  if(!o.stille) faseUdTekst(stof);
+}
+
+/* nærmeste punkt på en kurve, regnet i skærmkoordinater */
+function faseNaermest(k, g, x, y){
+  let bedst = null;
+  for(let i = 0; i < k.length - 1; i++){
+    const ax = g.X(k[i][0]), ay = g.Y(k[i][1]), bx = g.X(k[i+1][0]), by = g.Y(k[i+1][1]);
+    const vx = bx - ax, vy = by - ay, L2 = vx * vx + vy * vy;
+    const t = L2 ? Math.max(0, Math.min(1, ((x - ax) * vx + (y - ay) * vy) / L2)) : 0;
+    const dd = Math.hypot(x - ax - t * vx, y - ay - t * vy);
+    if(!bedst || dd < bedst.d){
+      const l1 = Math.log10(k[i][1]), l2 = Math.log10(k[i+1][1]);
+      bedst = {d:dd, T:k[i][0] + t * (k[i+1][0] - k[i][0]), p:Math.pow(10, l1 + t * (l2 - l1))};
+    }
+  }
+  return bedst;
+}
+
+/* Fra musen eller fingeren. Punktet trækkes ind på tripelpunktet, det kritiske
+   punkt, kurverne og 1 atm-linjen, når det er tæt på — ellers er de svære at ramme. */
+function faseFraSkaerm(stof, x, y){
+  const g = FASE.geo[stof], d = FASE_DATA[stof], S = FASE_STOF[stof];
+  x = Math.min(g.X(S.T[1]), Math.max(g.X(S.T[0]), x));
+  y = Math.min(g.Y(S.p[0]), Math.max(g.Y(S.p[1]), y));
+  for(const k of ['tripel', 'kritisk']){
+    const q = d.pkt[k];
+    if(Math.hypot(x - g.X(q.T), y - g.Y(q.p)) <= 9) return faseSaet(stof, q.T, q.p, {raa:true});
+  }
+  let bedst = null;
+  ['sub','smelt','damp'].forEach(n => { const r = faseNaermest(d[n], g, x, y); if(r.d <= 6 && (!bedst || r.d < bedst.d)) bedst = r; });
+  if(bedst) return faseSaet(stof, bedst.T, bedst.p, {raa:true});
+  if(Math.abs(y - g.Y(FASE_ATM)) <= 4) return faseSaet(stof, g.iT(x), FASE_ATM, {atm:true});
+  faseSaet(stof, g.iT(x), g.iP(y));
+}
+
+function faseSvgPkt(plot, e){
+  const svg = plot.querySelector('svg'), r = svg.getBoundingClientRect(), g = FASE.geo[plot.dataset.stof];
+  return {x:(e.clientX - r.left - 1) * g.W / (r.width - 2), y:(e.clientY - r.top - 1) * g.H / (r.height - 2)};
+}
+
+function faseKoblPlot(plot, stof){
+  const h = document.getElementById('faseHaand-' + stof);
+  const slut = e => {
+    const t = FASE.traek;
+    if(!t || t.id !== e.pointerId) return;
+    FASE.traek = null;
+    h.classList.remove('traek');
+    /* en finger på fladen flytter først punktet, når den slippes uden at have flyttet sig:
+       så kan man stadig rulle siden ved at stryge hen over diagrammet */
+    if(t.tryk && e.type === 'pointerup' && Math.hypot(e.clientX - t.cx, e.clientY - t.cy) < 10){
+      faseVejStop(); const q = faseSvgPkt(plot, e); faseFraSkaerm(stof, q.x, q.y);
+    }
+    const ud = document.getElementById('faseUd-' + stof);
+    if(ud){ ud.removeAttribute('aria-busy'); faseUdTekst(stof); }
+  };
+  plot.addEventListener('pointerdown', e => {
+    if(e.button > 0) return;
+    const paaHaand = !!e.target.closest('.fase-haand'), q = faseSvgPkt(plot, e), g = FASE.geo[stof];
+    if(!paaHaand && (q.x < g.mL - 4 || q.x > g.W - g.mR + 4 || q.y < g.mT - 4 || q.y > g.H - g.mB + 4)) return;
+    if(e.pointerType === 'touch' && !paaHaand){
+      FASE.traek = {id:e.pointerId, tryk:true, cx:e.clientX, cy:e.clientY};
+      return;
+    }
+    e.preventDefault();
+    faseVejStop();
+    FASE.traek = {id:e.pointerId, stof};
+    try{ plot.setPointerCapture(e.pointerId); }catch(err){}
+    h.classList.add('traek');
+    h.focus({preventScroll:true});
+    const ud = document.getElementById('faseUd-' + stof);
+    if(ud) ud.setAttribute('aria-busy', 'true');
+    if(!paaHaand) faseFraSkaerm(stof, q.x, q.y);
+  });
+  plot.addEventListener('pointermove', e => {
+    const t = FASE.traek;
+    if(!t || t.id !== e.pointerId || t.tryk) return;
+    const q = faseSvgPkt(plot, e);
+    faseFraSkaerm(stof, q.x, q.y);
+  });
+  plot.addEventListener('pointerup', slut);
+  plot.addEventListener('pointercancel', slut);
+  h.addEventListener('keydown', e => {
+    const S = FASE_STOF[stof], q = FASE.pkt[stof], st = e.shiftKey ? 10 : 1;
+    let T = q.T, p = q.p;
+    if(e.key === 'ArrowLeft') T -= S.dT * st;
+    else if(e.key === 'ArrowRight') T += S.dT * st;
+    else if(e.key === 'ArrowUp') p *= Math.pow(10, FASE_DLG * st);
+    else if(e.key === 'ArrowDown') p /= Math.pow(10, FASE_DLG * st);
+    else if(e.key === 'PageUp') p *= Math.pow(10, FASE_DLG * 10);
+    else if(e.key === 'PageDown') p /= Math.pow(10, FASE_DLG * 10);
+    else if(e.key === 'Home') T = S.T[0];
+    else if(e.key === 'End') T = S.T[1];
+    else return;
+    e.preventDefault();
+    faseVejStop();
+    faseSaet(stof, T, p);
+  });
+}
+
+/* ---------- tegn ---------- */
+const FASE_HJAELP = 'Træk i det gule punkt, eller klik på det og brug piletasterne: ← → ændrer temperaturen, ↑ ↓ ændrer trykket. Hold Shift nede for store skridt.';
+
+function faseVejHtml(trinFor){
+  return '<div class="fase-vej">' +
+    '<div class="ell-vaerk-h">Følg en vej</div>' +
+    '<div class="ell-vaerk-und">Vælg en vej, og se punktet bevæge sig gennem diagrammet, trin for trin.</div>' +
+    '<div class="mb-tasks" id="faseVejRk">' + FASE_VEJE.map(v =>
+      '<button class="mb-task" data-vej="' + v.id + '" onclick="faseVejStart(\'' + v.id + '\')">' + v.navn + '</button>').join('') + '</div>' +
+    (trinFor ? '<div class="fase-trin" id="faseTrin-' + trinFor + '" aria-live="polite" hidden></div>' : '') +
+    '<div class="row fase-styr" id="faseStyr" hidden>' +
+      '<button class="btn" onclick="faseVejSkridt(-1)">← Forrige</button>' +
+      '<button class="btn primary" id="faseSpil" onclick="faseVejSpil()">Pause</button>' +
+      '<button class="btn" onclick="faseVejSkridt(1)">Næste →</button>' +
+      '<button class="btn" onclick="faseVejStop()">Stop</button>' +
+    '</div></div>';
+}
+
+function faseFigHtml(stof, iFig){
+  return '<div class="fase-fig-h">' + FASE_STOF[stof].titel + '</div>' +
+    '<div class="fase-plot" id="fasePlot-' + stof + '" data-stof="' + stof + '">' +
+      '<div class="fase-haand" id="faseHaand-' + stof + '" tabindex="0" role="slider" aria-roledescription="flytbart punkt" ' +
+      'aria-label="Punkt i fasediagrammet for ' + FASE_STOF[stof].navn + '. Venstre og højre pil ændrer temperaturen, op og ned ændrer trykket." ' +
+      'aria-valuemin="' + FASE_STOF[stof].T[0] + '" aria-valuemax="' + FASE_STOF[stof].T[1] + '"></div>' +
+    '</div>' +
+    '<p class="ell-fod fase-pktfod" id="fasePktFod-' + stof + '" hidden></p>' +
+    (iFig ? '<div class="fase-ud" id="faseUd-' + stof + '" aria-live="polite" aria-atomic="true"></div>' +
+            '<div class="fase-trin" id="faseTrin-' + stof + '" aria-live="polite" hidden></div>' : '');
+}
+
+function faseLayout(){
+  const vaert = document.getElementById('faseFigurer');
+  if(!vaert) return;
+  const v = FASE.valg;
+  if(v === 'begge'){
+    vaert.innerHTML = '<div class="fase-begge">' +
+        ['H2O','CO2'].map(s => '<div class="fase-fig">' + faseFigHtml(s, true) + '</div>').join('') +
+      '</div><p class="ell-fod">' + FASE_HJAELP + '</p>' + faseVejHtml(null);
+  } else {
+    vaert.innerHTML = '<div class="fase-en">' +
+        '<div class="fase-fig">' + faseFigHtml(v, false) + '<p class="ell-fod">' + FASE_HJAELP + '</p></div>' +
+        '<div class="fase-side">' +
+          '<div class="fase-ud" id="faseUd-' + v + '" aria-live="polite" aria-atomic="true"></div>' +
+          faseVejHtml(v) +
+          (v === 'H2O' ? '<div class="ell-vaerk fase-zoom"><div class="ell-vaerk-h">Smeltekurven forstørret</div>' +
+            '<div class="ell-vaerk-und">Her er trykaksen lineær, og der er kun 12 grader i bredden. Nu kan du se, at vands smeltekurve ' +
+            faseFast('hælder mod venstre: ved 100 bar smelter is ved −0,75 °C, ved 1.000 bar ved −8,9 °C. Gassen ses ikke her — den findes kun under 0,006 bar.') + '</div>' +
+            '<div id="faseZoom"></div></div>' : '') +
+        '</div></div>';
+  }
+  faseStoffer().forEach(s => faseKoblPlot(document.getElementById('fasePlot-' + s), s));
+  faseTegn();
+}
+
+/* Diagrammet tegnes i den bredde, det faktisk får — så teksten har samme
+   størrelse på en telefon som på en skærm, i stedet for at blive skaleret ned. */
+function faseTegn(){
+  faseStoffer().forEach(stof => {
+    const plot = document.getElementById('fasePlot-' + stof);
+    if(!plot || !plot.clientWidth) return;
+    const W = Math.max(280, Math.round(plot.clientWidth));
+    const H = Math.round(W < 480 ? Math.min(440, Math.max(380, W * 1.2)) : Math.min(470, Math.max(360, W * 0.72)));
+    const gl = plot.querySelector('svg');
+    if(gl) gl.remove();
+    plot.insertAdjacentHTML('afterbegin', faseSvg(stof, W, H));
+    /* på en smal skærm er der ikke plads til tallene ved punkterne — de står her */
+    const fod = document.getElementById('fasePktFod-' + stof), S = FASE_STOF[stof];
+    if(fod){
+      fod.hidden = !FASE.geo[stof].smal;
+      fod.innerHTML = faseFast('<b>Tripelpunkt:</b> ' + S.tripelTxt + ' · <b>kritisk punkt:</b> ' + S.kritTxt);
+    }
+    faseVisPunkt(stof);
+    faseUdTekst(stof);
+  });
+  const z = document.getElementById('faseZoom');
+  if(z && z.clientWidth){ z.innerHTML = faseZoomSvg(Math.max(260, Math.round(z.clientWidth))); faseVisPunkt('H2O'); }
+  document.querySelectorAll('#faseStofRk .mb-task').forEach(b => {
+    const on = b.dataset.valg === FASE.valg;
+    b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  faseVejSpor();
+  faseVejKnapper();
+}
+
+function faseVaelg(v){
+  if(v === FASE.valg) return;
+  faseVejStop();
+  FASE.valg = v;
+  faseLayout();
+}
+
+/* ---------- følg en vej ---------- */
+/* vejen fra trin a til trin b: ad kurven, hvis trinnet siger det — ellers lige ud */
+function faseVejStykke(stof, tr, a, b){
+  const fra = tr[a], til = tr[b], via = (b === a + 1 ? til.via : b === a - 1 ? fra.via : null);
+  const pkt = [[fra.T, fra.p]];
+  if(via){
+    const lo = Math.min(fra.T, til.T), hi = Math.max(fra.T, til.T);
+    const mid = FASE_DATA[stof][via].filter(q => q[0] > lo && q[0] < hi);
+    mid.sort((u, w) => til.T > fra.T ? u[0] - w[0] : w[0] - u[0]);
+    mid.forEach(q => pkt.push(q));
+  }
+  pkt.push([til.T, til.p]);
+  return pkt;
+}
+
+/* sporet: hele vejen som en stiplet linje med numre ved trinene */
+function faseVejSpor(){
+  ['H2O','CO2'].forEach(stof => {
+    const gr = document.getElementById('faseSpor-' + stof), g = FASE.geo[stof];
+    if(!gr || !g) return;
+    const v = FASE.vej;
+    if(!v){ gr.innerHTML = ''; return; }
+    const tr = v.def[stof];
+    let linje = [], s = '';
+    for(let i = 1; i < tr.length; i++) linje = linje.concat(faseVejStykke(stof, tr, i - 1, i).slice(i > 1 ? 1 : 0));
+    if(tr.length === 1) linje = [[tr[0].T, tr[0].p]];
+    s += '<polyline points="' + linje.map(q => g.X(q[0]).toFixed(1) + ',' + g.Y(q[1]).toFixed(1)).join(' ') +
+      '" fill="none" stroke="#f1c75e" stroke-opacity=".6" stroke-width="2" stroke-dasharray="2 5" stroke-linecap="round"/>';
+    const set = [];
+    tr.forEach((q, i) => {
+      if(set.some(u => u.T === q.T && u.p === q.p)) return;
+      set.push(q);
+      const x = g.X(q.T).toFixed(1), y = g.Y(q.p).toFixed(1), nu = i <= v.i;
+      s += '<circle cx="' + x + '" cy="' + y + '" r="7.5" fill="' + (nu ? '#f1c75e' : '#0b1726') + '" stroke="#f1c75e" stroke-width="1.5"/>' +
+        '<text x="' + x + '" y="' + y + '" text-anchor="middle" dominant-baseline="central" font-size="9.5" font-weight="700" fill="' + (nu ? '#3a2c00' : '#f1c75e') + '">' + (i + 1) + '</text>';
+    });
+    gr.innerHTML = s;
+  });
+}
+
+function faseVejKnapper(){
+  const v = FASE.vej, styr = document.getElementById('faseStyr');
+  document.querySelectorAll('#faseVejRk .mb-task').forEach(b => {
+    const on = !!v && b.dataset.vej === v.def.id;
+    b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  if(styr) styr.hidden = !v;
+  faseStoffer().forEach(stof => {
+    const boks = document.getElementById('faseTrin-' + stof), ud = document.getElementById('faseUd-' + stof);
+    if(ud) ud.setAttribute('aria-live', v ? 'off' : 'polite');   // under vejen er det trinteksten, der læses op
+    if(!boks) return;
+    boks.hidden = !v;
+    if(!v){ boks.innerHTML = ''; return; }
+    const tr = v.def[stof], j = Math.min(v.i, tr.length - 1);
+    boks.innerHTML = '<span class="fase-trin-nr">' + v.def.navn + ' · trin ' + (j + 1) + ' af ' + tr.length + '</span>' + faseFast(tr[j].t);
+  });
+  if(!v) return;
+  const knap = document.getElementById('faseSpil');
+  if(knap) knap.textContent = v.spiller ? 'Pause' : (v.i >= v.n - 1 ? 'Forfra' : 'Afspil');
+}
+
+function faseVejStart(id){
+  const def = FASE_VEJE.find(v => v.id === id);
+  if(!def) return;
+  faseVejStop();
+  FASE.vej = {def, i:-1, n:Math.max(...faseStoffer().map(s => def[s].length)), spiller:!faseRoligt(), ur:null, raf:null};
+  faseVejTil(0);
+}
+
+function faseVejTil(i){
+  const v = FASE.vej;
+  if(!v) return;
+  clearTimeout(v.ur); cancelAnimationFrame(v.raf);
+  i = Math.max(0, Math.min(v.n - 1, i));
+  const fra = v.i;
+  v.i = i;
+  const ture = faseStoffer().map(stof => {
+    const tr = v.def[stof], j = Math.min(i, tr.length - 1), jf = fra < 0 ? -1 : Math.min(fra, tr.length - 1);
+    const nu = FASE.pkt[stof];
+    let pkt = jf >= 0 && Math.abs(j - jf) === 1 ? faseVejStykke(stof, tr, jf, j) : [[tr[j].T, tr[j].p]];
+    pkt[0] = [nu.T, nu.p];              // altid fra det sted, punktet står nu
+    if(pkt.length === 1) pkt.push([tr[j].T, tr[j].p]);
+    const g = FASE.geo[stof];
+    const sk = g ? pkt.map(q => [g.X(q[0]), g.Y(q[1])]) : [];
+    const len = [0];
+    for(let k = 1; k < sk.length; k++) len.push(len[k-1] + Math.hypot(sk[k][0] - sk[k-1][0], sk[k][1] - sk[k-1][1]));
+    return {stof, maal:tr[j], sk, len, L:len[len.length - 1], ms:Math.min(2200, 500 + len[len.length - 1] * 3.2)};
+  });
+  const fremme = () => {
+    ture.forEach(t => faseSaet(t.stof, t.maal.T, t.maal.p, {raa:true}));
+    if(v.i >= v.n - 1) v.spiller = false;
+    faseVejSpor();
+    faseVejKnapper();
+    if(v.spiller){
+      const tekst = Math.max(...ture.map(t => t.maal.t.length));
+      v.ur = setTimeout(() => { if(FASE.vej === v) faseVejTil(v.i + 1); }, Math.min(9000, 1800 + tekst * 32));
+    }
+  };
+  faseVejSpor();
+  faseVejKnapper();
+  if(faseRoligt() || ture.every(t => t.L < 1)){ fremme(); return; }
+  const t0 = performance.now(), ms = Math.max(...ture.map(t => t.ms));
+  const tik = nu => {
+    if(FASE.vej !== v) return;
+    const vis = document.getElementById('view-fase');
+    if(!vis || vis.style.display === 'none'){ v.spiller = false; fremme(); return; }
+    ture.forEach(t => {
+      if(t.L < 1) return;
+      const r = Math.min(1, (nu - t0) / t.ms), e = r < .5 ? 2 * r * r : 1 - Math.pow(-2 * r + 2, 2) / 2, s = e * t.L;
+      let k = 1; while(k < t.len.length - 1 && t.len[k] < s) k++;
+      const a = t.sk[k-1], b = t.sk[k], seg = (t.len[k] - t.len[k-1]) || 1, u = (s - t.len[k-1]) / seg;
+      const g = FASE.geo[t.stof];
+      faseSaet(t.stof, g.iT(a[0] + u * (b[0] - a[0])), g.iP(a[1] + u * (b[1] - a[1])), {raa:true, stille:true});
+    });
+    if(nu - t0 < ms) v.raf = requestAnimationFrame(tik);
+    else fremme();
+  };
+  v.raf = requestAnimationFrame(tik);
+}
+
+function faseVejSkridt(r){
+  const v = FASE.vej;
+  if(!v) return;
+  v.spiller = false;
+  faseVejTil(v.i + r);
+}
+function faseVejSpil(){
+  const v = FASE.vej;
+  if(!v) return;
+  if(v.spiller){ v.spiller = false; clearTimeout(v.ur); faseVejKnapper(); return; }
+  v.spiller = !faseRoligt();
+  if(v.i >= v.n - 1){ v.i = -1; faseVejTil(0); }
+  else faseVejTil(v.i + 1);
+}
+function faseVejStop(){
+  const v = FASE.vej;
+  if(!v) return;
+  clearTimeout(v.ur); cancelAnimationFrame(v.raf);
+  FASE.vej = null;
+  faseStoffer().forEach(s => faseUdTekst(s));
+  faseVejSpor();
+  faseVejKnapper();
+}
+
+let faseKlar = false, faseUrStr = null;
+function initFase(){
+  if(faseKlar){ faseTegn(); return; }
+  faseKlar = true;
+  const rk = document.getElementById('faseStofRk');
+  if(rk) rk.innerHTML = [['H2O','Vand (H₂O)'], ['CO2','CO₂ (R744)'], ['begge','Sammenlign']].map(([k, n]) =>
+    '<button class="mb-task" data-valg="' + k + '" onclick="faseVaelg(\'' + k + '\')">' + n + '</button>').join('');
+  faseLayout();
+}
+/* diagrammet er tegnet i den bredde, det fik — skifter vinduet bredde, tegnes det om */
+window.addEventListener('resize', () => {
+  clearTimeout(faseUrStr);
+  faseUrStr = setTimeout(() => {
+    const vis = document.getElementById('view-fase');
+    if(faseKlar && vis && vis.style.display !== 'none') faseTegn();
+  }, 120);
+});
 
 
 /* ===== nyt modul: rnr.js ===== */
@@ -28425,7 +29459,8 @@ const LR_FANE = {
   salt:"Ioner og salte", rx:"Reaktions-skemaer", sb:"Syrer og baser",
   korr:"Oxidation og korrosion", gas:"Idealgasloven", flaske:"Returflasker",
   quiz:"Quizzen", fridge:"Kølemidler", phlogp:"h log p sammenligning",
-  olie:"Olie", tewi:"TEWI", gw:"Stråling & drivhus", ptable:"Periodisk system"
+  olie:"Olie", tewi:"TEWI", gw:"Stråling & drivhus", ptable:"Periodisk system",
+  fase:"Fasediagrammer"
 };
 
 /* ---------- byggeopgaverne kobles til kompetencer ---------- */
@@ -30902,7 +31937,7 @@ const SPOR = {
   forloeb: ['elev','mis','quiz'],
   kemi:    ['build','mol','salt','rx','sb','korr','gas','ptable'],
   koel:    ['fridge','olie','flaske','sik','phlogp','gw','tewi'],
-  ekstra:  ['el']
+  ekstra:  ['el','fase']
 };
 const SPOR_FOR = {};
 Object.keys(SPOR).forEach(s => SPOR[s].forEach(f => { SPOR_FOR[f] = s; }));
