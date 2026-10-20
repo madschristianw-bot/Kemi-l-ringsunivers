@@ -10863,13 +10863,52 @@ const VAPT_VARM = {
   R455A  :[null,null,null]
 };
 
+/* Samme tal ved −90 og −50 °C — også kun til sammenligningsdiagrammet.
+   p og v har 4 betydende cifre, fordi mange står i dybt vakuum: R11 har kun 0,0008282 bar ved −90 °C.
+   null betyder her to forskellige ting:
+   – under stoffets TRIPELPUNKT (VAP_TTP) er det fast stof, og der er ingen væske at fordampe.
+     CoolProp regner faktisk et tal ud for R717 og R744 ved −90 °C, men det er underafkølet væske,
+     der ikke findes — derfor null;
+   – R404A og R410A er regnet med pseudo-rene tilstandsligninger, der kun gælder ned til 200 K = −73,15 °C
+     (VAP_TMIN). Det er IKKE et frysepunkt — blandingerne er flydende — men der er ingen data.
+   Ingen af kølemidlerne er over den kritiske temperatur her.
+   Beregnet med CoolProp på samme måde som VAPT; de øvrige blandinger med CoolProps blandingsmodel,
+   der går ned under −100 °C for dem alle. */
+const VAP_T_KOLD = [-90,-50];
+const VAPT_KOLD = {
+  R717   :[null,[1417.3,2.63,0.4078]],
+  R718   :[null,null],
+  R744   :[null,[339.7,0.05579,6.823]],
+  R290   :[[471.5,5.33,0.06448],[433.7,0.5791,0.7057]],
+  R600   :[[456.7,57.59,0.004546],[426.1,3.347,0.09467]],
+  R600a  :[[427.1,26.65,0.009819],[396.7,1.879,0.168]],
+  R134a  :[[255.5,9.77,0.01524],[232.0,0.6062,0.2945]],
+  R32    :[[420.2,3.272,0.08869],[380.1,0.3094,1.101]],
+  R404A  :[null,[202.9,0.2251,0.8101]],
+  R410A  :[null,[271.6,0.2245,1.086]],
+  R22    :[[262.5,3.645,0.04813],[239.4,0.3238,0.6453]],
+  R12    :[[189.1,4.395,0.02858],[174.2,0.3849,0.3911]],
+  R11    :[[220.3,133.8,0.0008282],[206.7,5.087,0.02646]],
+  R1234yf:[[210.6,5.512,0.02415],[191.4,0.4272,0.3723]],
+  R513A  :[[227.8,6.61,0.02119],[206.7,0.4653,0.3599]],
+  R449A  :[[264.8,4.621,0.03763],[238.5,0.3442,0.6002]],
+  R407A  :[[261.8,5.199,0.03238],[235.3,0.3594,0.5571]],
+  R407F  :[[284.8,5.322,0.03473],[256.5,0.373,0.589]],
+  R452A  :[[218.1,2.877,0.05087],[195.7,0.2443,0.7096]],
+  R507A  :[[223.3,2.209,0.06918],[199.0,0.208,0.8638]],
+  R454B  :[[349.5,3.101,0.07782],[315.2,0.287,0.9896]],
+  R455A  :[[256.8,4.524,0.03834],[231.8,0.3615,0.5713]]
+};
+const VAP_TTP  = {R718:0.01, R717:-77.7, R744:-56.6};   // tripelpunktet i °C — under det er stoffet fast
+const VAP_TMIN = {R404A:-73.15, R410A:-73.15};          // nedre grænse for tilstandsligningen i °C
+
 /* ============================================================
    VOLUMETRISK KØLEYDELSE  q_v = L_f / V_g   [kJ/m³]
    Det er den, der bestemmer kompressorens størrelse — en
    kompressor suger VOLUMEN, ikke masse.
 ============================================================ */
 let vapT = -10;                         // valgt fordampningstemperatur
-let vcT = -10;                          // temperaturen i sammenligningsdiagrammet (også +100…+300 °C)
+let vcT = -10;                          // temperaturen i sammenligningsdiagrammet (også −90/−50 og +100…+300 °C)
 
 function vapAt(rcode, t){
   const i=VAP_T.indexOf(t===undefined?vapT:t);
@@ -10885,6 +10924,17 @@ function setVapT(t){
   if(typeof curRefr!=='undefined' && curRefr) renderVapor(curRefr.r);
   drawVapChart();
 }
+/* kølemiddel-kortet, når temperaturen er over den kritiske: R1150 ved +10…+30 °C og R23 ved +30 °C */
+function vapKritiskKort(rcode, t, tc){
+  let s=`<b>${rcode}</b> er over sin <b>kritiske temperatur</b> ved ${t>0?'+':''}${t}&nbsp;°C — den ligger på ${mbNum(tc,1)}&nbsp;°C.
+    Over den kan dampen ikke gøres flydende, uanset hvor højt trykket bliver, så der er ingen væske at fordampe
+    og ingen fordampningsvarme.`;
+  if(rcode==='R1150') s+=` Ethylen bruges derfor kun i <b>lavtrinnet i et kaskadeanlæg</b>, hvor den fordamper langt
+    under 0 °C, og hvor et andet kølemiddel køler kondensatoren ned. Vælg en lavere temperatur.`;
+  else if(rcode==='R23') s+=` Derfor sidder R23 i <b>lavtrinnet i et kaskadeanlæg</b> — den kondenserer ikke
+    mod udeluften. Vælg en lavere temperatur.`;
+  return s;
+}
 
 function renderVapor(rcode){
   const host=document.getElementById('frVapor');
@@ -10897,9 +10947,12 @@ function renderVapor(rcode){
       <div class="vt-chips">${vapTempChips('frVapTemps','setVapT')}</div></div>`;
 
   if(!d){
+    /* null er enten vand under 0 °C eller et kølemiddel over sin kritiske temperatur (R1150, R23) */
+    const tc=VAP_TC[rcode];
     host.innerHTML = `<div class="fr-meter" style="margin-bottom:18px">${chips}
-      <div class="vap-flow">Vand er <b>frosset</b> ved ${vapT} °C — det kan altså ikke fordampe som
-      kølemiddel her. R718 kan kun bruges over 0 °C, typisk i absorptions- og turbo-anlæg til aircondition.</div></div>`;
+      <div class="vap-flow">${tc!==undefined && vapT>=tc ? vapKritiskKort(rcode, vapT, tc)
+      : `Vand er <b>frosset</b> ved ${vapT} °C — det kan altså ikke fordampe som
+      kølemiddel her. R718 kan kun bruges over 0 °C, typisk i absorptions- og turbo-anlæg til aircondition.`}</div></div>`;
     return;
   }
 
@@ -10954,7 +11007,7 @@ function setVapUnit(u){
   drawVapChart();
 }
 
-/* Diagrammet har sin egen temperatur, fordi det også kan vise +100…+300 °C.
+/* Diagrammet har sin egen temperatur, fordi det også kan vise −90/−50 og +100…+300 °C.
    −30…+30 °C går stadig gennem setVapT, så kølemiddel-kortet følger med som hidtil. */
 function setVcT(t){
   if(VAP_T.includes(t)){ setVapT(t); return; }
@@ -10962,19 +11015,28 @@ function setVcT(t){
   drawVapChart();
 }
 function vcTempChips(){
-  return VAP_T.concat(VAP_T_VARM).map(t=>(t===VAP_T_VARM[0]?'<span class="vt-skille" aria-hidden="true"></span>':'')
+  return VAP_T_KOLD.concat(VAP_T, VAP_T_VARM).map(t=>(t===VAP_T[0]||t===VAP_T_VARM[0]?'<span class="vt-skille" aria-hidden="true"></span>':'')
     + `<button class="${t===vcT?'on':''}" onclick="setVcT(${t})">${t>0?'+':''}${t} °C</button>`).join('');
 }
-/* {h, vg, p, qv} · {kritisk: Tc} over den kritiske temperatur · null uden data (vand under 0 °C) */
+/* {h, vg, p, qv} · {kritisk: Tc} over den kritiske temperatur · {fast: tripelpunkt} under tripelpunktet
+   (vand under 0 °C, ammoniak og CO₂ ved −90 °C) · {udenfor: grænse} under tilstandsligningens område
+   (R404A og R410A ved −90 °C) · null uden data */
 function vcAt(rcode, t){
   if(t===undefined) t=vcT;
-  const i=VAP_T_VARM.indexOf(t);
-  if(i<0) return vapAt(rcode, t);
   if(VAP_TC[rcode]!==undefined && t>=VAP_TC[rcode]) return {kritisk:VAP_TC[rcode]};
-  const row=(VAPT_VARM[rcode]||[])[i];
-  if(!row) return null;
-  return {h:row[0], vg:row[1], p:row[2], qv:row[0]/row[1]};
+  const iV=VAP_T_VARM.indexOf(t), iK=VAP_T_KOLD.indexOf(t);
+  let d;
+  if(iV<0 && iK<0) d=vapAt(rcode, t);
+  else {
+    const row = iV>=0 ? (VAPT_VARM[rcode]||[])[iV] : (VAPT_KOLD[rcode]||[])[iK];
+    d = row ? {h:row[0], vg:row[1], p:row[2], qv:row[0]/row[1]} : null;
+  }
+  if(d) return d;
+  if(VAP_TTP[rcode]!==undefined && t<VAP_TTP[rcode]) return {fast:VAP_TTP[rcode]};
+  if(VAP_TMIN[rcode]!==undefined && t<VAP_TMIN[rcode]) return {udenfor:VAP_TMIN[rcode]};
+  return null;
 }
+const vcGrad = (t, dec) => mbNum(t, dec).replace('-','\u2212');      // −56,6 med rigtigt minus
 function vcVarmNote(){
   const t=vcT, w=vcAt('R718', t);
   const kan=Object.keys(VAP).filter(r=>{ const d=vcAt(r, t); return d && d.kritisk===undefined; });
@@ -11010,24 +11072,95 @@ function vcVarmNote(){
         mod ${mbNum(1/w100.vg,1)} kg ved +100 °C.`;
   return s;
 }
+/* noten ved −50 og −90 °C — tallene hentes fra data, så de altid passer til søjlerne */
+function vcKoldNote(){
+  const t=vcT, alle=Object.keys(VAP), ATM=1.01325;
+  const D={}; alle.forEach(r=>{ D[r]=vcAt(r, t); });
+  const ok   = r => !!(D[r] && D[r].h!==undefined);
+  const kan  = alle.filter(ok);
+  const vak  = kan.filter(r=>D[r].p<ATM);
+  const over = kan.filter(r=>D[r].p>=ATM).sort((a,b)=>D[b].p-D[a].p);
+  const fast = alle.filter(r=>D[r] && D[r].fast!==undefined).sort((a,b)=>D[b].fast-D[a].fast);
+  const uden = alle.filter(r=>D[r] && D[r].udenfor!==undefined).sort();
+  const P    = r => ok(r) ? mbNum(D[r].p, D[r].p<0.1?3:2)+'&nbsp;bar' : '–';
+  const liste= a => a.length<2 ? a.join('') : a.slice(0,-1).join(', ')+' og '+a[a.length-1];
+  let s='';
+
+  if(t===-50){
+    s+=`<b>Ved −50 °C kan ${fast.length===1 && fast[0]==='R718' ? 'alle kølemidlerne stadig fordampe — undtagen vand, som er frosset'
+        : 'de fleste kølemidler stadig fordampe'}.</b> Men se på trykket:
+        ${vak.length} af de ${kan.length} står i <b>vakuum</b>, altså under atmosfærens tryk på 1,013 bar. Det gælder
+        alle de rene stoffer, der har deres normale kogepunkt over −50 °C: propan har ${P('R290')}, ammoniak ${P('R717')}
+        og R134a kun ${P('R134a')}. Et anlæg i vakuum suger luft og fugt ind ved den mindste utæthed, og den tynde damp
+        kræver en stor kompressor. Overtryk har kun ${liste(over)}.`;
+    if(ok('R744')) s+=` <b>CO₂ (R744)</b> klarer sig fint med ${P('R744')} — men det er kun ${mbNum(-50-VAP_TTP.R744,1)} K
+        over sit <b>tripelpunkt</b> ved ${vcGrad(VAP_TTP.R744,1)} °C. Længere ned kan CO₂ ikke komme: der bliver det til tøris.`;
+    s+='<br>';
+    s+= vapUnit==='m3'
+      ? `Pr. <b>kubikmeter</b> ligger <b>ethylen (R1150)</b>, CO₂, <b>ethan (R170)</b> og <b>R23</b> i top med flere
+         gange så høj volumetrisk ydelse som resten: de koger så lavt, at dampen stadig er tæt ved −50 °C.${ok('R717')
+         ? ` Ammoniak sakker agterud — den optager stadig mest pr. kg, men dampen er så tynd, at 1 m³ kun rummer ${mbNum(D.R717.qv,0)} kJ.`
+         : ''}`
+      : vapUnit==='kg'
+      ? `Pr. <b>kilo</b> er det stadig ammoniak, der stikker af. Sammenlign med −30 °C: fordampningsvarmen er
+         <b>steget</b> for dem alle, når temperaturen falder. Jo længere væk fra det kritiske punkt, jo mere energi
+         kræver det at rive molekylerne fri af hinanden.`
+      : `Pr. <b>mol</b> ligger de små molekyler <b>ethylen</b> og <b>ethan</b> nederst — de har de svageste London-kræfter.`;
+    return s;
+  }
+
+  /* −90 °C */
+  s+=`<b>−90 °C er ultralav temperatur</b> — fordamperen i en laboratoriefryser, der holder −80 °C, skal være endnu
+      koldere. Her falder flere kølemidler fra.<br>`;
+  if(fast.length){
+    const hvorfor={R718:`vand er is under ${vcGrad(VAP_TTP.R718,2)} °C`, R717:`ammoniak fryser ved ${vcGrad(VAP_TTP.R717,1)} °C`,
+                   R744:`CO₂ bliver til tøris allerede ved ${vcGrad(VAP_TTP.R744,1)} °C`};
+    s+=`<b>${liste(fast)}</b> er under ${fast.length>1?'deres':'sit'} <b>tripelpunkt</b> og er blevet til fast stof:
+        ${liste(fast.map(r=>hvorfor[r]||r))}. Under tripelpunktet findes der ingen væske at fordampe.<br>`;
+  }
+  if(uden.length){
+    s+=`<b>${liste(uden)}</b> mangler af en helt anden grund. De er <b>ikke</b> frosne — deres komponenter fryser først
+        mellem ca. −100 og −137 °C. Men tallene for netop ${uden.length>1?'de to blandinger':'den blanding'} er regnet med en
+        tilstandsligning, der kun går ned til ${vcGrad(VAP_TMIN[uden[0]],2)} °C (200 K), og uden for den regner vi ikke.
+        De øvrige blandinger er regnet med en model, der bygger på de enkelte komponenter, og den går længere ned.<br>`;
+  }
+  s+=`Resten kan fordampe, men næsten alle i <b>dybt vakuum</b>: propan ${P('R290')}, R32 ${P('R32')} og R134a ${P('R134a')}.
+      ${over.length===1 && over[0]==='R1150' ? `Kun <b>ethylen (R1150)</b> har overtryk (${P('R1150')}).` : ''}
+      Ethan (R170) ligger lige under atmosfærens tryk (${P('R170')}), fordi den koger ved −89 °C, og R23 har ${P('R23')}.<br>`;
+  const fak = (ok('R1150') && ok('R290')) ? Math.round(D.R1150.qv/D.R290.qv) : null;
+  const rp  = (ok('R290') && VAPT.R290 && VAPT.R290[6]) ? VAPT.R290[6][2]/D.R290.p : null;   // propan −90 → +30 °C
+  s+=`<b>Derfor bruger man ethylen og ethan herned.</b>${fak ? ` Pr. m³ indsuget damp optager ethylen ca. ${fak} gange
+      så meget varme som propan — kompressoren kan være tilsvarende mindre.` : ''} Men de har en lav <b>kritisk
+      temperatur</b> — ethylen ${mbNum(VAP_TC.R1150,1)} °C og ethan ${mbNum(VAP_TC.R170,1)} °C — så de kan ikke, eller kun
+      dårligt, kondensere mod udeluften. De sidder i <b>lavtrinnet i et kaskadeanlæg</b>, hvor lavtrinnets kondensator
+      køles af fordamperen i et højtrin med fx propan.${rp ? ` Et enkelt trin med propan hele vejen fra −90 til +30 °C
+      ville kræve et trykforhold på ca. ${mbNum(Math.round(rp/10)*10,0)} — langt mere, end én kompressor kan klare.` : ''}`;
+  if(vapUnit==='kg') s+=` Pr. <b>kilo</b> topper ethan, propylen og propan — ammoniak er frosset.`;
+  if(vapUnit==='mol') s+=` Pr. <b>mol</b> ligger ethylen og ethan nederst — de mindste molekyler med de svageste London-kræfter.`;
+  return s;
+}
 
 function drawVapChart(){
   const rows=document.getElementById('vcRows');
   if(!rows) return;
   const chips=document.getElementById('vcTemps');
   if(chips) chips.innerHTML=vcTempChips();
-  const varm=VAP_T_VARM.includes(vcT);
+  const varm=VAP_T_VARM.includes(vcT), kold=VAP_T_KOLD.includes(vcT);
 
   const navn={}; if(typeof REFR!=='undefined') REFR.forEach(r=>navn[r.r]=r.name);
-  const data=[], krit=[];
+  const data=[], krit=[], uden=[], fast=[];
   Object.keys(VAP).forEach(r=>{
     const d=vcAt(r); if(!d) return;
     if(d.kritisk!==undefined){ krit.push({r, navn:navn[r]||'', tc:d.kritisk}); return; }
+    if(d.udenfor!==undefined){ uden.push({r, navn:navn[r]||'', tmin:d.udenfor}); return; }
+    if(d.fast!==undefined){ fast.push({r, navn:navn[r]||'', tp:d.fast}); return; }
     const v = vapUnit==='kg' ? d.h : vapUnit==='mol' ? d.h*VAP[r].M/1000 : d.qv;
     data.push({r, navn:navn[r]||'', v, dom:vapDom(VAP[r].f)});
   });
   data.sort((a,b)=>b.v-a.v);
   krit.sort((a,b)=>b.tc-a.tc);           // dem, der var tættest på at kunne fordampe, øverst
+  uden.sort((a,b)=>a.r<b.r?-1:1);
+  fast.sort((a,b)=>b.tp-a.tp);           // vand (0,01 °C), CO₂ (−56,6 °C), ammoniak (−77,7 °C)
   const max=Math.max(...data.map(d=>d.v));
   const enhed = v => vapUnit==='kg' ? mbNum(v,0)+' kJ/kg'
                    : vapUnit==='mol' ? mbNum(v,1)+' kJ/mol'
@@ -11037,6 +11170,14 @@ function drawVapChart(){
       <span class="vc-name">${d.r} <span>${d.navn}</span></span>
       <span class="vc-track"><span class="vc-fill ${d.dom}" style="width:${d.v/max*100}%"></span></span>
       <span class="vc-val">${enhed(d.v)}</span>
+    </div>`).join('') + uden.map(d=>`
+    <div class="vc-row vc-krit vc-uden">
+      <span class="vc-name">${d.r} <span>${d.navn}</span></span>
+      <span class="vc-kritisk">Uden for tilstandsligningens område <span style="white-space:nowrap">(data ned til ${vcGrad(d.tmin,2)}&nbsp;°C)</span>&nbsp;— ikke frosset</span>
+    </div>`).join('') + fast.map(d=>`
+    <div class="vc-row vc-krit vc-fast">
+      <span class="vc-name">${d.r} <span>${d.navn}</span></span>
+      <span class="vc-kritisk">Under tripelpunktet <span style="white-space:nowrap">(${vcGrad(d.tp, Math.abs(d.tp)<1?2:1)}&nbsp;°C)</span>&nbsp;— fast stof${d.r==='R744'?' (tøris)':d.r==='R718'?' (is)':''}</span>
     </div>`).join('') + krit.map(d=>`
     <div class="vc-row vc-krit">
       <span class="vc-name">${d.r} <span>${d.navn}</span></span>
@@ -11050,6 +11191,20 @@ function drawVapChart(){
       (samme tilstandsligninger som REFPROP). For blandingerne er T<sub>c</sub> blandingens kritiske punkt.</span>`;
     return;
   }
+  if(kold){
+    if(n) n.innerHTML = vcKoldNote() + `<br><span style="opacity:.75">Værdier ved mættet damp, ${vcGrad(vcT,0)} °C. Beregnet med CoolProp
+      (samme tilstandsligninger som REFPROP). Trykket er absolut — under 1,013 bar er der vakuum i fordamperen.</span>`;
+    return;
+  }
+  /* lavtemperatur-kølemidlerne, der kan fordampe ved den valgte temperatur (R1150 kun til 0 °C, R23 til +20 °C).
+     Pr. m³ nævnes de kun, når de ligger klart over alle de andre — ved +30 °C er ethan næsten nede på R32's niveau. */
+  const kanFordampe = r => { const d=vcAt(r); return !!(d && d.h!==undefined); };
+  const qvVed = r => kanFordampe(r) ? vcAt(r).qv : 0;
+  const andreMax = Math.max(...Object.keys(VAP).filter(r=>!['R744','R1150','R23','R170'].includes(r)).map(qvVed));
+  const lavM3  = [['R1150','<b>ethylen (R1150)</b>'],['R23','<b>R23</b>'],['R170','<b>ethan (R170)</b>']].filter(([r])=>qvVed(r)>=1.25*andreMax).map(x=>x[1]);
+  const lavMol = [['R744','CO₂'],['R23','R23'],['R170','ethan'],['R1150','ethylen']].filter(([r])=>kanFordampe(r)).map(x=>x[1]);
+  const lavSmaa= lavMol.filter(x=>x==='ethan' || x==='ethylen');
+  const liste  = a => a.length<2 ? a.join('') : a.slice(0,-1).join(', ')+' og '+a[a.length-1];
   const noter={
     kg:`Pr. <b>kilo</b> er forskellen enorm ved ${T}: ammoniak optager mange gange så meget varme som R134a.
         Det skyldes især, at molekylet er meget <b>let</b> (17 g/mol mod R134a's 102) — og
@@ -11058,11 +11213,16 @@ function drawVapChart(){
         Det er London-kræfterne, der vokser med molekylets størrelse, så de tunge molekyler henter ind
         — R11 ligger endda over ammoniak. Ammoniak holder alligevel mindst lige så godt fast som R134a,
         selvom molekylet er seks gange lettere: det er <b>hydrogen-bindingerne</b>.
-        Kun <b>vand</b> stikker af (fra 0 °C og op).`,
+        Kun <b>vand</b> stikker af (fra 0 °C og op).${lavMol.length ? ` Nederst ligger ${liste(lavMol)}. De er forholdsvis
+        tæt på deres kritiske temperatur, og der falder fordampningsvarmen${lavSmaa.length
+        ? ` — ${liste(lavSmaa)} er desuden ${lavSmaa.length>1?'små molekyler':'et lille molekyle'} med svage London-kræfter` : ''}.` : ''}`,
     m3:`Pr. <b>kubikmeter</b> vender billedet: en kompressor suger <b>volumen</b>, ikke masse.
         Derfor ligger ammoniak og R134a tættere på hinanden, end kJ/kg-listen antyder — ammoniakdampen fylder
-        bare meget mere. <b>CO₂ (R744)</b> stikker af med flere gange så høj volumetrisk ydelse som de fleste andre,
-        og det er præcis derfor CO₂-anlæg kan bygges med små kompressorer. Modsat kræver <b>R600a</b> og
+        bare meget mere. ${lavM3.length ? `Øverst ligger <b>CO₂ (R744)</b> og ${lavM3.length>1?'lavtemperatur-kølemidlerne':'lavtemperatur-kølemidlet'}
+        ${liste(lavM3)} med flere gange så høj volumetrisk ydelse som de fleste andre: de koger så lavt, at dampen er
+        tæt og trykket højt. Det er præcis derfor, CO₂-anlæg kan bygges med små kompressorer.`
+        : `<b>CO₂ (R744)</b> stikker af med flere gange så høj volumetrisk ydelse som de fleste andre,
+        og det er præcis derfor CO₂-anlæg kan bygges med små kompressorer.`} Modsat kræver <b>R600a</b> og
         <b>R600</b> store kompressorer til en beskeden ydelse.`
   };
   if(n) n.innerHTML = noter[vapUnit] + (vapUnit!=='m3'
@@ -15179,6 +15339,99 @@ KOMP_KP.R744 = -78.5;
   halo3D   = a => erCO2(a) ? co2_3D() : h3(a);
   flatHalo = a => erCO2(a) ? flat2D({r:'R744'}) : fh(a);
 })();
+
+/* ---- Lavtemperatur-kølemidler: R1150 ethylen, R170 ethan, R1270 propylen og R23 trifluormethan ----
+   De koger alle langt under 0 °C og bruges, hvor der skal køles ned mod −50…−100 °C — de tre første
+   kulbrinter, R23 den klassiske HFC til kaskadens lavtrin. GWP er AR4 afrundet til heltal som R290 = 3:
+   R1150 3,7 → 4, R170 5,5 → 6, R1270 1,8 → 2 og R23 14.800.
+   Data beregnet med CoolProp på samme måde som de andre rene stoffer (HEOS):
+     R1150  Tc 9,20 °C  · tripelpunkt −169,2 °C · NBP −103,8 °C
+     R170   Tc 32,17 °C · tripelpunkt −182,8 °C · NBP −88,6 °C
+     R1270  Tc 91,06 °C · tripelpunkt −185,2 °C · NBP −47,6 °C
+     R23    Tc 26,14 °C · tripelpunkt −155,1 °C · NBP −82,0 °C
+   null i VAPT betyder her OVER den kritiske temperatur: R1150 ved +10/+20/+30 °C og R23 ved +30 °C.
+   Ingen PH-, KOEL_OLIE- eller ERSTAT-poster: kredsprocessen og erstatnings-kortet regner ved −10/+30 °C,
+   og hverken R1150 eller R23 kan kondensere ved +30 °C. */
+
+/* ethylen og propylen har en dobbeltbinding og kan heller ikke tegnes med standard-rutinen */
+Object.assign(STRUCT, {
+  R1150:{
+    el:['C','C','H','H','H','H'],
+    b:[[0,1,2],[0,2],[0,3],[1,4],[1,5]],
+    /* plant molekyle: C=C 1,33 Å, C–H 1,09 Å, H–C–H ca. 117° */
+    p3:[[-0.665,0,0],[0.665,0,0],[-1.234,0.930,0],[-1.234,-0.930,0],[1.234,0.930,0],[1.234,-0.930,0]],
+    angle:"ca. 120° — plant molekyle (dobbeltbinding)"
+  },
+  R1270:{
+    el:['C','H','H','H','C','H','C','H','H'],
+    b:[[0,1],[0,2],[0,3],[0,4],[4,5],[4,6,2],[6,7],[6,8]],
+    /* samme skelet som R1234yf, men med H i stedet for F: C–C 1,50 Å, C=C 1,34 Å, CH₃ tetraedrisk */
+    p3:[[-0.83,-0.72,0],[-0.122,-1.550,0],[-1.458,-0.777,0.889],[-1.458,-0.777,-0.889],
+        [-0.08,0.58,0],[-0.628,1.523,0],[1.26,0.58,0],[1.80,1.51,0],[1.80,-0.36,0]],
+    angle:"120° ved dobbeltbindingen · 109,5° ved CH₃"
+  }
+});
+(function(){
+  const g3=geom3D, f2=flat2D;
+  geom3D = r => (r && STRUCT[r.r]) ? structGeom(r.r) : g3(r);
+  flat2D = r => (r && STRUCT[r.r]) ? structFlat(r.r) : f2(r);
+})();
+
+const NYE_REFR4 = [
+  {r:"R1270", name:"Propylen (propen)", formula:"C3H6", type:"nat",
+   atoms:{C:3,H:6}, gwp:2, odp:0, bp:-48, safety:"A3", ped:1,
+   tags:[["Naturligt","safe"],["Brandbart","danger"],["Umættet (C=C)",""]],
+   desc:"Propylen — på kemisk <b>propen</b> — er propan med en <b>dobbeltbinding</b>: CH₂=CH–CH₃. Dobbeltbindingen koster to hydrogen-atomer, C₃H₆ mod propans C₃H₈. Kogepunktet ligger ved <b>−48 °C</b> mod propans −42 °C. Det giver 20–25 % højere tryk og ca. 20 % større volumetrisk køleydelse, så kompressoren kan gøres mindre — til gengæld bliver afgangstemperaturen nogle grader højere. Den kan bruges i de samme typer anlæg som propan. GWP 2 og ODP 0, men meget brandbar (A3), så de samme sikkerhedskrav gælder som for propan."},
+  {r:"R170", name:"Ethan", formula:"C2H6", type:"nat",
+   atoms:{C:2,H:6}, gwp:6, odp:0, bp:-89, safety:"A3", ped:1,
+   tags:[["Naturligt","safe"],["Brandbart","danger"],["Kaskade-lavtrin",""]],
+   desc:"Ethan er andet led i rækken methan, ethan, propan, butan — to carbon-atomer med en enkeltbinding, CH₃–CH₃. Kogepunktet er <b>−89 °C</b>, og det er netop det, der gør ethan nyttig: ved −80 °C er trykket stadig ca. 1,6 bar absolut, så kompressoren suger tæt damp i stedet for et tyndt vakuum. Derfor sidder ethan i <b>lavtrinnet i ULT-frysere</b> (ultralav temperatur, omkring −80 °C) til fx vacciner og biologiske prøver, typisk med propan i højtrinnet. Den kritiske temperatur er kun <b>32,2 °C</b>, så ethan kan ikke kondensere mod udeluften på en varm dag — også den hører hjemme i en kaskade. GWP 6 og ODP 0, men meget brandbar (A3)."},
+  {r:"R1150", name:"Ethylen (ethen)", formula:"C2H4", type:"nat",
+   atoms:{C:2,H:4}, gwp:4, odp:0, bp:-104, safety:"A3", ped:1,
+   tags:[["Naturligt","safe"],["Brandbart","danger"],["Kun i kaskade",""]],
+   desc:"Ethylen — på kemisk <b>ethen</b> — er den simpleste <b>alken</b>: to carbon-atomer med en <b>dobbeltbinding</b> imellem, CH₂=CH₂. Den koger allerede ved <b>−104 °C</b> og har stadig overtryk ved −90 °C. Derfor bruges ethylen, hvor der skal køles helt ned mod −100 °C: i laboratorieudstyr og i store industrianlæg, hvor naturgas gøres flydende (LNG). Men den <b>kritiske temperatur er kun 9,2 °C</b>. Over den kan dampen ikke gøres flydende, uanset hvor højt trykket bliver — så i praksis kan ethylen ikke kondensere mod udeluften. Den sidder i <b>lavtrinnet i et kaskadeanlæg</b>, hvor et andet kølemiddel i højtrinnet køler kondensatoren ned. GWP 4 og ODP 0, men meget brandbar (A3): ethylen kan brænde i luft fra ca. 2,7 % og helt op til ca. 36 %. Du kender den måske også fra frugtlagre — ethylen er det plantehormon, der får frugt til at modne."},
+  {r:"R23", name:"Trifluormethan (HFC)", formula:"CHF3", type:"hfc",
+   atoms:{C:1,H:1,F:3}, gwp:14800, odp:0, bp:-82, safety:"A1", ped:2,
+   tags:[["Syntetisk (HFC)","danger"],["Ikke brandbart","safe"],["Ekstremt GWP","danger"]],
+   desc:"Trifluormethan er en HFC med ét carbon, ét hydrogen og tre fluor, CHF₃. Kogepunktet er <b>−82 °C</b>, og i årtier var R23 standard i <b>lavtrinnet i kaskadeanlæg</b> til −60…−80 °C, fx i testkamre og laboratoriefrysere. Den er ikke brandbar (A1) — men har et GWP på <b>14.800</b>, det højeste af alle kølemidlerne her, endda over R12's. Molekylet er så stabilt, at det bliver i atmosfæren i over 200 år. Den kritiske temperatur er kun 26,1 °C, så også R23 skal sidde i en kaskade. F-gasforordningen har undtagelser for anlæg, der køler produkter til under −50 °C, men HFC-kvoterne skrumper trin for trin, så R23 er blevet dyr og svær at skaffe. I nye anlæg vælger man derfor i stigende grad ethan (R170) eller ethylen (R1150). R23 dannes desuden som biprodukt, når man fremstiller R22 — efter Kigali-aftalen skal det destrueres i stedet for at slippe ud."}
+];
+/* kulbrinterne efter butan, R23 efter R32 (de to HFC'er med ét carbon) */
+(function(){
+  const i = REFR.findIndex(r=>r.r==='R600');
+  REFR.splice(i<0?REFR.length:i+1, 0, ...NYE_REFR4.filter(r=>r.type==='nat'));
+  const j = REFR.findIndex(r=>r.r==='R32');
+  REFR.splice(j<0?REFR.length:j+1, 0, ...NYE_REFR4.filter(r=>r.type!=='nat'));
+})();
+
+Object.assign(VAPT, {
+  R1270:[[418.4,0.2133,2.116],[405.7,0.1509,3.056],[392.2,0.1095,4.281],[377.6,0.08112,5.841],[361.7,0.06115,7.786],[344.3,0.04673,10.17],[325.0,0.03608,13.05]],
+  R170 :[[388.8,0.05207,10.643],[364.3,0.03863,14.215],[336.0,0.02892,18.588],[302.5,0.02169,23.867],[261.4,0.01612,30.172],[206.4,0.0116,37.655],[106.7,0.007229,46.551]],
+  R1150:[[327.9,0.02745,19.366],[292.3,0.02017,25.284],[247.7,0.01466,32.428],[185.3,0.01018,40.99],null,null,null],
+  R23  :[[186.8,0.02328,10.074],[172.9,0.01651,13.953],[156.9,0.01181,18.853],[137.6,0.008427,24.947],[113.2,0.005887,32.438],[76.8,0.003805,41.61],null]
+});
+Object.assign(VAP_TC, {R1270:91.1, R170:32.2, R1150:9.2, R23:26.1});
+Object.assign(VAPT_VARM, {R1270:[null,null,null], R170:[null,null,null], R1150:[null,null,null], R23:[null,null,null]});
+Object.assign(VAPT_KOLD, {
+  R1270:[[482.5,4.103,0.08767],[441.5,0.4694,0.9081]],
+  R170 :[[491.3,0.5228,0.938],[429.8,0.09935,5.518]],
+  R1150:[[461.5,0.2403,2.132],[383.6,0.05161,10.62]],
+  R23  :[[245.8,0.3377,0.6239],[210.0,0.04895,4.789]]
+});
+/* Propen har en lille dipol (0,37 D), men efter reglen i molekyle-byggeren er C–H upolær, og
+   London-kræfterne dominerer — derfor upolær som propan. R23 er polær som R32 og R22. */
+Object.assign(VAP, {
+  R1270:{M: 42.08, h:378, pol:0, f:['l'],
+         note:"Næsten samme fordampningsvarme pr. kg som propan — men dampen er tættere, så hver m³ indsuget damp optager ca. 20 % mere varme."},
+  R170 :{M: 30.07, h:303, pol:0, f:['l'],
+         note:"Ved +30 °C er ethan kun 2 K fra sin kritiske temperatur på 32,2 °C — derfor er fordampningsvarmen her faldet til omkring det halve af værdien ved +20 °C."},
+  R1150:{M: 28.05, h:185, pol:0, f:['l'],
+         note:"Den kritiske temperatur er kun 9,2 °C. Allerede ved 0 °C er fordampningsvarmen faldet til under halvdelen af værdien ved −90 °C, og over 9,2 °C er der slet ingen væske at fordampe."},
+  R23  :{M: 70.01, h:138, pol:3, f:['d','l'],
+         note:"Den kritiske temperatur er 26,1 °C, så ved +30 °C kan R23 ikke fordampe. Tæt på den falder fordampningsvarmen hurtigt: ved +20 °C er der kun 77 kJ/kg tilbage — mod 138 kJ/kg ved 0 °C."}
+});
+/* molekyle-byggeren: ethan og ethen peger nu på kølemidlet (CHF₃ gjorde det allerede) */
+MB_DB.C2H6.r = 'R170';
+MB_DB.C2H4.r = 'R1150';
 
 /* ============================================================
    H LOG P — kølemiddel-sammenligneren indlejret i sin egen ramme,
