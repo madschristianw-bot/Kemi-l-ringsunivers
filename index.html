@@ -757,6 +757,7 @@
   .vc-kritisk{grid-column:2 / 4;font-size:11.5px;line-height:1.35;color:var(--muted);font-style:italic;
     padding:1px 8px;border:1px dashed var(--line);border-radius:6px}
   @media(max-width:600px){.vc-kritisk{font-size:10.5px;padding:1px 6px}}
+  @media(max-width:400px){.vc-kritisk{font-size:10px;padding:1px 4px}}
 
   /* ===== log p,h — køleprocessen ===== */
   .ph-ctrl{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
@@ -10994,13 +10995,14 @@ function vcVarmNote(){
         at 1 m³ kun vejer ${mbNum(1/w.vg,1)} kg. Tæt på det kritiske punkt er dampen derimod tung — 1 m³ R134a-damp vejer ${mbNum(1/a.vg,0)} kg.`;
   } else if(t===200){
     s+=`Ved +200 °C er <b>vand</b> det eneste kølemiddel, der stadig kan fordampe — R11 passerede sin kritiske
-        temperatur ved ${mbNum(VAP_TC.R11,1)} °C. Vandet koger først ved ${mbNum(w.p,2)} bar, og fordampningsvarmen
+        temperatur ved ${mbNum(VAP_TC.R11,1)} °C. Vandet koger her ved ${mbNum(w.p,2)} bar — så højt skal trykket mindst være, for at vandet kan holdes flydende — og fordampningsvarmen
         er faldet fra ${mbNum(VAPT.R718[3][0],0)} kJ/kg ved 0 °C til ${mbNum(w.h,0)} kJ/kg.`;
   } else {
-    s+=`Ved +${t} °C koger vandet først ved ${mbNum(w.p,2)} bar, og fordampningsvarmen er nede på ${mbNum(w.h,0)} kJ/kg.
+    s+=`Ved +${t} °C koger vandet ved ${mbNum(w.p,2)} bar — trykket skal så højt op, før vandet kan holdes flydende — og fordampningsvarmen er nede på ${mbNum(w.h,0)} kJ/kg.
         Vands kritiske temperatur ligger helt oppe på ${mbNum(VAP_TC.R718,1)} °C: <b>hydrogen-bindingerne</b> holder
         så godt sammen på molekylerne, at vand kan holdes flydende under tryk helt derop. Jo stærkere kræfterne
-        mellem molekylerne er, desto højere ligger den kritiske temperatur.`;
+        mellem molekylerne er, desto højere ligger den kritiske temperatur. Det gælder de samlede kræfter pr. molekyle:
+        store molekyler som R11 og butan har så stærke London-kræfter, at de ender over ammoniak, selv om de ikke har hydrogen-bindinger.`;
   }
   const w100=vcAt('R718', 100);
   if(t!==100 && vapUnit==='m3' && w100 && w100.kritisk===undefined) s+=` Pr. m³ er tallet langt højere end ved +100 °C,
@@ -11038,7 +11040,7 @@ function drawVapChart(){
     </div>`).join('') + krit.map(d=>`
     <div class="vc-row vc-krit">
       <span class="vc-name">${d.r} <span>${d.navn}</span></span>
-      <span class="vc-kritisk">Over kritisk temperatur (T<sub>c</sub> = ${mbNum(d.tc,1)} °C) — ingen fordampning</span>
+      <span class="vc-kritisk">Over kritisk temperatur <span style="white-space:nowrap">(T<sub>c</sub>&nbsp;=&nbsp;${mbNum(d.tc,1)}&nbsp;°C)</span>&nbsp;— ingen fordampning</span>
     </div>`).join('');
 
   const T=`${vcT>0?'+':''}${vcT} °C`;
