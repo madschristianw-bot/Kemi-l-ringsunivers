@@ -751,6 +751,12 @@
   .vc-legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px;font-size:12px;color:var(--muted)}
   .vc-legend span{display:inline-flex;align-items:center;gap:7px}
   .vc-legend i{width:14px;height:10px;border-radius:3px;display:inline-block}
+  /* +100…+300 °C: skillelinje før de varme temperaturer, og kølemidler over den kritiske temperatur */
+  .vt-skille{width:1px;align-self:stretch;background:var(--line);margin:2px 4px}
+  .vc-krit .vc-name{color:var(--muted)}
+  .vc-kritisk{grid-column:2 / 4;font-size:11.5px;line-height:1.35;color:var(--muted);font-style:italic;
+    padding:1px 8px;border:1px dashed var(--line);border-radius:6px}
+  @media(max-width:600px){.vc-kritisk{font-size:10.5px;padding:1px 6px}}
 
   /* ===== log p,h — køleprocessen ===== */
   .ph-ctrl{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
@@ -10821,12 +10827,48 @@ const VAPT = {
   R11   :[[199.9,1.589,0.09],[196.6,0.9638,0.16],[193.2,0.6114,0.26],[189.8,0.4033,0.40],[186.3,0.2752,0.61],[182.7,0.1934,0.89],[179.0,0.1395,1.26]]
 };
 
+/* Samme tal ved +100, +200 og +300 °C — kun til sammenligningsdiagrammet under Fordampningsvarme
+   (kølemiddel-kortet under Vælg kølemiddel bruger stadig kun VAP_T og VAPT).
+   VAP_TC er den kritiske temperatur i °C — for blandingerne blandingens kritiske punkt.
+   null i VAPT_VARM betyder OVER den kritiske temperatur: der findes ingen væske at fordampe.
+   (R718's null i VAPT betyder noget andet: under 0 °C er vandet frosset.)
+   Beregnet med CoolProp på samme måde som VAPT. */
+const VAP_T_VARM = [100,200,300];
+const VAP_TC = {R717:132.4, R718:373.9, R744:31.0, R290:96.7, R600:152.0, R600a:134.7, R134a:101.1, R32:78.1,
+  R404A:72.1, R410A:71.3, R22:96.1, R12:112.0, R11:198.0, R1234yf:94.7, R513A:95.4, R449A:82.5, R407A:82.2,
+  R407F:82.6, R452A:75.1, R507A:70.6, R454B:78.3, R455A:85.6};
+const VAPT_VARM = {
+  R717   :[[715.7,0.01782,62.55],null,null],
+  R718   :[[2256.4,1.672,1.01],[1939.7,0.1272,15.55],[1404.6,0.02166,85.88]],
+  R744   :[null,null,null],
+  R290   :[null,null,null],
+  R600   :[[258.3,0.02541,15.26],null,null],
+  R600a  :[[211.0,0.01764,19.87],null,null],
+  R134a  :[[34.4,0.002681,39.72],null,null],
+  R32    :[null,null,null],
+  R404A  :[null,null,null],
+  R410A  :[null,null,null],
+  R22    :[null,null,null],
+  R12    :[[64.0,0.003959,33.40],null,null],
+  R11    :[[147.1,0.02312,8.24],null,null],
+  R1234yf:[null,null,null],
+  R513A  :[null,null,null],
+  R449A  :[null,null,null],
+  R407A  :[null,null,null],
+  R407F  :[null,null,null],
+  R452A  :[null,null,null],
+  R507A  :[null,null,null],
+  R454B  :[null,null,null],
+  R455A  :[null,null,null]
+};
+
 /* ============================================================
    VOLUMETRISK KØLEYDELSE  q_v = L_f / V_g   [kJ/m³]
    Det er den, der bestemmer kompressorens størrelse — en
    kompressor suger VOLUMEN, ikke masse.
 ============================================================ */
 let vapT = -10;                         // valgt fordampningstemperatur
+let vcT = -10;                          // temperaturen i sammenligningsdiagrammet (også +100…+300 °C)
 
 function vapAt(rcode, t){
   const i=VAP_T.indexOf(t===undefined?vapT:t);
@@ -10838,7 +10880,7 @@ function vapTempChips(id, fn){
   return VAP_T.map(t=>`<button class="${t===vapT?'on':''}" onclick="${fn}(${t})">${t>0?'+':''}${t} °C</button>`).join('');
 }
 function setVapT(t){
-  vapT=t;
+  vapT=t; vcT=t;
   if(typeof curRefr!=='undefined' && curRefr) renderVapor(curRefr.r);
   drawVapChart();
 }
@@ -10910,20 +10952,80 @@ function setVapUnit(u){
   document.querySelectorAll('#vcToggle button').forEach(b=>b.classList.toggle('on', b.dataset.u===u));
   drawVapChart();
 }
+
+/* Diagrammet har sin egen temperatur, fordi det også kan vise +100…+300 °C.
+   −30…+30 °C går stadig gennem setVapT, så kølemiddel-kortet følger med som hidtil. */
+function setVcT(t){
+  if(VAP_T.includes(t)){ setVapT(t); return; }
+  vcT=t;
+  drawVapChart();
+}
+function vcTempChips(){
+  return VAP_T.concat(VAP_T_VARM).map(t=>(t===VAP_T_VARM[0]?'<span class="vt-skille" aria-hidden="true"></span>':'')
+    + `<button class="${t===vcT?'on':''}" onclick="setVcT(${t})">${t>0?'+':''}${t} °C</button>`).join('');
+}
+/* {h, vg, p, qv} · {kritisk: Tc} over den kritiske temperatur · null uden data (vand under 0 °C) */
+function vcAt(rcode, t){
+  if(t===undefined) t=vcT;
+  const i=VAP_T_VARM.indexOf(t);
+  if(i<0) return vapAt(rcode, t);
+  if(VAP_TC[rcode]!==undefined && t>=VAP_TC[rcode]) return {kritisk:VAP_TC[rcode]};
+  const row=(VAPT_VARM[rcode]||[])[i];
+  if(!row) return null;
+  return {h:row[0], vg:row[1], p:row[2], qv:row[0]/row[1]};
+}
+function vcVarmNote(){
+  const t=vcT, w=vcAt('R718', t);
+  const kan=Object.keys(VAP).filter(r=>{ const d=vcAt(r, t); return d && d.kritisk===undefined; });
+  let s=`<b>Så varmt er der ikke i fordamperen i et almindeligt køleanlæg</b> — men de høje temperaturer viser,
+        hvad der sker, når et stof nærmer sig sit <b>kritiske punkt</b>. Væsken udvider sig, dampen bliver tættere,
+        og de to faser ligner hinanden mere og mere. Derfor falder fordampningsvarmen mod nul, og ved den
+        <b>kritiske temperatur T<sub>c</sub></b> er den helt væk. Over T<sub>c</sub> kan væske og gas ikke skelnes
+        fra hinanden — så er der intet at fordampe, uanset hvor højt trykket bliver.<br>`;
+  if(!w || w.kritisk!==undefined) return s;
+  if(t===100){
+    const a=vcAt('R134a', 100), a0=vapAt('R134a', 0);
+    s+=`Ved +100 °C kan kun ${kan.length} af de ${Object.keys(VAP).length} kølemidler stadig fordampe.`;
+    if(a && a.kritisk===undefined && a0) s+=` Se på <b>R134a</b>: kun ${mbNum(VAP_TC.R134a-100,1)} K under sin
+        kritiske temperatur er fordampningsvarmen faldet til ${mbNum(a.h,0)} kJ/kg — mod ${mbNum(a0.h,0)} kJ/kg ved 0 °C.`;
+    s+=` <b>Vand</b> koger her ved ${mbNum(w.p,2)} bar — det er almindeligt lufttryk, så det er vandets kogepunkt fra køkkenet.`;
+    if(vapUnit==='mol') s+=` Pr. mol giver det ${mbNum(w.h*VAP.R718.M/1000,1)} kJ/mol — den værdi for vand, du finder i tabellerne.`;
+    if(vapUnit==='m3' && a && a.kritisk===undefined) s+=` Pr. m³ ender vand til gengæld nederst: dampen ved 1 bar er så tynd,
+        at 1 m³ kun vejer ${mbNum(1/w.vg,1)} kg. Tæt på det kritiske punkt er dampen derimod tung — 1 m³ R134a-damp vejer ${mbNum(1/a.vg,0)} kg.`;
+  } else if(t===200){
+    s+=`Ved +200 °C er <b>vand</b> det eneste kølemiddel, der stadig kan fordampe — R11 passerede sin kritiske
+        temperatur ved ${mbNum(VAP_TC.R11,1)} °C. Vandet koger først ved ${mbNum(w.p,2)} bar, og fordampningsvarmen
+        er faldet fra ${mbNum(VAPT.R718[3][0],0)} kJ/kg ved 0 °C til ${mbNum(w.h,0)} kJ/kg.`;
+  } else {
+    s+=`Ved +${t} °C koger vandet først ved ${mbNum(w.p,2)} bar, og fordampningsvarmen er nede på ${mbNum(w.h,0)} kJ/kg.
+        Vands kritiske temperatur ligger helt oppe på ${mbNum(VAP_TC.R718,1)} °C: <b>hydrogen-bindingerne</b> holder
+        så godt sammen på molekylerne, at vand kan holdes flydende under tryk helt derop. Jo stærkere kræfterne
+        mellem molekylerne er, desto højere ligger den kritiske temperatur.`;
+  }
+  const w100=vcAt('R718', 100);
+  if(t!==100 && vapUnit==='m3' && w100 && w100.kritisk===undefined) s+=` Pr. m³ er tallet langt højere end ved +100 °C,
+        selvom fordampningsvarmen er faldet: ved ${mbNum(w.p,2)} bar vejer 1 m³ vanddamp ${mbNum(1/w.vg,1)} kg
+        mod ${mbNum(1/w100.vg,1)} kg ved +100 °C.`;
+  return s;
+}
+
 function drawVapChart(){
   const rows=document.getElementById('vcRows');
   if(!rows) return;
   const chips=document.getElementById('vcTemps');
-  if(chips) chips.innerHTML=vapTempChips('vcTemps','setVapT');
+  if(chips) chips.innerHTML=vcTempChips();
+  const varm=VAP_T_VARM.includes(vcT);
 
   const navn={}; if(typeof REFR!=='undefined') REFR.forEach(r=>navn[r.r]=r.name);
-  const data=[];
+  const data=[], krit=[];
   Object.keys(VAP).forEach(r=>{
-    const d=vapAt(r); if(!d) return;
+    const d=vcAt(r); if(!d) return;
+    if(d.kritisk!==undefined){ krit.push({r, navn:navn[r]||'', tc:d.kritisk}); return; }
     const v = vapUnit==='kg' ? d.h : vapUnit==='mol' ? d.h*VAP[r].M/1000 : d.qv;
     data.push({r, navn:navn[r]||'', v, dom:vapDom(VAP[r].f)});
   });
   data.sort((a,b)=>b.v-a.v);
+  krit.sort((a,b)=>b.tc-a.tc);           // dem, der var tættest på at kunne fordampe, øverst
   const max=Math.max(...data.map(d=>d.v));
   const enhed = v => vapUnit==='kg' ? mbNum(v,0)+' kJ/kg'
                    : vapUnit==='mol' ? mbNum(v,1)+' kJ/mol'
@@ -10933,9 +11035,19 @@ function drawVapChart(){
       <span class="vc-name">${d.r} <span>${d.navn}</span></span>
       <span class="vc-track"><span class="vc-fill ${d.dom}" style="width:${d.v/max*100}%"></span></span>
       <span class="vc-val">${enhed(d.v)}</span>
+    </div>`).join('') + krit.map(d=>`
+    <div class="vc-row vc-krit">
+      <span class="vc-name">${d.r} <span>${d.navn}</span></span>
+      <span class="vc-kritisk">Over kritisk temperatur (T<sub>c</sub> = ${mbNum(d.tc,1)} °C) — ingen fordampning</span>
     </div>`).join('');
 
-  const T=`${vapT>0?'+':''}${vapT} °C`;
+  const T=`${vcT>0?'+':''}${vcT} °C`;
+  const n=document.getElementById('vcNote');
+  if(varm){
+    if(n) n.innerHTML = vcVarmNote() + `<br><span style="opacity:.75">Værdier ved mættet damp, ${T}. Beregnet med CoolProp
+      (samme tilstandsligninger som REFPROP). For blandingerne er T<sub>c</sub> blandingens kritiske punkt.</span>`;
+    return;
+  }
   const noter={
     kg:`Pr. <b>kilo</b> er forskellen enorm ved ${T}: ammoniak optager mange gange så meget varme som R134a.
         Det skyldes især, at molekylet er meget <b>let</b> (17 g/mol mod R134a's 102) — og
@@ -10951,7 +11063,6 @@ function drawVapChart(){
         og det er præcis derfor CO₂-anlæg kan bygges med små kompressorer. Modsat kræver <b>R600a</b> og
         <b>R600</b> store kompressorer til en beskeden ydelse.`
   };
-  const n=document.getElementById('vcNote');
   if(n) n.innerHTML = noter[vapUnit] + (vapUnit!=='m3'
       ? ' Skift til <b>kJ pr. m³</b> og se, hvad kompressoren egentlig mærker.'
       : '') + `<br><span style="opacity:.75">Værdier ved mættet damp, ${T}. Beregnet med CoolProp
