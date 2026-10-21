@@ -7825,8 +7825,9 @@ function showRefr(rcode){
         </div>`).join('');
   }
 
-  // GWP (log-skala, max ~11000)
-  const gwpPct = r.gwp<=1 ? 2 : Math.min(100, (Math.log10(r.gwp)/Math.log10(11000))*100);
+  // GWP (log-skala; loftet er den største GWP i listen, nu R23 = 14800, så ingen søjle klippes)
+  const gwpMax = Math.max(11000, ...REFR.map(x=>x.gwp));
+  const gwpPct = r.gwp<=1 ? 2 : Math.min(100, (Math.log10(r.gwp)/Math.log10(gwpMax))*100);
   document.getElementById('frGWPbar').style.width = gwpPct+'%';
   document.getElementById('frGWPval').textContent = r.gwp + ' kg CO₂-ækv.';
   document.getElementById('frGWPnote').textContent =
@@ -11195,7 +11196,7 @@ function drawVapChart(){
   const max=Math.max(...data.map(d=>d.v));
   const enhed = v => vapUnit==='kg' ? mbNum(v,0)+' kJ/kg'
                    : vapUnit==='mol' ? mbNum(v,1)+' kJ/mol'
-                   : mbNum(v,0)+' kJ/m³';
+                   : mbNum(v, v<10?1:0)+' kJ/m³';
   rows.innerHTML=data.map(d=>`
     <div class="vc-row">
       <span class="vc-name">${d.r} <span>${d.navn}</span></span>
@@ -13287,11 +13288,14 @@ function renderErstat(rcode){
           <span class="v">${mbNum(A.t2,0)} → <b>${mbNum(B.t2,0)}</b> °C</span>
           <span class="d ${rfKlasse(dt,5,18)}">${rfPil(dt)} ${mbNum(Math.abs(dt),0)} K</span></div>`;
     }
-    const o1=KOEL_OLIE[rcode]||'–', o2=KOEL_OLIE[ny]||'–';
-    const olieOk = o2===o1 || o2.includes(o1);
-    raekker+=`<div class="rf-row"><span class="k">Smøreolie</span>
+    /* uden olie-post (fx R170 og R1150) vises ingen olie-række — ellers ville den gætte "skal skiftes" */
+    const o1=KOEL_OLIE[rcode], o2=KOEL_OLIE[ny];
+    if(o1 && o2){
+      const olieOk = o2===o1 || o2.includes(o1);
+      raekker+=`<div class="rf-row"><span class="k">Smøreolie</span>
         <span class="v">${o1} → <b>${o2}</b></span>
         <span class="d ${olieOk?'ok':'mid'}">${o2===o1?'uændret':olieOk?'kan blive siddende':'skal skiftes'}</span></div>`;
+    }
     const gNy = KOEL_GLID[ny]||0;
     const gTxt = !nr.blend  ? 'rent stof — intet glid'
                : gNy<0.2    ? 'azeotrop — opfører sig som ét stof'
@@ -13306,7 +13310,9 @@ function renderErstat(rcode){
         <span class="d ${nr.safety===r.safety?'ok':nr.safety.includes('3')||nr.safety.startsWith('B')?'lav':'mid'}">${nr.safety===r.safety?'uændret':'nye krav'}</span></div>`;
 
     const [lbl,kl]=ERSTAT_TYPE[type];
-    const forbehold = ny==='R744'
+    /* forbeholdene handler om COP og kapacitet — kun når tallene faktisk vises */
+    const forbehold = !(A&&B) ? ''
+      : ny==='R744'
       ? `<p class="rf-obs"><b>Om tallene:</b> sammenligningen sker ved +30 °C kondensering, og det ligger
          lige under CO₂'s kritiske temperatur på 31 °C. Derfor ser COP'en her meget dårlig ud. I virkelige
          anlæg kører CO₂ enten <b>transkritisk</b> med gaskøler eller som <b>lavtrin i et kaskadeanlæg</b>,
@@ -15425,7 +15431,7 @@ const NYE_REFR4 = [
   {r:"R170", name:"Ethan", formula:"C2H6", type:"nat",
    atoms:{C:2,H:6}, gwp:6, odp:0, bp:-89, safety:"A3", ped:1,
    tags:[["Naturligt","safe"],["Brandbart","danger"],["Kaskade-lavtrin",""]],
-   desc:"Ethan er andet led i rækken methan, ethan, propan, butan — to carbon-atomer med en enkeltbinding, CH₃–CH₃. Kogepunktet er <b>−89 °C</b>, og det er netop det, der gør ethan nyttig: ved −80 °C er trykket stadig ca. 1,6 bar absolut — lidt over atmosfærens tryk — så kompressoren suger forholdsvis tæt damp i stedet for et tyndt vakuum. Derfor sidder ethan i <b>lavtrinnet i ULT-frysere</b> (ultralav temperatur, ned til ca. −86 °C) til fx vacciner og biologiske prøver, typisk med propan i højtrinnet. Ethan er i dag et af de oplagte alternativer til R23. Den kritiske temperatur er kun <b>32,2 °C</b>, så ethan kan ikke kondensere mod udeluften på en varm dag — også den hører hjemme i en kaskade. GWP 6 og ODP 0, men meget brandbar (A3)."},
+   desc:"Ethan er andet led i rækken methan, ethan, propan, butan — to carbon-atomer med en enkeltbinding, CH₃–CH₃. Kogepunktet er <b>−89 °C</b>, og det er netop det, der gør ethan nyttig: ved −80 °C er trykket stadig ca. 1,6 bar absolut — lidt over atmosfærens tryk — så kompressoren suger forholdsvis tæt damp i stedet for tynd damp i dybt vakuum. Derfor sidder ethan i <b>lavtrinnet i ULT-frysere</b> (ultralav temperatur, ned til ca. −86 °C) til fx vacciner og biologiske prøver, typisk med propan i højtrinnet. Ethan er i dag et af de oplagte alternativer til R23. Den kritiske temperatur er kun <b>32,2 °C</b>, så ethan kan ikke kondensere mod udeluften på en varm dag — også den hører hjemme i en kaskade. GWP 6 og ODP 0, men meget brandbar (A3)."},
   {r:"R1150", name:"Ethylen (ethen)", formula:"C2H4", type:"nat",
    atoms:{C:2,H:4}, gwp:4, odp:0, bp:-104, safety:"A3", ped:1,
    tags:[["Naturligt","safe"],["Brandbart","danger"],["Kun i kaskade",""]],
