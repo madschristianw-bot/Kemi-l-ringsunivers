@@ -11153,6 +11153,8 @@ function vcKondNote(){
     else if(kant.length) s+=` ${kant[0]} er kun ${dK(kant[0])} fra sin T<sub>c</sub> og har ${H(kant[0])} tilbage.`;
     if(ok('R717')) s+=` Store varmepumper til fjernvarme kører derfor ofte med <b>ammoniak</b>: T<sub>c</sub> ligger på
         ${mbNum(VAP_TC.R717,1)}&nbsp;°C, og ved ${Tg(t)} har den stadig ${H('R717')}. Andre kører med CO₂ — transkritisk, med gaskøler.`;
+    if(ok('R1234ze(E)')) s+=` Og der findes også store varmepumper med HFO'en <b>R1234ze(E)</b>: T<sub>c</sub> ligger på
+        ${mbNum(VAP_TC['R1234ze(E)'],1)}&nbsp;°C, og ved ${Tg(t)} har den stadig ${H('R1234ze(E)')}.`;
   }
 
   if(vapUnit==='mol'){
@@ -15590,6 +15592,89 @@ Object.assign(ERSTAT, {
 MB_DB.C2H6.r = 'R170';
 MB_DB.C2H4.r = 'R1150';
 
+/* ---- R1234ze(E): trans-1,3,3,3-tetrafluorprop-1-en, CF₃–CH=CHF — en isomer af R1234yf ----
+   HFO til chillere og varmepumper. GWP er AR4 som resten af listen: 7 i F-gasforordningen 517/2014,
+   bilag II, afsnit 1 ("HFC-1234ze, trans", samme tabel som R1234yf = 4). AR5 sætter den under 1, AR6 til 1,37.
+   ASHRAE 34: A2L — ASHRAE prøver brandbarheden ved 60 °C, og dér brænder den svagt. PED-gruppe 2: EU's
+   regler (CLP) prøver ved 20 °C, og dér har den intet brandbart område i luft — leverandørernes
+   sikkerhedsdatablade klassificerer den kun som gas under tryk (H280). Derfor både A2L og gruppe 2.
+   Data beregnet med CoolProp 8.0 på samme måde som R1234yf, der med samme metode genskabes tal for tal
+   (HEOS::R1234ze(E), Thol & Lemmon 2016):
+     R1234ze(E)  M 114,04 · Tc 109,36 °C · pc 36,35 bar · tripelpunkt −104,5 °C · normalt kogepunkt −19,0 °C
+   Tc 109,4 °C: ægte værdier ved +60/+70/+80/+100 °C og null (over Tc) ved +200/+300 °C. Tripelpunktet ligger
+   under −90 °C, så der er også ægte værdier ved −90 og −50 °C — i dybt vakuum (0,0102 og 0,209 bar).
+   Under −19 °C står fordamperen i vakuum: 0,97 bar ved −20 °C og 0,61 bar ved −30 °C.
+   p med 3 decimaler som de andre nyere rene stoffer. PH med IIR-reference (mættet væske 0 °C = 200 kJ/kg).
+   Samme formel som R1234yf (C₃H₂F₄): halo3D/flatHalo giver R1234yf for alle C₃H₂F₄, så strukturen slås
+   op på r.r — ellers tegnede kortet den forkerte isomer. */
+Object.assign(STRUCT, {
+  "R1234ze(E)":{
+    el:['C','F','F','F','C','H','C','F','H'],
+    b:[[0,1],[0,2],[0,3],[0,4],[4,5],[4,6,2,'E'],[6,7],[6,8]],
+    /* R1234yf-skelettet med F og H byttet om på C=C: 0 = CF₃-carbonet, 4 = det midterste (=CH–),
+       6 = carbonet for enden (=CHF). C=C 1,34 Å, C–C 1,50 Å, C–F 1,34–1,35 Å, C–H 1,08–1,09 Å,
+       120° omkring C=C. CF₃-carbonet ligger under C=C-aksen og F (7) over: hver sin side = E. */
+    p3:[[-0.83,-0.72,0],[0.04,-1.74,0],[-1.60,-0.79,1.09],[-1.60,-0.79,-1.09],
+        [-0.08,0.58,0],[-0.628,1.523,0],[1.26,0.58,0],[1.938,1.747,0],[1.80,-0.36,0]],
+    angle:"120° ved dobbeltbindingen · 109,5° ved CF₃"
+  }
+});
+/* 3D har faste koordinater. I 2D (structFlat) tager mbRelax ikke hensyn til E/Z, så tegningen tjekkes:
+   ligger CF₃-carbonet (0) og F (7) på samme side af C=C-linjen (4–6), spejles F og H på carbonet for
+   enden over linjen. */
+(function(){
+  const g3=geom3D, f2=flat2D, ZE='R1234ze(E)';
+  function fladE(){
+    const g=structFlat(ZE), a=g.atoms, A=a[4], B=a[6];
+    const dx=B.x-A.x, dy=B.y-A.y, L2=dx*dx+dy*dy;
+    const side=q=>Math.sign(dx*(q.y-A.y)-dy*(q.x-A.x));
+    if(side(a[0])===side(a[7])) [7,8].forEach(i=>{
+      const q=a[i], t=((q.x-A.x)*dx+(q.y-A.y)*dy)/L2;
+      q.x=2*(A.x+t*dx)-q.x; q.y=2*(A.y+t*dy)-q.y;
+    });
+    return g;
+  }
+  geom3D = r => (r && r.r===ZE) ? structGeom(ZE) : g3(r);
+  flat2D = r => (r && r.r===ZE) ? fladE() : f2(r);
+})();
+
+const NYE_REFR5 = [
+  {r:"R1234ze(E)", name:"HFO — trans-tetrafluorpropen", formula:"C3H2F4", type:"hfo",
+   atoms:{C:3,H:2,F:4}, gwp:7, odp:0, bp:-19, safety:"A2L", ped:2,
+   tags:[["HFO (ny generation)","safe"],["Svagt brandbart","danger"],["Isomer af R1234yf",""]],
+   desc:"En isomer af R1234yf: samme atomer, C₃H₂F₄, og samme <b>dobbeltbinding</b> — men det fluor-atom, der ikke sidder i CF₃-gruppen, er flyttet fra det midterste carbon ud på carbonet for enden. R1234yf er CF₃–CF=CH₂, R1234ze(E) er <b>CF₃–CH=CHF</b>. (E) betyder, at F og CF₃ sidder på <b>hver sin side</b> af dobbeltbindingen, som ikke kan drejes. Det lille skift giver et andet stof: kogepunktet er <b>−19 °C</b> mod R1234yf's −29 °C, og den kritiske temperatur er 109 °C mod 95 °C. Hvor R1234yf næsten svarer til R134a, ligger trykket og den volumetriske køleydelse for R1234ze(E) ca. en fjerdedel under R134a's. Den er derfor ikke et drop-in: kompressoren skal være ca. en tredjedel større. Virkningsgraden (COP) er til gengæld næsten den samme. R1234ze(E) bruges især i <b>store chillere</b> med skrue- eller turbokompressor og i <b>varmepumper</b> — også store varmepumper til fjernvarme. Under −19 °C står fordamperen i vakuum, så den hører ikke hjemme i frostanlæg. GWP er 7 (nyere opgørelser sætter den omkring 1), for molekylet nedbrydes i atmosfæren på et par uger. Brandbarheden er et grænsetilfælde: ved stuetemperatur kan R1234ze(E) ikke antændes i luft, men ved 60 °C — den temperatur, ASHRAE 34 prøver ved — kan den. Derfor er den <b>A2L</b>. EU's regler for brandbare gasser prøver derimod ved 20 °C, og dér regnes den ikke som brandbar — så den hører til <b>PED-gruppe 2</b>."}
+];
+/* lige efter R1234yf */
+(function(){
+  const i = REFR.findIndex(r=>r.r==='R1234yf');
+  REFR.splice(i<0?REFR.length:i+1, 0, ...NYE_REFR5);
+})();
+
+Object.assign(VAPT, {"R1234ze(E)":[[201.8,0.2818,0.611],[196.2,0.1828,0.969],[190.3,0.123,1.474],[184.2,0.08537,2.166],[177.6,0.06079,3.084],[170.6,0.04423,4.273],[163.1,0.03276,5.783]]});
+Object.assign(VAP_TC, {"R1234ze(E)":109.4});
+Object.assign(VAPT_VARM, {"R1234ze(E)":[[135.5,0.01427,12.766],[123.8,0.01092,16.11],[110.2,0.008318,20.077],[70.4,0.004444,30.26],null,null]});
+Object.assign(VAPT_KOLD, {"R1234ze(E)":[[234.0,13.09,0.01019],[212.6,0.7676,0.2092]]});
+/* pol og f som R1234yf: målt dipolmoment ca. 1,1 D mod R1234yf's ca. 2,2 D (Sampson m.fl. 2019) — polært,
+   men svagere, fordi C–F og CF₃ peger hver sin vej i trans-formen. (Molekyle-byggerens simple vektor-regel
+   ville give ca. 0 for E-formen; byggeren kender ikke C₃H₂F₄, så de to kommer ikke til at modsige hinanden.) */
+Object.assign(VAP, {
+  "R1234ze(E)":{M:114.04, h:184, pol:2, f:['d','l'],
+         note:"Samme molmasse som R1234yf — de to er isomerer — men fordampningsvarmen er ca. 20 kJ/kg højere, og dampen er tyndere, fordi trykket er lavere. Pr. m³ indsuget damp optager R1234ze(E) ca. en fjerdedel mindre varme end R134a, så kompressoren skal være tilsvarende større. Under ca. −19 °C står fordamperen i vakuum."}
+});
+Object.assign(PH, {"R1234ze(E)":{"Tc":109.4,"dome":[[0.2793,142.4,352.4],[0.3122,144.9,353.8],[0.3692,148.8,356.0],[0.4484,153.4,358.7],[0.5533,158.7,361.6],[0.6894,164.5,364.9],[0.8638,170.7,368.4],[1.085,177.3,372.0],[1.3633,184.4,375.9],[1.7106,191.8,379.9],[2.1408,199.6,384.0],[2.6699,207.7,388.1],[3.316,216.2,392.4],[4.0995,225.1,396.7],[5.0433,234.3,401.0],[6.173,244.0,405.2],[7.5169,254.0,409.4],[9.1065,264.4,413.4],[10.9768,275.4,417.3],[13.1664,286.8,420.9],[15.7187,298.8,424.0],[18.6829,311.5,426.5],[22.1159,325.2,428.2],[26.0864,340.1,428.4],[30.685,357.2,425.5],[36.0635,384.5,408.5]],"cyc":{"-30|20":[363.1,398.7,226.9,0.28176,0.611,4.273,[371.6,380.4,389.5],21.2,58.2],"-30|30":[363.1,404.4,240.8,0.28176,0.611,5.783,[373.0,383.2,393.7],30.6,72.0],"-30|40":[363.1,409.8,255.0,0.28176,0.611,7.665,[374.2,385.8,397.8],40.0,85.0],"-30|50":[363.1,414.7,269.6,0.28176,0.611,9.972,[375.4,388.3,401.5],50.0,97.1],"-20|20":[370.2,397.6,226.9,0.18282,0.969,4.273,[376.9,383.7,390.6],20.0,48.5],"-20|30":[370.2,403.3,240.8,0.18282,0.969,5.783,[378.2,386.5,394.8],30.0,62.6],"-20|40":[370.2,408.6,255.0,0.18282,0.969,7.665,[379.5,389.1,398.8],40.0,75.8],"-20|50":[370.2,413.5,269.6,0.18282,0.969,9.972,[380.7,391.6,402.6],50.0,88.2],"-10|20":[377.2,397.0,226.9,0.12302,1.474,4.273,[382.1,387.0,392.0],20.0,40.1],"-10|30":[377.2,402.7,240.8,0.12302,1.474,5.783,[383.5,389.9,396.3],30.0,54.4],"-10|40":[377.2,408.0,255.0,0.12302,1.474,7.665,[384.8,392.5,400.3],40.0,67.9],"-10|50":[377.2,412.9,269.6,0.12302,1.474,9.972,[386.0,395.0,404.0],50.0,80.5],"0|20":[384.2,396.9,226.9,0.08537,2.166,4.273,[387.3,390.5,393.7],20.0,32.6],"0|30":[384.2,402.6,240.8,0.08537,2.166,5.783,[388.7,393.3,398.0],30.0,47.2],"0|40":[384.2,407.9,255.0,0.08537,2.166,7.665,[390.1,396.0,401.9],40.0,60.9],"0|50":[384.2,412.7,269.6,0.08537,2.166,9.972,[391.3,398.5,405.6],50.0,73.8],"10|20":[391.0,397.1,226.9,0.06079,3.084,4.273,[392.5,394.0,395.6],20.0,26.0],"10|30":[391.0,402.8,240.8,0.06079,3.084,5.783,[393.9,396.9,399.8],30.0,40.8],"10|40":[391.0,408.1,255.0,0.06079,3.084,7.665,[395.2,399.5,403.8],40.0,54.8],"10|50":[391.0,413.0,269.6,0.06079,3.084,9.972,[396.5,402.0,407.5],50.0,67.9],"20|30":[397.5,403.2,240.8,0.04423,4.273,5.783,[399.0,400.4,401.8],30.0,35.1],"20|40":[397.5,408.5,255.0,0.04423,4.273,7.665,[400.3,403.0,405.8],40.0,49.3],"20|50":[397.5,413.4,269.6,0.04423,4.273,9.972,[401.5,405.5,409.5],50.0,62.7],"30|40":[403.8,409.2,255.0,0.03276,5.783,7.665,[405.2,406.5,407.8],40.0,44.5],"30|50":[403.8,414.1,269.6,0.03276,5.783,9.972,[406.4,409.0,411.5],50.0,58.1]}}});
+/* olie som R1234yf. Rent stof — intet glid, så ingen post i KOEL_GLID, GLID_KURVE eller BLEND_KOMP. */
+Object.assign(KOEL_OLIE, {"R1234ze(E)":"POE"});
+
+/* også et alternativ til R134a (erstatnings-kortet er skjult, VIS_ERSTAT). Tallene ved −10/+30 °C:
+   q_v 1.516 → 1.109 kJ/m³ (−27 %), COP 5,41 → 5,35, p0 2,01 → 1,47 bar, pc 7,70 → 5,78 bar. */
+(function(){
+  const a=ERSTAT.R134a;
+  if(a){
+    const i=a.alt.findIndex(x=>x[0]==='R1234yf');
+    a.alt.splice(i<0?a.alt.length:i+1, 0, ["R1234ze(E)","nyt","En isomer af R1234yf, med GWP 7. COP'en er næsten som med R134a, men trykket og den volumetriske ydelse er ca. en fjerdedel lavere — kompressoren skal være større, så det er ikke et drop-in. Bruges især i nye store chillere og varmepumper. A2L: ved stuetemperatur kan den ikke antændes, men anlægget skal alligevel bygges til et svagt brandbart kølemiddel."]);
+  }
+})();
+
 /* ============================================================
    H LOG P — kølemiddel-sammenligneren indlejret i sin egen ramme,
    så dens CSS og JS ikke blandes sammen med resten af siden.
@@ -19246,7 +19331,7 @@ const RNR_BLAND = {
   '407C':{dele:'R32 23 % · R125 25 % · R134a 52 %'},
   '407F':{dele:'R32 30 % · R125 30 % · R134a 40 %'},
   '410A':{dele:'R32 50 % · R125 50 %'},
-  '448A':{dele:'R32 26 % · R125 26 % · R1234yf 20 % · R134a 21 % · R1234ze 7 %'},
+  '448A':{dele:'R32 26 % · R125 26 % · R1234yf 20 % · R134a 21 % · R1234ze(E) 7 %'},
   '449A':{dele:'R32 24,3 % · R125 24,7 % · R1234yf 25,3 % · R134a 25,7 %'},
   '452A':{dele:'R32 11 % · R125 59 % · R1234yf 30 %'},
   '454B':{dele:'R32 68,9 % · R1234yf 31,1 %'},
@@ -19266,15 +19351,17 @@ const RNR_SERIE = [
   ['500', 'Azeotrope blandinger','Blandinger, der opfører sig som ét rent stof. R500, R502, R507A.'],
   ['600', 'Øvrige organiske',   'Butan, pentan, ether, aminer. R600a er isobutan.'],
   ['700', 'Uorganiske',         'De to sidste cifre er molmassen. R717 ammoniak (17), R718 vand (18), R744 CO₂ (44).'],
-  ['1000','Umættede',           'Har en dobbeltbinding. Det ekstra ciffer foran siger hvor mange. R1150 ethen, R1270 propen og R1234yf.']
+  ['1000','Umættede',           'Har en dobbeltbinding. Det ekstra ciffer foran siger hvor mange. R1150 ethen, R1270 propen, R1234yf og R1234ze(E).']
 ];
 
 /* ---------- selve aflæsningen ---------- */
 function rnrLaes(raa){
   /* (E) og (Z) staar paa flasken, men de er en oplysning om formen,
-     ikke en del af nummeret - de skaeres fra, saa R1234ze(E) kan laeses */
-  const s = String(raa || '').trim().toUpperCase().replace(/^R[-–\s]?/, '')
-              .replace(/\s+/g, '').replace(/\((?:E|Z)\)$/, '');
+     ikke en del af nummeret - de skaeres fra, saa R1234ze(E) kan laeses.
+     Bogstavet huskes dog: det faar sit eget trin, og modellen tegnes efter det */
+  const u = String(raa || '').trim().toUpperCase().replace(/^R[-–\s]?/, '').replace(/\s+/g, '');
+  const ez = (u.match(/\((E|Z)\)$/) || [])[1] || null;
+  const s = u.replace(/\((?:E|Z)\)$/, '');
   if(!s) return {fejl:'Skriv et R-nummer — fx R134a, R410A eller R717.'};
   /* endelsen kan være to bogstaver — yf, ze, zd på de umættede */
   const m = s.match(/^(C?)(\d{1,4})([A-Z]{0,3}\d?)$/);
@@ -19399,8 +19486,24 @@ function rnrLaes(raa){
     const s2 = suf.toLowerCase();
     ud.trin.push(['Bogstavet', s2,
       C === 3 || (dobbelt && C !== 2)
-        ? 'To bogstaver bruges på propan-rækken og de umættede: det første siger, hvad der sidder på det <b>midterste</b> carbon. På propanerne siger det andet, hvor skævt enderne er; på de umættede, hvad der sidder på carbonet for enden af dobbeltbindingen (yf: F i midten, =CH₂ for enden). Samme formel, anden struktur.'
+        ? 'To bogstaver bruges på propan-rækken og de umættede: det første siger, hvad der sidder på det <b>midterste</b> carbon. På propanerne siger det andet, hvor skævt enderne er; på de umættede, hvad der sidder på carbonet for enden af dobbeltbindingen (yf: F i midten, =CH₂ for enden · ze: H i midten, =CHF for enden). Samme formel, anden struktur.'
         : 'Samme formel, anden struktur — en <b>isomer</b>. Uden bogstav er molekylet mest symmetrisk; a, b, c er stigende skævhed. R134 er CHF₂–CHF₂, R134a er CF₃–CH₂F.']);
+  }
+
+  /* (E)/(Z) - kun paa de stoffer, hvis form om dobbeltbindingen staar i RNR_MOL */
+  const fastEZ = RNR_MOL[ud.nr] && RNR_MOL[ud.nr].ez;
+  const ze = ud.nr === 'R1234ze';
+  if(dobbelt && fastEZ && ez){
+    ud.ez = ez;
+    ud.trin.push(['Bogstavet i parentes', '(' + ez + ')' + (ze ? (ez === 'E' ? ' — trans' : ' — cis') : ''),
+      'Er <b>ikke</b> en del af selve nummeret. Den fortæller, hvordan molekylet ligger omkring dobbeltbindingen, ' +
+      'der ikke kan drejes. På hvert af de to carbon i dobbeltbindingen ser man på det af de to andre atomer, ' +
+      'der har det højeste atomnummer' + (ze ? ' — i R1234ze er det F på det ene og C’et i CF₃ på det andet' : '') + '. ' +
+      '<b>E</b> (tysk <i>entgegen</i>, modsat): de sidder på <b>hver sin side</b>. <b>Z</b> (<i>zusammen</i>, sammen): ' +
+      'de sidder på samme side. E og Z er to forskellige stoffer' +
+      (ze ? ' — R1234ze(E) koger ved −19 °C, R1234ze(Z) først ved ca. +10 °C.' : ' med hvert sit kogepunkt.')]);
+  } else if(dobbelt && ze && !ez){
+    ud.bem = 'Står der bare R1234ze på flasken, er det næsten altid E-formen, R1234ze(E) — det er den, der bruges som kølemiddel, og den, modellen viser.';
   }
   return ud;
 }
@@ -19714,10 +19817,11 @@ function rnrStruktur(r){
 
   const fast = RNR_MOL[r.nr];
   if(fast){
-    const m = rnrSpec(fast.s);
-    /* E/Z hænges på dobbeltbindingen, så mbRelax lægger den trans eller cis */
-    if(fast.ez) m.bind.forEach(bd => { if(bd[2] === 2) bd[3] = fast.ez; });
-    return {el:m.el, bind:m.bind, navn:fast.n, sikker:true};
+    const m = rnrSpec(fast.s), ez = r.ez || fast.ez;
+    /* E/Z hænges på dobbeltbindingen, så mbRelax lægger den trans eller cis.
+       Står der (E) eller (Z) efter nummeret, er det dén, der tegnes — ellers den i tabellen */
+    if(ez) m.bind.forEach(bd => { if(bd[2] === 2) bd[3] = ez; });
+    return {el:m.el, bind:m.bind, navn:(r.ez ? '(' + r.ez + ')-' : '') + fast.n, sikker:true};
   }
   if(!r.antal || !r.antal.C) return null;
 
@@ -19943,7 +20047,7 @@ function rnr3dVis(r, st){
   /* en blanding er ikke ét molekyle — så vises delene i stedet */
   if(st && st.blanding){
     rnr3dRyd();
-    const dele = (r.dele || '').match(/R\d+[A-Za-z]*/g) || [];
+    const dele = (r.dele || '').match(/R\d+[A-Za-z]*(?:\([EZ]\))?/g) || [];
     navn.innerHTML = '<b>' + rnrEsc(r.nr) + '</b><span>er en blanding — ikke ét molekyle</span>';
     iso.innerHTML = dele.map(d =>
       '<button class="mb-task" onclick="rnrSaet(\'' + d + '\')">' + d + '</button>').join('');
@@ -19958,7 +20062,8 @@ function rnr3dVis(r, st){
     return;
   }
 
-  navn.innerHTML = '<b>' + rnrEsc(r.nr) + '</b>' +
+  const nrVis = r.nr + (r.ez ? '(' + r.ez + ')' : '');     /* R1234ze(E) og R1234ze(Z) er to modeller */
+  navn.innerHTML = '<b>' + rnrEsc(nrVis) + '</b>' +
     (st.navn ? '<span>' + rnrEsc(st.navn) + '</span>' : '');
   iso.innerHTML = (st.soeskende || []).map(s =>
     '<button class="mb-task' + (s.valgt ? ' on' : '') + '" onclick="rnrSaet(\'' + s.nr + '\')">' +
@@ -19967,7 +20072,7 @@ function rnr3dVis(r, st){
     ? 'Træk i modellen for at dreje den.'
     : 'Uden det rigtige bogstav ved man ikke, hvilken isomer det er — her vises den mest symmetriske form.';
 
-  if(RNR3D.nr === r.nr && RNR3D.v){ rnr3dFarv(); return; }
+  if(RNR3D.nr === nrVis && RNR3D.v){ rnr3dFarv(); return; }
   rnr3dRyd();
   const bred = vaert.clientWidth || 0;
   if(bred < 60) return;            /* panelet er skjult — vi prøver igen, når det vises */
@@ -19980,7 +20085,7 @@ function rnr3dVis(r, st){
     {atoms: st.el.map((e,i) => ({el:e, p:p[i]})),
      bonds: st.bind.map(b => [b[0], b[1], b[2] === 3 ? 3 : (b[2] === 2 ? true : 0)])},
     {w:w, h:h, scale:(Math.min(w,h)/2 - 10)/(R + 0.7)});
-  RNR3D.nr = r.nr;
+  RNR3D.nr = nrVis;
   /* den fælles drejesløjfe kører først, når noget har startet den */
   if(typeof _raf !== 'undefined' && !_raf && typeof animateViewers === 'function')
     _raf = requestAnimationFrame(animateViewers);
@@ -20015,12 +20120,14 @@ function rnrTegn(){
   const formel = r.vis || rnrFormel(r.atomer);
   const M  = r.M != null ? r.M : rnrMolmasse(r.atomer);
   const gr = rnrGruppe(r.atomer, !!r.dobbelt);
+  /* R1234ze(E) står i kølemiddel-listen med parentesen; R1234ze(Z) er et andet stof og findes ikke dér */
+  const nrVis = r.nr + (r.ez ? '(' + r.ez + ')' : '');
   const kendt = (typeof REFR !== 'undefined')
-    ? REFR.find(x => x.r.toLowerCase() === r.nr.toLowerCase()) : null;
+    ? REFR.find(x => x.r.toLowerCase() === nrVis.toLowerCase()) : null;
   const st = rnrStruktur(r);
 
   /* ---- klammen: hvert tegn ud til sin egen betydning ---- */
-  let h = '<div class="rnr-hoved"><span class="rnr-nr">' + rnrEsc(r.nr) + '</span>' +
+  let h = '<div class="rnr-hoved"><span class="rnr-nr">' + rnrEsc(nrVis) + '</span>' +
     (r.navn ? '<span class="rnr-navn">' + rnrEsc(r.navn) + '</span>' : '') +
     (kendt && !r.navn ? '<span class="rnr-navn">' + rnrEsc(kendt.name) + '</span>' : '') +
     '<span class="rnr-art">' + rnrEsc(r.art || '') + '</span></div>';
@@ -20179,7 +20286,7 @@ function initRnr(){
   const rk = document.getElementById('rnrHurtig');
   if(rk && !rk.children.length){
     rk.innerHTML = ['R12','R22','R32','R134','R134a','R290','R410A','R513A','R600a','R717','R744',
-                    'R1234yf','R13B1','RC318','R218']
+                    'R1234yf','R1234ze(E)','R13B1','RC318','R218']
       .map(x => `<button class="mb-task" data-r="${x}" onclick="rnrSaet('${x}')">${x}</button>`).join('');
   }
   const st = document.getElementById('rnrSerier');
@@ -29606,12 +29713,12 @@ QZ.push(
  e:"Kobber — ammoniak angriber det. Derfor bygges ammoniak-anlæg i sortstål, og derfor kan en almindelig kobberloddet komponent ikke bare flyttes over på et R717-anlæg. Kemien bestemmer materialevalget."},
 {t:'koel',d:2,k:'koel-identitet',type:'sorter',q:"Sortér kølemidlerne efter gruppe: naturligt, HFC eller HFO?",
  kasser:['Naturligt','HFC','HFO'],
- brikker:[['R290 propan',0],['R717 ammoniak',0],['R744 CO₂',0],['R134a',1],['R32',1],['R404A',1],['R1234yf',2]],
- e:"De naturlige findes i naturen og har GWP på 0–3. HFC'erne er syntetiske, klorfri og har GWP i hundredvis til tusindvis. HFO'erne har en dobbeltbinding, der gør, at de nedbrydes på uger — derfor GWP under 5."},
+ brikker:[['R290 propan',0],['R717 ammoniak',0],['R744 CO₂',0],['R134a',1],['R32',1],['R404A',1],['R1234yf',2],['R1234ze(E)',2]],
+ e:"De naturlige findes i naturen og har GWP på 0–3. HFC'erne er syntetiske, klorfri og har GWP i hundredvis til tusindvis. HFO'erne har en dobbeltbinding, der gør, at de nedbrydes på uger — derfor GWP under 10."},
 {t:'koel',d:3,k:'koel-sikkerhed',type:'sorter',q:"Sortér kølemidlerne efter sikkerhedsgruppe.",
  kasser:['A1','A2L','A3','B2L'],
- brikker:[['R134a',0],['R744 CO₂',0],['R404A',0],['R32',1],['R1234yf',1],['R290 propan',2],['R600a isobutan',2],['R717 ammoniak',3]],
- e:"Bogstavet er giftighed (A lav, B høj), tallet brandbarhed (1 ingen, 2L svag, 3 høj). A1 er sikrest. Ammoniak er den eneste B her — giftig, men kun svagt brandbar."},
+ brikker:[['R134a',0],['R744 CO₂',0],['R404A',0],['R32',1],['R1234yf',1],['R1234ze(E)',1],['R290 propan',2],['R600a isobutan',2],['R717 ammoniak',3]],
+ e:"Bogstavet er giftighed (A lav, B høj), tallet brandbarhed (1 ingen, 2L svag, 3 høj). A1 er sikrest. Ammoniak er den eneste B her — giftig, men kun svagt brandbar. R1234ze(E) er et grænsetilfælde: ved stuetemperatur kan den ikke antændes, men ved 60 °C, som klassificeringen prøver ved, kan den — derfor er den ikke A1, men A2L."},
 {t:'koel',d:3,k:'koel-egenskaber',type:'sorter',q:"Sortér blandingerne: azeotrop (intet glid) eller zeotrop (temperaturglid)?",
  kasser:['Azeotrop — opfører sig som ét stof','Zeotrop — koger over et interval'],
  brikker:[['R507A',0],['R513A',0],['R407A',1],['R407F',1],['R449A',1],['R452A',1],['R454B',1],['R455A',1]],
