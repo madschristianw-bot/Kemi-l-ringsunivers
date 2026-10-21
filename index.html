@@ -16221,7 +16221,7 @@ let olieAnim={raf:0, mol:[], W:0, H:0};
 function olieSaetKM(k){ olieKM=k; olieValg=OLIE_KM[k].std; renderOlie(); }
 function olieSaetOlie(o){ olieValg=o; renderOlie(); }
 function olieSaet3D(v){ olie3D=v; renderOlie(); }
-function olieSaetVand(v){ olieVand=+v; tegnHydro(); }
+function olieSaetVand(v){ olieVand=+v; olieVandVis(); }
 function olieSaetGlasT(v){
   const foer=olieGlasT; olieGlasT=+v;
   const e=document.getElementById('olieGlasTval');
@@ -16529,14 +16529,6 @@ function tegnHydro(){
       <br><br>Vælg <b>POE</b> for at se, hvad vand gør ved en ester-olie.</div>`;
     return;
   }
-  const ppm=olieVand;
-  const niv = ppm<=50?0 : ppm<=100?1 : ppm<=300?2 : 3;
-  const NIV=[["Tørt anlæg","ok","Under 50 ppm — som en nyfyldt olie skal være."],
-             ["Acceptabelt","ok","Op til ca. 100 ppm. Tørrefilteret arbejder, men holder trit."],
-             ["Begyndende nedbrydning","mid","Syretallet stiger. Skift tørrefilter og tag en olieprøve."],
-             ["Kritisk","lav", olieKM==='R717'
-               ? "Olien nedbrydes hurtigt, og syren bliver til slam med ammoniakken — anlægget skal renses."
-               : "Olien nedbrydes hurtigt. Syren angriber lak og kobber — anlægget skal renses."]][niv];
   const frag=(el,b,g)=>{ const f=fyldBrint(el,b); return olieMolSVG(f.el,f.b,g||[], '#c8b273'); };
   host.innerHTML=`
     <div class="ol-reak">
@@ -16551,10 +16543,10 @@ function tegnHydro(){
       <div class="ol-rb"><div class="ol-rt">Alkohol</div>${frag(['C','C','O','H'],[[0,1],[1,2],[2,3]])}</div>
     </div>
     <div class="ol-styr" style="margin-top:14px">
-      <label style="flex:1">Vand i olien <b>${ppm} ppm</b>
-        <input type="range" min="0" max="600" step="10" value="${ppm}" oninput="olieSaetVand(this.value)"></label>
+      <label style="flex:1">Vand i olien <b></b>
+        <input type="range" min="0" max="600" step="10" value="${olieVand}" oninput="olieSaetVand(this.value)"></label>
     </div>
-    <div class="ol-bl ${NIV[1]}"><b>${NIV[0]}</b> — ${NIV[2]}</div>
+    <div class="ol-bl"></div>
     <p class="ol-txt">Vand spalter ester-bindingen og efterlader en <b>carboxylsyre</b> og en <b>alkohol</b>.
       Reaktionen er den omvendte af den, olien blev fremstillet ved. Syren måles som <b>syretal (TAN)</b>,
       og konsekvenserne kommer i denne rækkefølge:</p>
@@ -16574,6 +16566,28 @@ function tegnHydro(){
     <div class="ol-kerne"><b>DERFOR:</b> POE optager vand mange gange hurtigere end mineralsk olie.
       Dunken må kun stå åben få minutter, anlægget skal vakuumeres, og der skal <b>tørrefilter</b> i.
       Grænseværdierne står i <b>DIN 51503-2</b>.</div>`;
+  olieVandVis();
+}
+
+/* kun det, der afhænger af vandindholdet: tallet og niveau-boksen.
+   Skyderen selv må ikke skiftes ud midt i et træk */
+function olieVandVis(){
+  const styr=document.querySelector('#olieHydro .ol-styr');
+  if(!styr) return;   // ikke POE: ingen skyder
+  const ppm=olieVand;
+  const niv = ppm<=50?0 : ppm<=100?1 : ppm<=300?2 : 3;
+  const NIV=[["Tørt anlæg","ok","Under 50 ppm — som en nyfyldt olie skal være."],
+             ["Acceptabelt","ok","Op til ca. 100 ppm. Tørrefilteret arbejder, men holder trit."],
+             ["Begyndende nedbrydning","mid","Syretallet stiger. Skift tørrefilter og tag en olieprøve."],
+             ["Kritisk","lav", olieKM==='R717'
+               ? "Olien nedbrydes hurtigt, og syren bliver til slam med ammoniakken — anlægget skal renses."
+               : "Olien nedbrydes hurtigt. Syren angriber lak og kobber — anlægget skal renses."]][niv];
+  const inp=styr.querySelector('input');
+  if(+inp.value!==ppm) inp.value=ppm;
+  styr.querySelector('b').textContent=ppm+' ppm';
+  const boks=styr.nextElementSibling;
+  boks.className='ol-bl '+NIV[1];
+  boks.innerHTML=`<b>${NIV[0]}</b> — ${NIV[2]}`;
 }
 
 function renderOlie(){
