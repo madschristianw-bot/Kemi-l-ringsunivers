@@ -16364,18 +16364,21 @@ function olieOpdaterStatus(){
   if(!e) return;
   const M=olieAnim.mol||[];
   if(!olieAnim.reagerer){ e.innerHTML=''; return; }
+  // boksen bygges om — står fokus på Forfra, skal det blive der
+  const fokus=e.contains(document.activeElement);
   const hele=M.filter(m=>m.erOlie&&!m.frag&&m.arme===4).length;
   const skadet=M.filter(m=>m.erOlie&&!m.frag&&m.arme!==null&&m.arme<4).length;
   const frag=M.filter(m=>m.frag).length;
   const nh3=M.filter(m=>!m.erOlie).length;
   e.innerHTML=`<div class="ol-status${frag?' skadet':''}">
-      <span><b>${hele}</b> hele</span><span><b>${skadet}</b> angrebet</span>
-      <span><b>${frag}</b> afklippede stumper</span><span><b>${nh3}</b> NH₃ tilbage</span>
+      <span>Hele: <b>${hele}</b></span><span>Angrebne: <b>${skadet}</b></span>
+      <span>Afklippede stumper: <b>${frag}</b></span><span>NH₃ tilbage: <b>${nh3}</b></span>
       <button class="btn" onclick="olieBeholder()">Forfra</button></div>
-    ${frag?`<p class="ol-status-txt">Hver gang et <b>NH₃</b> rammer en ester-arm, klippes den af.
+    <p class="ol-status-txt">Hver gang et <b>NH₃</b> rammer en ester-arm, klippes den af.
       Fedtsyren bliver til et <b>amid</b>, og tilbage sidder en fri <b>OH-gruppe</b>. Olien mister
       sin smøreevne.<br><br>Læg mærke til, at <b>ammoniakken også forsvinder</b> — nitrogenet i amidet
-      kommer fra NH₃. Anlægget taber både olie og kølemiddel.</p>`:''}`;
+      kommer fra NH₃. Anlægget taber både olie og kølemiddel.</p>`;
+  if(fokus){ const k=e.querySelector('.btn'); if(k) k.focus({preventScroll:true}); }
 }
 
 function olieStartAnim(){
