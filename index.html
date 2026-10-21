@@ -16233,8 +16233,8 @@ function olieSaetGlasT(v){
   const f2=v2.bl==='ingen' || (v2.bl==='delvis' && gab!==undefined && olieGlasT<gab);
   // over ca. 10 °C er flydende CO₂ lettere end olien — krydses grænsen, bytter lagene plads
   const n1=olieKM==='R744'&&foer>10, n2=olieKM==='R744'&&olieGlasT>10;
-  if(f1!==f2){ olieBeholder(); olieGlasStyr(); }
-  else if(f2 && n1!==n2) olieBeholder();
+  // kun beholderen bygges om — skyderen selv må ikke skiftes ud midt i et træk
+  if(f1!==f2 || (f2 && n1!==n2)) olieBeholder();
 }
 
 /* et molekyle tegnet som en gruppe, der kan flyttes og drejes */
@@ -16312,6 +16312,8 @@ function olieBeholder(){
     kmNavn:km.navn, olNavn:ol.kort, klip:0,
     nyGeom:(el,b,ring,aro)=>{const f=fyldBrint(el,b,ring,aro);
                              return olieMolGruppe(f.el,f.b,skala,null,f.ring);}});
+  // ny beholder: tælleren starter forfra — og forsvinder, hvis intet reagerer
+  olieOpdaterStatus();
   olieStartAnim();
 }
 
@@ -16407,7 +16409,8 @@ function olieStartAnim(){
   let sidst=0;
   const skridt=t=>{
     const g=document.getElementById('olieMolG');
-    if(!g || !document.body.contains(g)){ olieAnim.raf=0; return; }
+    // skjult fane eller afsnit: stop — beholderen bygges forfra, når den vises igen
+    if(!g || !document.body.contains(g) || !g.ownerSVGElement.getClientRects().length){ olieAnim.raf=0; return; }
     const dt=sidst?Math.min(50,t-sidst):16; sidst=t;
     const M=olieAnim.mol;
     const maal=0.22+(olieGlasT+40)/100*1.05;
