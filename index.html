@@ -32872,7 +32872,7 @@ tegnSpor();
   table.ts-pts td:nth-child(2){color:var(--mut2)}
   table.ts-pts td.v{font-family:var(--mono);color:#f8fafc;white-space:nowrap}
   .ts-crow{display:grid;grid-template-columns:1fr 1fr;gap:24px;font-size:12.5px;line-height:1.7}
-  @media(max-width:980px){.ts-top{grid-template-columns:minmax(0,1fr)}.ts-fig{max-width:680px}}
+  @media(max-width:1040px){.ts-top{grid-template-columns:minmax(0,1fr)}.ts-fig{max-width:680px}}
   @media(max-width:760px){.ts-crow{grid-template-columns:minmax(0,1fr)}}
   @media(max-width:420px){table.ts-pts{font-size:10.5px}table.ts-pts th,table.ts-pts td{padding:4px 3px}}
 </style>
@@ -33027,7 +33027,7 @@ tegnSpor();
           <button type="button" data-v="5" class="seg on">5 K</button>
           <button type="button" data-v="10" class="seg">10 K</button>
         </div>
-        <span class="ts-hint">Væsken i spiralen kan ikke blive koldere end den kogende væske uden om den, så den forlader mellemkøleren ved t<sub>5</sub> = t<sub>MT</sub> + ΔT.</span>
+        <span class="ts-hint">Spiralen har et begrænset areal, så væsken i den når ikke helt ned på den kogende væskes temperatur t<sub>MT</sub>, men forlader mellemkøleren ved t<sub>5</sub> = t<sub>MT</sub> + ΔT.</span>
       </div>
       <div class="cyctoggle" style="gap:18px">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="ts_temp"><span class="slider-mini"></span><span style="font-size:12px">Vis temperatur i punkterne</span></label>
@@ -33700,9 +33700,9 @@ let tsType="closed", tsDT=5;
 const TS_SUB={closed:"Lukket mellemkøler — 2-trins kompression, 1-trins ekspansion",
               open:"Åben mellemkøler — 2-trins kompression, 2-trins ekspansion"};
 const TS_TXT={
-  closed:`<b style="color:#c4b5fd">Lukket mellemkøler</b> — 2-trins kompression, 1-trins ekspansion. LT-kompressoren suger dampen fra udskilleren (7) og trykker den op til mellemtrykket p<sub>MT</sub> (8). Trykgassen ledes ned i den kogende væske i mellemkøleren B og køles til mættet damp (8→1), som HT-kompressoren komprimerer videre til p<sub>c</sub> (1→2). Efter kondensatoren A (2→3) drøvles en lille delstrøm ind i mellemkøleren (3→4), hvor den fordamper og fjerner varmen. Resten af væsken løber gennem en spiral i mellemkøleren og underkøles dér ved fuldt kondensatortryk (3→5) — den bliver altså på højtryk helt frem til ekspansionsventilen ved udskilleren og drøvles kun én gang (5→6). Det er en fordel ved lange væskeledninger og flere fordampere, fordi væsken ikke danner flashgas undervejs. Prisen er en lidt lavere COP end med åben mellemkøler, fordi væsken kun køles til t<sub>MT</sub> + ΔT og ikke helt ned til t<sub>MT</sub>. `,
+  closed:`<b style="color:#c4b5fd">Lukket mellemkøler</b> — 2-trins kompression, 1-trins ekspansion. LT-kompressoren suger dampen fra udskilleren (7) og trykker den op til mellemtrykket p<sub>MT</sub> (8). Trykgassen ledes ned i den kogende væske i mellemkøleren B og køles til mættet damp (8→1), som HT-kompressoren komprimerer videre til p<sub>c</sub> (1→2). Efter kondensatoren A (2→3) drøvles en delstrøm m<sub>x</sub> ind i mellemkøleren (3→4), hvor den fordamper (4→1) og optager varmen fra LT-trykgassen (8→1) og fra væsken i spiralen (3→5). Resten af væsken løber gennem en spiral i mellemkøleren og underkøles dér ved fuldt kondensatortryk (3→5) — den bliver altså på højtryk helt frem til ekspansionsventilen ved udskilleren og drøvles kun én gang (5→6). Det er en fordel ved lange væskeledninger og flere fordampere, fordi væsken ikke danner flashgas undervejs. Prisen er en lidt lavere COP end med åben mellemkøler, fordi væsken kun køles til t<sub>MT</sub> + ΔT og ikke helt ned til t<sub>MT</sub>. `,
   open:`<b style="color:#c4b5fd">Åben mellemkøler</b> — 2-trins kompression, 2-trins ekspansion. LT-kompressoren suger dampen fra udskilleren (7) og trykker den op til mellemtrykket p<sub>MT</sub> (8). Trykgassen ledes ned i væsken i mellemkøleren B og køles til mættet damp (8→1), som HT-kompressoren komprimerer videre til p<sub>c</sub> (1→2). Al væsken fra kondensatoren A (2→3) drøvles ind i mellemkøleren (3→4) og deles dér i damp, der går med til HT-kompressoren, og mættet væske ved t<sub>MT</sub> (5 = (4)). Den mættede væske drøvles derefter videre til p<sub>0</sub> (5→6) — væsken ekspanderes altså i to trin. Fordi væsken køles helt ned til t<sub>MT</sub>, giver den åbne mellemkøler den højeste COP, men væsken til fordamperne har kun mellemtryk. `,
-  faelles:`Det geometriske middeltryk giver lige store trykforhold på de to trin (π<sub>p,LT</sub> = π<sub>p,HT</sub>), hvilket minimerer det samlede arbejde. Forudsætninger som i 1-trins-sammenligningen: OH 5 K i punkt 7 og UK 2 K i punkt 3 (3 ligger derfor lige til venstre for væskelinjen) — faste værdier, uafhængige af felterne for overhedning og underkøling ovenfor — isentropisk kompression og samme entalpi-reference som diagrammet ovenfor (h = 200 kJ/kg for mættet væske ved 0 °C). Data: CoolProp.`
+  faelles:`Det geometriske middeltryk giver lige store trykforhold på de to trin (π<sub>p,LT</sub> = π<sub>p,HT</sub>), hvilket minimerer det samlede arbejde. Forudsætninger som i 1-trins-sammenligningen: OH 5 K i punkt 7, UK 2 K i punkt 3 (3 ligger derfor lige til venstre for væskelinjen), isentropisk kompression og samme entalpi-reference som diagrammet ovenfor (h = 200 kJ/kg for mættet væske ved 0 °C). OH og UK er faste og afhænger ikke af felterne for overhedning og underkøling ovenfor; dampen fra udskilleren er i praksis mættet, og de 5 K svarer til opvarmning i sugeledningen. Data: CoolProp.`
 };
 
 // Anlægsdiagram efter undervisningsmaterialets "Lukket mellemkøler": LT- og HT-kompressor, kondensator A,
@@ -33807,8 +33807,8 @@ function drawTwoStage(){
     svg.appendChild(el("text",{x:PL-8,y:Y(p)+3,fill:"#64748b","font-size":11,"text-anchor":"end"},p));});
   for(let hh=0;hh<=hMax;hh+=200){ svg.appendChild(el("line",{x1:X(hh),y1:PT,x2:X(hh),y2:PT+ph,stroke:"#16203a","stroke-width":0.6}));
     svg.appendChild(el("text",{x:X(hh),y:H-28,fill:"#64748b","font-size":10,"text-anchor":"middle"},hh));}
-  // NH3-klokke (forlænget med de præcise mætningspunkter ved p0, hvis p0 ligger under tabellens laveste tryk)
-  const d=PHBELLS.R717, bell=(R.p0<d.bell[0][0]?[[R.p0,R.h6f,R.hg0]]:[]).concat(d.bell); let dPath="";
+  // NH3-klokke (forlænget ned til aksens bund ved 0,3 bar og med de præcise mætningspunkter ved p0, hvis p0 ligger under tabellens laveste tryk)
+  const d=PHBELLS.R717, bell=[[0.3,-47.5,1383.5]].concat(R.p0<d.bell[0][0]?[[R.p0,R.h6f,R.hg0]]:[]).concat(d.bell); let dPath="";
   bell.forEach((row)=>{const[p,hf]=row;if(p<pMin||p>pMax)return;dPath+=(dPath===""?"M":"L")+X(hf).toFixed(1)+","+Y(p).toFixed(1);});
   if(d.pcrit<=pMax)dPath+="L"+X(d.hcrit).toFixed(1)+","+Y(d.pcrit).toFixed(1);
   for(let i=bell.length-1;i>=0;i--){const[p,hf,hg]=bell[i];if(p<pMin||p>pMax)continue;dPath+="L"+X(hg).toFixed(1)+","+Y(p).toFixed(1);}
@@ -33830,8 +33830,8 @@ function drawTwoStage(){
   const seg=(a,b,col,w,dash)=>{const o={x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:col,"stroke-width":w||2.4,"stroke-linecap":"round"};if(dash)o["stroke-dasharray"]=dash;svg.appendChild(el("line",o));};
   const dot=(p,lbl,col,dx,dy,temp,r)=>{svg.appendChild(el("circle",{cx:p[0],cy:p[1],r:r||4,fill:"#0b1220",stroke:col,"stroke-width":2}));
     const anc=dx<0?"end":"start";
-    svg.appendChild(el("text",{x:p[0]+(dx||7),y:p[1]+(dy||-6),fill:col,"font-size":10,"font-weight":700,"text-anchor":anc},lbl));
-    if(showT&&temp!=null&&isFinite(temp)) svg.appendChild(el("text",{x:p[0]+(dx||7),y:p[1]+(dy||-6)+(dy<0?-11:11),fill:col,"font-size":9,"text-anchor":anc,opacity:.85},tf(temp,0)+"°C"));};
+    svg.appendChild(el("text",{x:p[0]+(dx||7),y:p[1]+(dy||-6),fill:col,"font-size":10,"font-weight":700,"text-anchor":anc,"paint-order":"stroke",stroke:"#0b1220","stroke-width":3,"stroke-linejoin":"round"},lbl));
+    if(showT&&temp!=null&&isFinite(temp)) svg.appendChild(el("text",{x:p[0]+(dx||7),y:p[1]+(dy||-6)+(dy<0?-11:11),fill:col,"font-size":9,"text-anchor":anc,opacity:.85,"paint-order":"stroke",stroke:"#0b1220","stroke-width":3,"stroke-linejoin":"round"},tf(temp,0)+"°C"));};
   const dhLab=(a,b,txt,col,below,side)=>{ if(!showDh)return; const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;
     svg.appendChild(el("text",{x:mx+(side?9:0),y:my+(side?3:below?14:-7),fill:col||"#cbd5e1","font-size":9,"font-weight":600,"text-anchor":side?"start":"middle"},txt));};
   // nummerering som jeres anlæg: 1 HT-sug, 2 HT-trykgas, 3 kondensatorudgang, 4 drøvlet ind i mellemkøleren,
@@ -33851,8 +33851,9 @@ function drawTwoStage(){
   seg(p1,p2,colHT); seg(p2,p3,colHT);
   // 3→4: delstrøm (lukket) / al væsken (åben) drøvles ind i mellemkøleren
   seg(p3,p4,colIC,2.2);
+  seg(p4,p1,colIC,1.6,"4 3");                                 // 4→1: dampen i mellemkøleren går til HT-suget (lukket: delstrømmen m_x fordamper)
   if(closed){ seg(p3,p5,colIC,2.2); }                         // 3→5: underkøling i spiralen ved p_c
-  else { seg(p4,p1,colIC,1.6,"4 3"); seg(p4,p5,colIC,1.6,"4 3"); }  // 4 deles i damp (1) og mættet væske (5)
+  else { seg(p4,p5,colIC,1.6,"4 3"); }                        // 4 deles i damp (1) og mættet væske (5)
   seg(p5,p6,colIC,2.2);                                       // 5→6: ekspansion til p0
   dhLab(p6,p7,"Δh₀ "+R.q0.toFixed(0),colLT,true);
   dhLab(p7,p8,"w_LT "+R.wLT.toFixed(0),colLT,false,true);
@@ -33872,10 +33873,10 @@ function drawTwoStage(){
     ["1",colHT,"Mættet damp fra mellemkøleren → HT-sug",R.pMT,R.t1,R.h1],
     ["2",colHT,"HT-trykgas → kondensator A",R.pc,R.t2,R.h2],
     ["3",colHT,`Væske fra kondensatoren (UK ${R.UK} K)`,R.pc,R.t3,R.h3],
-    ["4",colIC,(closed?"Delstrøm":"Al væsken")+` drøvlet ind i mellemkøleren (x = ${f(R.x4,2)})`,R.pMT,R.t4,R.h4],
+    ["4",colIC,(closed?"Delstrøm":"Al væsken")+` drøvlet ind i mellemkøleren (x = ${f(R.x4,2)})`+(closed?" — fordamper til 1":""),R.pMT,R.t4,R.h4],
     ["5",colIC,closed?`Underkølet i spiralen ved p<sub>c</sub> til t<sub>MT</sub> + ${R.dT} K`:"Mættet væske fra mellemkøleren (= (4))",closed?R.pc:R.pMT,R.t5,R.h5],
     ["6",colLT,`Drøvlet fra ${closed?"p<sub>c</sub>":"p<sub>MT</sub>"} til p<sub>0</sub> → udskilleren (x = ${f(R.x6,2)})`,R.p0,R.t6,R.h6],
-    ["7",colLT,`LT-sug fra udskilleren (OH ${R.OH} K)`,R.p0,R.t7,R.h7],
+    ["7",colLT,`LT-sug: damp fra udskilleren + OH ${R.OH} K i sugeledningen`,R.p0,R.t7,R.h7],
     ["8",colLT,"LT-trykgas → mellemkøleren",R.pMT,R.t8,R.h8],
     ["(4)",colG,"Mættet væske i mellemkøleren",R.pMT,R.tMT,R.h4f],
     ["(6)",colG,"Mættet væske i udskilleren",R.p0,R.t0,R.h6f]];
