@@ -1910,6 +1910,10 @@
   .ol-bl.mid b{color:var(--gold)}
   .ol-bl.lav{background:rgba(232,83,63,.09);border:1px solid rgba(232,83,63,.35)}
   .ol-bl.lav b{color:#ff9d83}
+  /* niveau-boksen: alle fire tekster i samme celle, så højden ikke hopper */
+  .ol-niv{display:grid}
+  .ol-niv>span{grid-area:1/1}
+  .ol-niv>span:not(.on){visibility:hidden}
   .ol-txt{font-size:13.5px;line-height:1.65;color:var(--ink);margin:0}
   .ol-txt b{color:var(--gold)}
   .ol-fakta{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
@@ -16546,7 +16550,7 @@ function tegnHydro(){
       <label style="flex:1">Vand i olien <b></b>
         <input type="range" min="0" max="600" step="10" value="${olieVand}" oninput="olieSaetVand(this.value)"></label>
     </div>
-    <div class="ol-bl"></div>
+    <div class="ol-bl ol-niv">${olieNiv().map(n=>`<span><b>${n[0]}</b> — ${n[2]}</span>`).join('')}</div>
     <p class="ol-txt">Vand spalter ester-bindingen og efterlader en <b>carboxylsyre</b> og en <b>alkohol</b>.
       Reaktionen er den omvendte af den, olien blev fremstillet ved. Syren måles som <b>syretal (TAN)</b>,
       og konsekvenserne kommer i denne rækkefølge:</p>
@@ -16569,6 +16573,16 @@ function tegnHydro(){
   olieVandVis();
 }
 
+/* de fire vand-niveauer: [navn, klasse, tekst] — Kritisk afhænger af kølemidlet */
+function olieNiv(){
+  return [["Tørt anlæg","ok","Under 50 ppm — som en nyfyldt olie skal være."],
+          ["Acceptabelt","ok","Op til ca. 100 ppm. Tørrefilteret arbejder, men holder trit."],
+          ["Begyndende nedbrydning","mid","Syretallet stiger. Skift tørrefilter og tag en olieprøve."],
+          ["Kritisk","lav", olieKM==='R717'
+            ? "Olien nedbrydes hurtigt, og syren bliver til slam med ammoniakken — anlægget skal renses."
+            : "Olien nedbrydes hurtigt. Syren angriber lak og kobber — anlægget skal renses."]];
+}
+
 /* kun det, der afhænger af vandindholdet: tallet og niveau-boksen.
    Skyderen selv må ikke skiftes ud midt i et træk */
 function olieVandVis(){
@@ -16576,18 +16590,13 @@ function olieVandVis(){
   if(!styr) return;   // ikke POE: ingen skyder
   const ppm=olieVand;
   const niv = ppm<=50?0 : ppm<=100?1 : ppm<=300?2 : 3;
-  const NIV=[["Tørt anlæg","ok","Under 50 ppm — som en nyfyldt olie skal være."],
-             ["Acceptabelt","ok","Op til ca. 100 ppm. Tørrefilteret arbejder, men holder trit."],
-             ["Begyndende nedbrydning","mid","Syretallet stiger. Skift tørrefilter og tag en olieprøve."],
-             ["Kritisk","lav", olieKM==='R717'
-               ? "Olien nedbrydes hurtigt, og syren bliver til slam med ammoniakken — anlægget skal renses."
-               : "Olien nedbrydes hurtigt. Syren angriber lak og kobber — anlægget skal renses."]][niv];
   const inp=styr.querySelector('input');
   if(+inp.value!==ppm) inp.value=ppm;
   styr.querySelector('b').textContent=ppm+' ppm';
+  // alle fire tekster ligger i boksen; kun den aktive vises
   const boks=styr.nextElementSibling;
-  boks.className='ol-bl '+NIV[1];
-  boks.innerHTML=`<b>${NIV[0]}</b> — ${NIV[2]}`;
+  boks.className='ol-bl ol-niv '+olieNiv()[niv][1];
+  Array.prototype.forEach.call(boks.children,(s,i)=>s.classList.toggle('on',i===niv));
 }
 
 function renderOlie(){
