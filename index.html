@@ -10832,39 +10832,41 @@ const VAPT = {
   R11   :[[199.9,1.589,0.09],[196.6,0.9638,0.16],[193.2,0.6114,0.26],[189.8,0.4033,0.40],[186.3,0.2752,0.61],[182.7,0.1934,0.89],[179.0,0.1395,1.26]]
 };
 
-/* Samme tal ved +100, +200 og +300 °C — kun til sammenligningsdiagrammet under Fordampningsvarme
+/* Samme tal ved +60, +70, +80, +100, +200 og +300 °C — kun til sammenligningsdiagrammet under Fordampningsvarme
    (kølemiddel-kortet under Vælg kølemiddel bruger stadig kun VAP_T og VAPT).
    VAP_TC er den kritiske temperatur i °C — for blandingerne blandingens kritiske punkt.
    null i VAPT_VARM betyder OVER den kritiske temperatur: der findes ingen væske at fordampe.
    (R718's null i VAPT betyder noget andet: under 0 °C er vandet frosset.)
-   Beregnet med CoolProp på samme måde som VAPT. */
-const VAP_T_VARM = [100,200,300];
+   Beregnet med CoolProp på samme måde som VAPT. Tæt på Tc finder CoolProp ikke altid selv dug- og boblepunktet
+   for blandingerne (R452A og R507A ved +70 °C, R407A, R407F, R449A og R455A ved +80 °C) — dér er beregningen
+   startet med gæt fra blandingens fasekonvolut. Samme ligninger, og samme tal, hvor begge veje virker. */
+const VAP_T_VARM = [60,70,80,100,200,300];
 const VAP_TC = {R717:132.4, R718:373.9, R744:31.0, R290:96.7, R600:152.0, R600a:134.7, R134a:101.1, R32:78.1,
   R404A:72.1, R410A:71.3, R22:96.1, R12:112.0, R11:198.0, R1234yf:94.7, R513A:95.4, R449A:82.5, R407A:82.2,
   R407F:82.6, R452A:75.1, R507A:70.6, R454B:78.3, R455A:85.6};
 const VAPT_VARM = {
-  R717   :[[715.7,0.01782,62.55],null,null],
-  R718   :[[2256.4,1.672,1.01],[1939.7,0.1272,15.55],[1404.6,0.02166,85.88]],
-  R744   :[null,null,null],
-  R290   :[null,null,null],
-  R600   :[[258.3,0.02541,15.26],null,null],
-  R600a  :[[211.0,0.01764,19.87],null,null],
-  R134a  :[[34.4,0.002681,39.72],null,null],
-  R32    :[null,null,null],
-  R404A  :[null,null,null],
-  R410A  :[null,null,null],
-  R22    :[null,null,null],
-  R12    :[[64.0,0.003959,33.40],null,null],
-  R11    :[[147.1,0.02312,8.24],null,null],
-  R1234yf:[null,null,null],
-  R513A  :[null,null,null],
-  R449A  :[null,null,null],
-  R407A  :[null,null,null],
-  R407F  :[null,null,null],
-  R452A  :[null,null,null],
-  R507A  :[null,null,null],
-  R454B  :[null,null,null],
-  R455A  :[null,null,null]
+  R717   :[[997.8,0.04882,26.14],[939.3,0.03787,33.12],[874.2,0.02951,41.41],[715.7,0.01782,62.55],null,null],
+  R718   :[[2357.7,7.667,0.20],[2333.0,5.04,0.31],[2308.0,3.405,0.47],[2256.4,1.672,1.01],[1939.7,0.1272,15.55],[1404.6,0.02166,85.88]],
+  R744   :[null,null,null,null,null,null],
+  R290   :[[259.2,0.0202,21.17],[228.6,0.01565,25.87],[189.8,0.01185,31.32],null,null,null],
+  R600   :[[321.3,0.06366,6.38],[307.7,0.05012,8.09],[292.9,0.03978,10.12],[258.3,0.02541,15.26],null,null],
+  R600a  :[[284.9,0.04459,8.69],[269.6,0.03525,10.88],[252.6,0.02799,13.44],[211.0,0.01764,19.87],null,null],
+  R134a  :[[139.1,0.01144,16.82],[124.4,0.008653,21.17],[106.4,0.006448,26.33],[34.4,0.002681,39.72],null,null],
+  R32    :[[175.5,0.007396,39.33],[127.8,0.005084,48.77],null,null,null,null],
+  R404A  :[[81.3,0.005137,28.71],[41.5,0.003118,35.63],null,null,null,null],
+  R410A  :[[105.2,0.004976,38.35],[44.0,0.002881,47.62],null,null,null,null],
+  R22    :[[139.9,0.008961,24.27],[123.0,0.00685,29.97],[101.6,0.005118,36.64],null,null,null],
+  R12    :[[114.5,0.01124,15.22],[105.3,0.008828,18.80],[94.5,0.006905,22.97],[64.0,0.003959,33.40],null,null],
+  R11    :[[166.9,0.05924,3.13],[162.5,0.04601,4.08],[157.7,0.0362,5.23],[147.1,0.02312,8.24],null,null],
+  R1234yf:[[110.6,0.01004,16.418],[96.6,0.007573,20.445],[78.6,0.005558,25.195],null,null,null],
+  R513A  :[[119.5,0.01008,17.329],[104.7,0.007594,21.646],[85.9,0.00558,26.748],null,null,null],
+  R449A  :[[119.1,0.007334,26.818],[94.3,0.005248,33.638],[50.6,0.003278,42.125],null,null,null],
+  R407A  :[[116.7,0.007059,26.873],[92.0,0.005019,33.784],[47.3,0.003084,42.376],null,null,null],
+  R407F  :[[128.2,0.007408,28.070],[101.7,0.005279,35.282],[55.3,0.003292,44.225],null,null,null],
+  R452A  :[[85.9,0.005475,27.989],[56.7,0.003644,35.088],null,null,null,null],
+  R507A  :[[76.0,0.004798,29.467],[25.1,0.002597,36.553],null,null,null,null],
+  R454B  :[[145.7,0.007002,35.498],[105.9,0.004837,44.125],null,null,null,null],
+  R455A  :[[120.5,0.008353,24.722],[98.4,0.0061,31.083],[64.8,0.004121,39.039],null,null,null]
 };
 
 /* Samme tal ved −90 og −50 °C — også kun til sammenligningsdiagrammet.
@@ -10912,7 +10914,7 @@ const VAP_TMIN = {R404A:-73.15, R410A:-73.15};          // nedre grænse for den
    kompressor suger VOLUMEN, ikke masse.
 ============================================================ */
 let vapT = -10;                         // valgt fordampningstemperatur
-let vcT = -10;                          // temperaturen i sammenligningsdiagrammet (også −90/−50 og +100…+300 °C)
+let vcT = -10;                          // temperaturen i sammenligningsdiagrammet (også −90/−50 og +60…+300 °C)
 
 function vapAt(rcode, t){
   const i=VAP_T.indexOf(t===undefined?vapT:t);
@@ -11012,7 +11014,7 @@ function setVapUnit(u){
   drawVapChart();
 }
 
-/* Diagrammet har sin egen temperatur, fordi det også kan vise +100…+300 °C.
+/* Diagrammet har sin egen temperatur, fordi det også kan vise +60…+300 °C.
    −30…+30 °C går stadig gennem setVapT, så kølemiddel-kortet følger med som hidtil. */
 function setVcT(t){
   if(VAP_T.includes(t)){ setVapT(t); return; }
@@ -11065,7 +11067,7 @@ function vcVarmNote(){
     s+=`Ved +200 °C er <b>vand</b> det eneste kølemiddel, der stadig kan fordampe — R11 passerede sin kritiske
         temperatur ved ${mbNum(VAP_TC.R11,1)} °C. Vandet koger her ved ${mbNum(w.p,2)} bar — så højt skal trykket mindst være, for at vandet kan holdes flydende — og fordampningsvarmen
         er faldet fra ${mbNum(VAPT.R718[3][0],0)} kJ/kg ved 0 °C til ${mbNum(w.h,0)} kJ/kg.`;
-  } else {
+  } else if(t===300){
     s+=`Ved +${t} °C koger vandet ved ${mbNum(w.p,2)} bar — trykket skal så højt op, før vandet kan holdes flydende — og fordampningsvarmen er nede på ${mbNum(w.h,0)} kJ/kg.
         Vands kritiske temperatur ligger helt oppe på ${mbNum(VAP_TC.R718,1)} °C: <b>hydrogen-bindingerne</b> holder
         så godt sammen på molekylerne, at vand kan holdes flydende under tryk helt derop. Jo stærkere kræfterne
@@ -11073,9 +11075,104 @@ function vcVarmNote(){
         store molekyler som R11 og butan har så stærke London-kræfter, at de ender over ammoniak, selv om de ikke har hydrogen-bindinger.`;
   }
   const w100=vcAt('R718', 100);
-  if(t!==100 && vapUnit==='m3' && w100 && w100.kritisk===undefined) s+=` Pr. m³ er tallet langt højere end ved +100 °C,
+  if(t>100 && vapUnit==='m3' && w100 && w100.kritisk===undefined) s+=` Pr. m³ er tallet langt højere end ved +100 °C,
         selvom fordampningsvarmen er faldet: ved ${mbNum(w.p,2)} bar vejer 1 m³ vanddamp ${mbNum(1/w.vg,1)} kg
         mod ${mbNum(1/w100.vg,1)} kg ved +100 °C.`;
+  return s;
+}
+/* noten ved +60, +70 og +80 °C — det er kondenseringstemperaturer i en varmepumpe.
+   Tallene hentes fra data, så de altid passer til søjlerne. */
+function vcKondNote(){
+  const t=vcT, alle=Object.keys(VAP), TT=VAP_T_KOLD.concat(VAP_T, VAP_T_VARM), forrige=TT[TT.indexOf(t)-1];
+  const ok   = (r, T=t) => { const d=vcAt(r, T); return !!(d && d.h!==undefined); };
+  const krit = (r, T=t) => { const d=vcAt(r, T); return !!(d && d.kritisk!==undefined); };
+  const kan  = alle.filter(r=>ok(r));
+  const ny   = alle.filter(r=>ok(r, forrige) && krit(r)).sort((a,b)=>VAP_TC[a]-VAP_TC[b]);   // over Tc siden forrige chip
+  const naer = kan.filter(r=>VAP_TC[r]!==undefined).sort((a,b)=>VAP_TC[a]-VAP_TC[b]);       // tættest på Tc først
+  const kant = naer.filter(r=>VAP_TC[r]-t<3);
+  const NAVN = {R744:'CO₂', R170:'ethan', R1150:'ethylen', R290:'propan', R717:'ammoniak'};
+  const nv   = r => NAVN[r] || r;
+  const liste= a => a.length<2 ? a.join('') : a.slice(0,-1).join(', ')+' og '+a[a.length-1];
+  const tal  = n => ['ingen','ét','to','tre','fire','fem','seks','syv','otte','ni','ti'][n] || String(n);
+  const Tg   = T => (T>0?'+':'')+T+'&nbsp;°C';
+  const H    = (r, T=t) => mbNum(vcAt(r, T).h, 0)+'&nbsp;kJ/kg';
+  const Q    = (r, T=t) => mbNum(vcAt(r, T).qv, 0)+'&nbsp;kJ/m³';
+  const dK   = r => mbNum(VAP_TC[r]-t, 1)+'&nbsp;K';
+  const fra  = (a, d) => mbNum(Math.min(...a), d)+'–'+mbNum(Math.max(...a), d);
+  const molar= r => vcAt(r).h*VAP[r].M/1000;
+  let s;
+
+  if(t===60) s=`<b>Så varmt er der ikke i fordamperen i et almindeligt køleanlæg — men +60 °C er en typisk
+      kondenseringstemperatur i en varmepumpe, der laver varmt brugsvand.</b> Vandet skal op på 55–60 °C, og kondensatoren skal være lidt varmere.`;
+  else if(t===70) s=`<b>Ved +70 °C kondenserer en varmepumpe, når vandet skal rigtig varmt</b> — fx til et gammelt
+      radiatoranlæg eller til fjernvarme.`;
+  else s=`<b>${Tg(t)} kræver en højtemperatur-varmepumpe</b>, fx i et fjernvarmeværk.`;
+  s+=` I kondensatoren sker det modsatte af i fordamperen: dampen bliver til væske og afgiver sin fordampningsvarme igen.<br>
+      Ved ${Tg(t)} kan ${kan.length} af de ${alle.length} kølemidler stadig kondensere. Mellem ${Tg(forrige)} og ${Tg(t)} har `;
+  const nyTxt = ny.map(r=>`<b>${nv(r)}</b> (${mbNum(VAP_TC[r],1)}&nbsp;°C)`);
+  if(!ny.length) s+=`ingen kølemidler passeret deres kritiske temperatur.`;
+  else if(ny.length>2) s+=`${tal(ny.length)} kølemidler passeret deres kritiske temperatur: ${liste(nyTxt)}.`;
+  else s+=`${liste(nyTxt)} passeret ${ny.length>1?'deres':'sin'} kritiske temperatur${t===60 ? ` — ${
+      liste(alle.filter(r=>krit(r, forrige)).sort((a,b)=>VAP_TC[a]-VAP_TC[b]).map(nv))} var allerede over ved ${Tg(forrige)}` : ''}.`;
+
+  if(t===60){
+    if(ny.includes('R744')) s+=` <b>CO₂</b> kan altså ikke kondensere i varmepumpen. Et CO₂-anlæg kører derfor
+        <b>transkritisk</b>: højtrykssiden ligger over det kritiske tryk på 73,8 bar, og i stedet for en kondensator er der
+        en <b>gaskøler</b>, hvor gassen afgiver varmen uden at blive til væske. Temperaturen falder hele vejen gennem
+        gaskøleren — og det passer faktisk godt til at varme koldt brugsvand op.`;
+    if(ok('R410A') && ok('R410A', 0) && ok('R410A', forrige) && t-forrige===forrige){
+      const a0=vcAt('R410A', 0).h, a1=vcAt('R410A', forrige).h, a=vcAt('R410A').h;
+      s+=`<br>Se på <b>R410A</b>, som sidder i mange varmepumper: den er kun ${dK('R410A')} fra sin kritiske temperatur,
+          og fordampningsvarmen er nede på ${H('R410A')}. Fra ${Tg(forrige)} til ${Tg(t)} har den tabt ${mbNum(a1-a,0)}&nbsp;kJ/kg
+          — fra 0 til ${Tg(forrige)} ${a0-a1<a1-a?'kun ':''}${mbNum(a0-a1,0)}&nbsp;kJ/kg. Jo tættere på T<sub>c</sub>, jo stejlere går det ned.
+          Hvert kg giver derfor mindre varme fra sig, når det kondenserer, og varmepumpens COP falder. Et kølemiddel med lav kritisk
+          temperatur som R410A er et dårligt valg til varmt brugsvand — man vælger hellere et med højere T<sub>c</sub>${ok('R290')
+          ? `, fx propan (R290, T<sub>c</sub>&nbsp;${mbNum(VAP_TC.R290,1)}&nbsp;°C), der stadig har ${H('R290')}` : ''}.`;
+    }
+  } else if(t===70){
+    if(kant.length){
+      const r=kant[0];
+      s+=` Men ${tal(kant.length)} er helt på kanten: <b>${r}</b> er kun ${dK(r)} fra sin kritiske temperatur${
+          kant.length>1 ? ', '+liste(kant.slice(1).map(k=>`${k} ${dK(k)}`)) : ''}.`;
+      if(ok(r, forrige) && ok(r, 0)) s+=` Se, hvor stejlt det går til sidst: ${r} har ${H(r)} tilbage — ved ${Tg(forrige)}
+          var det ${H(r, forrige)} og ved 0 °C ${H(r, 0)}. Damp og væske er ved at blive ens: dampen bliver så tæt,
+          at 1 m³ mættet ${r}-damp her vejer ${mbNum(1/vcAt(r).vg,0)} kg — ved 0 °C kun ${mbNum(1/vcAt(r, 0).vg,0)} kg.`;
+      s+=` Med så lidt kondenseringsvarme tilbage kan ${liste(kant)} ikke bruges i en varmepumpe, der skal kondensere ved ${Tg(t)}.`;
+    }
+    if(ok('R32') && ok('R454B') && !kant.includes('R32') && !kant.includes('R454B'))
+      s+=` <b>R32</b> og <b>R454B</b>, som afløser R410A i nye varmepumper, har stadig ${H('R32')} og ${H('R454B')}
+          — men de er også kun ${dK('R32')} og ${dK('R454B')} fra deres T<sub>c</sub>.`;
+  } else {
+    if(ny.includes('R32') && ny.includes('R454B')) s+=` Blandt dem er R32 og R454B, som afløser R410A i nye varmepumper.`;
+    if(ny.length){
+      const r=ny.slice().sort((a,b)=>vcAt(b, forrige).h-vcAt(a, forrige).h)[0];     // den, der havde mest at miste
+      s+=` <b>${r}</b> havde ${H(r, forrige)} ved ${Tg(forrige)} — ${t-forrige} K højere er der intet tilbage.`;
+    }
+    if(kant.length>1) s+=` ${liste(kant)} er kun ${fra(kant.map(r=>VAP_TC[r]-t),1)}&nbsp;K fra deres T<sub>c</sub>
+        og har ${fra(kant.map(r=>vcAt(r).h),0)}&nbsp;kJ/kg tilbage.`;
+    else if(kant.length) s+=` ${kant[0]} er kun ${dK(kant[0])} fra sin T<sub>c</sub> og har ${H(kant[0])} tilbage.`;
+    if(ok('R717')) s+=` Store varmepumper til fjernvarme kører derfor ofte med <b>ammoniak</b>: T<sub>c</sub> ligger på
+        ${mbNum(VAP_TC.R717,1)}&nbsp;°C, og ved ${Tg(t)} har den stadig ${H('R717')}. Andre kører med CO₂ — transkritisk, med gaskøler.`;
+  }
+
+  if(vapUnit==='mol'){
+    const bund=kan.slice().sort((a,b)=>molar(a)-molar(b)).slice(0,3);
+    s+=`<br>Pr. <b>mol</b> ligger ${liste(bund)} nederst${bund.slice().sort().join()===naer.slice(0,3).sort().join()
+        ? ' — netop de tre, der er tættest på deres kritiske temperatur' : ''}.`;
+  } else if(vapUnit==='m3'){
+    const top=T=>alle.filter(r=>ok(r, T)).sort((a,b)=>vcAt(b, T).qv-vcAt(a, T).qv)[0];
+    const r1=top(forrige), r=top(t);
+    if(t===80){
+      if(r!==r1 && krit(r1)) s+=`<br>Pr. <b>m³</b> ligger ${nv(r)} nu øverst med ${Q(r)} — ${r1}, der lå højere ved ${Tg(forrige)},
+          er over sin kritiske temperatur.`;
+    } else if(ok('R410A') && ok('R410A', forrige)){
+      const q1=vcAt('R410A', forrige).qv, q=vcAt('R410A').qv;
+      s+= q>q1 ? `<br>Pr. <b>m³</b> er R410A ligefrem steget fra ${Q('R410A', forrige)} ved ${Tg(forrige)} til ${Q('R410A')}:
+          hvert kg giver mindre, men dampen er blevet så tæt, at 1 m³ vejer ${mbNum(1/vcAt('R410A').vg,0)} kg.`
+        : `<br>Pr. <b>m³</b> er R410A nu faldet fra ${Q('R410A', forrige)} ved ${Tg(forrige)} til ${Q('R410A')}:
+          nu falder fordampningsvarmen hurtigere, end dampen bliver tættere.`;
+    }
+  }
   return s;
 }
 /* noten ved −50 og −90 °C — tallene hentes fra data, så de altid passer til søjlerne */
@@ -11219,7 +11316,7 @@ function drawVapChart(){
   const T=`${vcT>0?'+':''}${vcT} °C`;
   const n=document.getElementById('vcNote');
   if(varm){
-    if(n) n.innerHTML = vcVarmNote() + `<br><span style="opacity:.75">Værdier ved mættet damp, ${T}. Beregnet med CoolProp
+    if(n) n.innerHTML = (vcT<100 ? vcKondNote() : vcVarmNote()) + `<br><span style="opacity:.75">Værdier ved mættet damp, ${T}. Beregnet med CoolProp
       (samme tilstandsligninger som REFPROP). For blandingerne er T<sub>c</sub> blandingens kritiske punkt.</span>`;
     return;
   }
@@ -15456,7 +15553,7 @@ Object.assign(VAPT, {
   R23  :[[186.8,0.02328,10.074],[172.9,0.01651,13.953],[156.9,0.01181,18.853],[137.6,0.008427,24.947],[113.2,0.005887,32.438],[76.8,0.003805,41.61],null]
 });
 Object.assign(VAP_TC, {R1270:91.1, R170:32.2, R1150:9.2, R23:26.1});
-Object.assign(VAPT_VARM, {R1270:[null,null,null], R170:[null,null,null], R1150:[null,null,null], R23:[null,null,null]});
+Object.assign(VAPT_VARM, {R1270:[[249.7,0.01695,25.283],[214.2,0.01298,30.802],[166.4,0.009561,37.205],null,null,null], R170:[null,null,null,null,null,null], R1150:[null,null,null,null,null,null], R23:[null,null,null,null,null,null]});
 Object.assign(VAPT_KOLD, {
   R1270:[[482.5,4.103,0.08767],[441.5,0.4694,0.9081]],
   R170 :[[491.3,0.5228,0.938],[429.8,0.09935,5.518]],
