@@ -2561,8 +2561,8 @@
      (som .ol-niv), så siden ikke hopper under fingeren. */
   #view-pfas [hidden]{display:none!important}
   #view-pfas .card+.card{margin-top:18px}
-  #view-pfas button:focus-visible,#view-pfas summary:focus-visible,#view-pfas input:focus-visible,
-  #view-pfas textarea:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  #view-pfas button:focus-visible,#view-pfas summary:focus-visible,
+  #view-pfas input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
   .pfas-sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
     clip:rect(0,0,0,0);white-space:nowrap;border:0}
   .pfas-v .mb-tasks{margin-bottom:12px}
@@ -2587,8 +2587,9 @@
   .pfas-molnavn b{display:block;color:var(--ink);font-size:12.5px}
   .pfas-hoved{font-size:13.5px;line-height:1.5;color:var(--muted);margin:0 0 10px}
   .pfas-hoved b{font-family:var(--serif);font-size:17px;color:var(--ink)}
-  .pfas-prik{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold);
-    margin-left:6px;vertical-align:middle}
+  /* mærket (✓ eller •) har altid sin plads, så chip-rækken ikke brydes om, når et stof er besvaret */
+  #pfasTjekRk .pfas-mk{display:inline-block;width:1em;margin-right:2px;text-align:center}
+  #pfasTjekRk .mb-task:not(.done):not(.on) .pfas-mk{color:var(--gold)}
   .pfas-tjek{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:18px;align-items:start}
   @media(max-width:700px){.pfas-tjek{grid-template-columns:minmax(0,1fr)}}
   .pfas-komp+.pfas-komp{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
@@ -2617,7 +2618,8 @@
   .pfas-trinrk .mb-task b{display:inline-block;min-width:1.2em;font-weight:700}
   .pfas-trinnav{display:flex;gap:6px;flex-wrap:wrap}
   .pfas-trinnav .btn{min-height:40px}
-  .pfas-trinnav .btn[aria-disabled="true"]{opacity:.45;cursor:default}
+  #view-pfas .btn[aria-disabled="true"]{opacity:.45;cursor:default}
+  #view-pfas .btn[aria-disabled="true"]:hover{background:#0e1d31;border-color:var(--line)}
   .pfas-scene{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 8px;
     background:#0b1726;border:1px solid var(--line);border-radius:12px;padding:12px 8px;min-height:190px}
   .pfas-scene .pfas-mol{flex:0 0 190px}
@@ -2679,7 +2681,7 @@
   .pfas-typeknap{font-family:var(--sans);font-size:13px;line-height:1.3;padding:9px 13px;min-height:40px;
     border-radius:10px;border:1px solid var(--line);background:#0e1d31;color:var(--ink);cursor:pointer;
     transition:border-color .12s,background .12s}
-  .pfas-typeknap:hover:not(:disabled):not([aria-disabled="true"]){border-color:var(--gold)}
+  .pfas-typeknap:hover:not(:disabled):not([aria-disabled="true"]):not(.skidt){border-color:var(--gold)}
   .pfas-typeknap.god{border-color:var(--ok);background:rgba(90,209,154,.12);color:var(--ok);font-weight:600}
   .pfas-typeknap.skidt{border-color:var(--proton);background:rgba(232,83,63,.1);color:#ff9d83}
   .pfas-typeknap:disabled,.pfas-typeknap[aria-disabled="true"]{cursor:default}
@@ -2720,6 +2722,10 @@
   .pfas-mere{margin:0 0 14px;font-size:13.5px}
   .pfas-mere summary{cursor:pointer;color:var(--ink);font-weight:600;padding:4px 0}
   .pfas-mere p{margin:6px 0 0}
+  .pfas-kilde{margin:0;font-size:12.5px}
+  .pfas-kilde summary{color:#9fd0ff}
+  .pfas-kilde .ig-kilde{margin-top:6px}
+  @media(max-width:560px){#view-pfas .pfas-mere summary{padding:10px 0;min-height:40px}}
 
   /* sorteringen: fire bunker — 2 × 2 på en telefon */
   .pfas-kasser{grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -2733,7 +2739,8 @@
   @media(max-width:560px){.pfas-pulje .qo-brik{padding:8px 11px;font-size:13px}}
   .pfas-hvem{display:block;font-size:11px;line-height:1.4;color:var(--muted);margin-top:4px}
   .pfas-domfb{min-height:6em;margin-top:12px;font-size:13.5px;line-height:1.6;color:var(--muted);
-    padding:11px 13px;border-radius:11px;background:var(--panel-2);border:1px solid var(--line)}
+    padding:11px 13px;border-radius:11px;background:var(--panel-2);border:1px solid var(--line);scroll-margin:16px 0}
+  #pfasDomSlut{scroll-margin:16px 0}
   .pfas-domfb:focus{outline:none}
   .pfas-domfb:empty{background:none;border-style:dashed}
   .pfas-domfb b{color:var(--ink)}
@@ -5180,8 +5187,8 @@
   <section id="view-pfas" style="display:none">
     <p class="sub">Det her er <b>ekstra materiale</b>. Det er ikke kemi F-pensum, og det tæller
       ikke med i din progression. Mange af de kølemidler, du arbejder med, er <b>PFAS</b> – også de
-      nye HFO'er. Her finder du ud af hvorfor, og hvad de bliver til, når de slipper ud. Du får ikke serveret en holdning. Du lærer at tjekke en påstand – både
-      dem, der advarer, og dem, der beroliger.</p>
+      nye HFO'er. Her finder du ud af hvorfor, og hvad de bliver til, når de slipper ud. Du får ikke serveret en holdning. Du lærer at tjekke påstande – både
+      fra dem, der advarer, og fra dem, der beroliger.</p>
 
     <!-- [1] hvad: Er det PFAS? -->
     <div class="card">
@@ -5192,12 +5199,12 @@
       <div class="ell-blok-pointe"><div class="ell-h3">Sådan genkender du et PFAS</div>
         <p>Find et carbonatom, der har <b>mindst to F</b> og <b>ingen H eller Cl</b> (heller ikke Br eller I).
         I kølemidler er det næsten altid en <b>CF₃-gruppe</b> for enden af molekylet: ét C med tre F. Har
-        molekylet bare én af dem, er det PFAS. Sådan definerer OECD det (2021), og EU's forslag bruger
+        molekylet bare ét carbonatom af den slags, er det PFAS. Sådan definerer OECD det (2021), og EU's forslag bruger
         samme regel.<br><small>PFAS står for per- og polyfluorerede alkylstoffer.</small></p></div>
       </div>
       <div class="ell-vaerk pfas-v">
         <div class="ell-vaerk-h">PFAS-tjekket</div>
-        <div class="ell-vaerk-und">Vælg et stof. Find selv CF₃-gruppen, før du svarer.</div>
+        <div class="ell-vaerk-und">Vælg et stof. Se efter en CF₃-gruppe, før du svarer.</div>
         <div class="mb-tasks" id="pfasTjekRk" role="group" aria-label="Vælg stof"></div>
         <div id="pfasTjekUd"></div>
         <p class="pfas-tael" id="pfasTjekTal" aria-live="polite"></p>
@@ -5217,13 +5224,14 @@
       </div>
       <div class="mb-koel" style="margin:0 0 14px"><b>Køleteknik:</b> Det er ikke kun kølemidlet. Teflontape (PTFE)
         og O-ringe og pakninger af fluorgummi (FKM) er også PFAS. De er lange kæder af –CF₂–.</div>
-      <div class="ol-kerne" style="margin-bottom:14px"><b>KERNEN I DET:</b> Næsten alle HFC'er og HFO'er i appen er PFAS – kun
+      <div class="ol-kerne" style="margin-bottom:14px"><b>KERNEN I DET:</b> De fleste HFC'er og HFO'er i appen er PFAS – kun
         R32 og R23 er ikke. Alle blandingerne i appen har mindst én PFAS-del. Om et PFAS er et problem,
-        afhænger af, hvad der sker med det. Det ser du i næste fane.</div>
-      <div class="ig-kilde"><b>Kilder:</b> OECD (2021), <i>Reconciling Terminology of the Universe of PFAS</i>:
+        afhænger af, hvad der sker med det. Det ser du i næste afsnit.</div>
+      <details class="pfas-mere pfas-kilde"><summary>Kilder</summary><div class="ig-kilde">OECD (2021), <i>Reconciling Terminology of the Universe of PFAS</i>:
         definitionen, og at den ikke siger noget om, hvor farligt et stof er. ECHA: EU's forslag til en
         PFAS-begrænsning (2023, opdateret 2025) bruger samme definition. Formler, blandinger og GWP: appens
-        egne data (Kølemidler; GWP efter AR4).</div>
+        egne data (Kølemidler). GWP er AR4-tal; HFO'erne er ikke med i AR4, så for dem er det ældre
+        litteraturværdier. IPCC's nyeste rapport (AR6) giver R1234yf under 1 og R1234ze(E) ca. 1.</div></details>
       </div>
     </div>
 
@@ -5246,8 +5254,8 @@
       </div>
       <div class="ell-afsnit">
       <div class="ol-kerne" style="margin-bottom:14px"><b>KERNEN I DET:</b> Kort levetid giver lav GWP – men nedbrudt er
-        ikke forsvundet. For HFO'erne afgør ét atom, om de bliver til TFA: det, der sidder på carbonet ved
-        siden af CF₃. »HFO« er ikke én ting.</div>
+        ikke forsvundet. For HFO'erne afgør ét atom, hvor meget TFA de bliver til: det, der sidder på carbonet
+        ved siden af CF₃. »HFO« er ikke én ting.</div>
       <details class="pfas-mere"><summary>For de nysgerrige: R1234ze(E) og R23</summary>
         <p>En lille smule R1234ze(E) bliver til R23 (HFC-23), en meget kraftig drivhusgas. At det sker, er
         målt. Hvor meget, er forskerne uenige om. En ny beregning (Killen m.fl. 2026) giver R1234ze(E) en
@@ -5259,11 +5267,12 @@
           meget TFA. Et <b>H</b> giver lidt. Prøv reglen.</div>
         <div id="pfasForudsig"></div>
       </div>
-      <div class="ig-kilde"><b>Kilder:</b> Levetider: IPCC AR6 (gengivet i EFCTC's tabel, 2024). TFA-udbytter:
+      <details class="pfas-mere pfas-kilde"><summary>Kilder</summary><div class="ig-kilde">Levetider: IPCC AR6 (gengivet i EFCTC's tabel, 2024). TFA-udbytter:
         FN's miljøpanel under Montreal-protokollen (EEAP 2022; Madronich m.fl. 2023) og WMO (2022); R134a
-        også Hart m.fl. (2026), <i>Geophys. Res. Lett.</i> Nedbrydningen af R1234yf: <i>Atmos. Chem. Phys.</i>
-        21:14833 (2021). Arktisk is: Pickard m.fl. (2020). GWP: appens tal (AR4). Killen m.fl. (2026) om R23
-        fra R1234ze(E).</div>
+        også Hart m.fl. (2026), <i>Geophys. Res. Lett.</i> TFA fra R1234yf, og hvor den lander: David m.fl.
+        (2021), <i>Atmos. Chem. Phys.</i> 21:14833. Arktisk is: Pickard m.fl. (2020). GWP: appens tal (AR4; for
+        HFO'erne ældre litteraturværdier). Killen m.fl. (2026), <i>Environ. Sci.: Atmos.</i>, om R23 og om den
+        øvre grænse for TFA fra R1234ze(E).</div></details>
     </div>
 
     <!-- [3] luft: Regn på din egen lækage -->
@@ -5286,34 +5295,35 @@
             <button type="button" class="mb-task" data-kg="5">5&nbsp;kg</button>
           </div>
         </div>
-        <div class="pfas-regnud" id="pfasRegnUd" aria-live="polite"></div>
-        <p class="pfas-note">0,6&nbsp;µg/l er langt under den danske grænse for drikkevand (9&nbsp;µg/l). Pointen er
+        <div class="pfas-regnud" id="pfasRegnUd"></div>
+        <p class="pfas-sr" id="pfasRegnSt" aria-live="polite"></p>
+        <p class="pfas-note">0,6&nbsp;µg/l (mikrogram pr. liter – 1&nbsp;µg er en milliontedel gram) er langt under den danske grænse for drikkevand (9&nbsp;µg/l). Pointen er
           ikke, at ét udslip er farligt. Pointen er, at TFA ikke forsvinder igen – og at der kommer mere til
           hvert år.</p>
-        <p class="ell-fod">R404A: der findes ikke et sikkert tal for, hvor meget TFA R143a giver, så vi gætter
-          ikke. 0,65&nbsp;kg svarer til fyldningen i én bilmodel fra Volvo. Molmasserne er regnet med appens
+        <p class="ell-fod">0,65&nbsp;kg svarer til fyldningen i én bilmodel fra Volvo. Molmasserne er regnet med appens
           atommasser. Regnvand og svømmebassiner (2.500&nbsp;m³) er vores egen udregning.</p>
       </div>
       <div class="ell-afsnit">
       <div class="ell-blok-fejl"><div class="ell-h3">Pas på enhederne</div>
         <p><b>Det mange gør:</b> ganger udbyttet direkte med kiloene. Men udbyttet tæller <b>molekyler</b>, ikke
         kilo. 9&nbsp;% af 1&nbsp;kg R134a giver ikke 90&nbsp;g TFA, men ca. 100&nbsp;g, fordi et TFA-molekyle
-        (114&nbsp;g/mol) er tungere end et R134a-molekyle (102&nbsp;g/mol). Kun for R1234yf går det op, fordi
-        molmasserne er næsten ens: 114,04 og 114,02&nbsp;g/mol.</p></div>
+        (114&nbsp;g/mol) er tungere end et R134a-molekyle (102&nbsp;g/mol). Kun for R1234yf og R1234ze(E) går det
+        op: De har samme formel, C₃H₂F₄, og deres molmasse (114,04&nbsp;g/mol) er næsten den samme som TFA's
+        (114,02&nbsp;g/mol).</p></div>
       </div>
       <div class="ell-vaerk pfas-v">
         <div class="ell-vaerk-h">Regn selv</div>
         <div class="ell-vaerk-und">Regn først på papir – brug regneren bagefter, hvis du vil se regnestykket.
-          Svaret må højst ramme 2&nbsp;% ved siden af.</div>
+          Dit svar må højst ligge 2&nbsp;% fra facit.</div>
         <div class="pfas-opg" id="pfasRegnSelv"></div>
       </div>
       <div class="ell-afsnit">
       <div class="mb-koel" style="margin:0 0 14px"><b>Køleteknik:</b> TFA fra kølemidler dannes kun af det, der
         slipper ud. Et tæt anlæg, lækagesøgning og korrekt genvinding giver 0&nbsp;g TFA. Her gør dit håndværk
         en direkte forskel.</div>
-      <div class="ig-kilde"><b>Kilder:</b> Udbytter: EEAP 2022, WMO 2022, Madronich m.fl. 2023, Hart m.fl. 2026.
-        TFA i dansk regn (København og Roskilde 2023–25): GEUS-rapport 2025/34. Grænseværdi for drikkevand:
-        Miljøstyrelsen. Fyldning: Volvo (én bilmodel).</div>
+      <details class="pfas-mere pfas-kilde"><summary>Kilder</summary><div class="ig-kilde">Udbytter: EEAP 2022, WMO 2022, Madronich m.fl. 2023, Hart m.fl. 2026,
+        Killen m.fl. 2026. TFA i dansk regn (København og Roskilde 2023–25): GEUS-rapport 2025/34. Grænseværdi
+        for drikkevand: Miljøstyrelsen. Fyldning: Volvo (én bilmodel).</div></details>
       </div>
     </div>
 
@@ -5332,8 +5342,7 @@
         </figure>
         <div class="ell-afsnit">
           <div class="ell-blok-pointe" style="margin-bottom:12px"><div class="ell-h3">Tre ting om TFA</div>
-            <p>• Den er en <b>stærk syre</b>. De tre F trækker i elektronerne, så H⁺ sidder løst. I vand findes den
-            som ionen CF₃COO⁻ (trifluoracetat).<br>• Den <b>nedbrydes ikke</b> i naturen. C–F-bindingen er en af de
+            <p>• Den er en <b>stærk syre</b>. De tre F trækker i elektronerne, så H⁺ sidder løst.<br>• Den <b>nedbrydes ikke</b> i naturen. C–F-bindingen er en af de
             stærkeste i kemien.<br>• Den <b>binder sig ikke</b> til jorden. Den følger vandet helt ned i
             grundvandet – og almindelig vandbehandling, fx kulfiltre, fjerner den dårligt.</p></div>
           <button type="button" class="btn" onclick="visUnderfane('sb','stof'); showTab('sb')">Stærke og svage syrer →</button>
@@ -5344,24 +5353,25 @@
       <p>Grundvand er gammel regn, der er sivet ned. Forskerne kan måle, hvornår vandet faldt som regn. Is har
         også et årstal på.</p>
       <ul class="pfas-tid">
-        <li><span class="pfas-aar">Før 1960</span><span>Dansk grundvand, der faldt som regn før 1960: ingen TFA.</span></li>
+        <li><span class="pfas-aar">Før 1960</span><span>Dansk grundvand, der faldt som regn før 1960: ingen målbar TFA.</span></li>
         <li><span class="pfas-aar">1960–80</span><span>De første spor, men lave værdier.</span></li>
         <li><span class="pfas-aar">Efter ca. 1980</span><span>TFA i stort set alt dansk grundvand, og mængden stiger.</span></li>
         <li><span class="pfas-aar">Omkring 1990</span><span>TFA i arktisk is begynder at stige – samtidig med, at R134a
           og andre afløsere for CFC'erne kommer i brug.</span></li>
-        <li><span class="pfas-aar">2017</span><span>Alle nye biler i EU skal have kølemiddel med GWP under 150. I praksis
-          bliver det R1234yf.</span></li>
-        <li><span class="pfas-aar">I dag</span><span>Det yngste danske grundvand har typisk 0,3–1,0&nbsp;µg/l. Regnen i
+        <li><span class="pfas-aar">2017</span><span>Aircon i alle nye personbiler i EU skal have kølemiddel med GWP på
+          højst 150. I praksis bliver det R1234yf.</span></li>
+        <li><span class="pfas-aar">I dag</span><span>Det yngste danske grundvand har typisk 0,3–1,0&nbsp;µg/l (mikrogram pr. liter). Regnen i
           København og Roskilde havde ca. 0,6&nbsp;µg/l i 2023–25.</span></li>
       </ul>
       <div class="ol-kerne" style="margin-bottom:14px"><b>KERNEN I DET:</b> Det gamle vand er rent. Jo yngre vandet
-        er, jo mere TFA. Og stigningen begyndte omkring 1990 – længe før R1234yf kom i bilerne. Dengang kom
-        TFA'en især fra R134a og to andre afløsere for CFC'erne, HCFC-123 og HCFC-124.</div>
-      <div class="ig-kilde"><b>Kilder:</b> Syrestyrke: Sigma-Aldrich (pKa ca. 0,2–0,5). Persistent og mobil: ECHA
+        er, jo mere TFA. De første spor i grundvandet er fra 1960–80, og i arktisk is stiger TFA fra omkring 1990 –
+        længe før R1234yf kom i bilerne. Stigningen i isen kom især fra R134a og to andre afløsere for CFC'erne,
+        HCFC-123 og HCFC-124.</div>
+      <details class="pfas-mere pfas-kilde"><summary>Kilder</summary><div class="ig-kilde">Syrestyrke: Sigma-Aldrich (pKa ca. 0,2–0,5). Persistent og mobil: ECHA
         RAC (2026); Arp m.fl. (2024), <i>Environ. Sci. Technol.</i> Grundvand: Albers &amp; Sültenfuss (2024),
         <i>Environ. Sci. Technol. Lett.</i> (113 danske boringer; vandets alder målt med tritium og helium);
         GEUS-rapport 2025/34. Arktisk is: Pickard m.fl. (2020); Hart m.fl. (2026). Bil-aircon:
-        MAC-direktivet 2006/40/EF.</div>
+        MAC-direktivet 2006/40/EF.</div></details>
       </div>
     </div>
 
@@ -5377,21 +5387,21 @@
           Alle tre har fat i en del af sandheden. I regnen over Schweiz kommer ca. halvdelen (48&nbsp;%) af
           TFA'en fra HFO'er. Men på marker giver sprøjtemidler 2,5–3 gange så meget TFA som regnen. Om der er
           naturlig TFA i havet, er forskerne uenige om – men i ferskvand er den menneskeskabt: dansk grundvand
-          fra før 1960 har ingen.</div>
+          fra før 1960 har ingen målbar TFA.</div>
       </div>
       <div class="ell-afsnit">
-      <div class="ell-blok-tekst"><div class="ell-h3">Over hele Europa</div>
+      <details class="pfas-mere"><summary>For de nysgerrige: Giver R1234yf allerede mere TFA over Europa end R134a?</summary>
         <p>Et modelstudie fra 2026 finder, at R1234yf allerede giver mere TFA-nedfald over Europa end R134a –
         selvom verden slipper ca. 22 gange mere R134a ud. Grunden kender du nu: R1234yf giver langt mere TFA pr.
-        kg, og det lander i samme del af verden, som det slap ud i.</p></div>
+        kg, og meget af det lander i samme del af verden, som det slap ud i.</p></details>
       <div class="ol-kerne" style="margin-bottom:14px"><b>KERNEN I DET:</b> Spørg altid: Hvem siger det? Hvor er
         der målt? Og hvad har de at vinde? I regnen fylder kølemidlerne mest. Under marker kan sprøjtemidlerne
         fylde mest. Begge dele er sandt på én gang.</div>
-      <div class="ig-kilde"><b>Kilder:</b> Henne m.fl. (2025), <i>Atmos. Chem. Phys.</i> (Schweiz). Holland m.fl.
+      <details class="pfas-mere pfas-kilde"><summary>Kilder</summary><div class="ig-kilde">Henne m.fl. (2025), <i>Atmos. Chem. Phys.</i> (Schweiz). Holland m.fl.
         (2026), <i>Environ. Sci. Technol. Lett.</i> (modelstudie, Europa). Miljøstyrelsen (2025) om
         sprøjtemidler. Bæredygtigt Landbrug, debatindlæg i Landbrugsavisen. PAN Europe (2025), »Message from the
         Bottle« (ikke fagfællebedømt). EFCTC (2021), positionspapir om naturlig TFA. Frank m.fl. (2002), Joudan
-        m.fl. (2021) og Hanson m.fl. (2024) om naturlig TFA i havet.</div>
+        m.fl. (2021) og Hanson m.fl. (2024) om naturlig TFA i havet.</div></details>
       </div>
     </div>
 
@@ -5401,10 +5411,6 @@
       <p class="sub">TFA er fundet hos stort set alle, der er undersøgt – i et dansk studie hos alle 134
         gravide, der fik målt deres urin. Betyder det, at det hober sig op i dig?</p>
       <div id="gaet-pfaskrop"></div>
-      <div class="pfas-fliser" style="margin:0 0 14px">
-        <div class="stat"><div class="k">TFA i kroppen</div><div class="v">få dage</div></div>
-        <div class="stat"><div class="k">PFOS i kroppen</div><div class="v">flere år</div></div>
-      </div>
       <div class="ell-afsnit">
       <div class="ell-blok-pointe"><div class="ell-h3">To slags »evig«</div>
         <p><b>I kroppen</b> er TFA ude igen på få dage. Når alle har lidt i sig, er det, fordi vi får lidt hver
@@ -5413,10 +5419,11 @@
       <div class="ell-vaerk pfas-v">
         <div class="ell-vaerk-h">Regn på din egen dag</div>
         <div class="ell-vaerk-und">EFSA har sat en grænse for, hvor meget TFA man kan få hver dag hele livet
-          uden kendt risiko: <b>ADI</b> (acceptabelt dagligt indtag) = 0,014&nbsp;mg pr. kg kropsvægt.</div>
+          uden kendt risiko: <b>ADI</b> (acceptabelt dagligt indtag) = 0,014&nbsp;mg (14&nbsp;µg) pr. kg kropsvægt om
+          dagen.</div>
         <div class="pfas-rkh" id="pfasAdiVaegtH">Din vægt</div>
         <div class="mb-tasks" id="pfasAdiVaegt" role="group" aria-labelledby="pfasAdiVaegtH"></div>
-        <div class="pfas-rkh" id="pfasAdiDrikH">Hvad drikker du?</div>
+        <div class="pfas-rkh" id="pfasAdiDrikH">Du drikker 2 liter vand med …</div>
         <div class="mb-tasks" id="pfasAdiDrik" role="group" aria-labelledby="pfasAdiDrikH"></div>
         <div class="pfas-adiud" id="pfasAdiUd" aria-live="polite"></div>
         <p class="pfas-note">Det er et regneeksempel, ikke en risikovurdering. Mad og andre drikke giver også
@@ -5429,16 +5436,18 @@
       <div class="ell-h3">Hvad siger eksperterne?</div>
       <p>De ser på de samme forsøg, men svarer på forskellige spørgsmål.</p>
       <div class="pfas-ekspert" style="margin-bottom:18px">
-        <details><summary><b>EFSA</b>, EU's fødevaremyndighed · juli 2026: Sænkede ADI ca. 3,5 gange, fra 0,05 til
+        <details><summary><b>EFSA</b>, EU's fødevaremyndighed · juli 2026: Sænkede ADI ca. 3,6 gange, fra 0,05 til
           0,014&nbsp;mg pr. kg om dagen.</summary><p>Grunden: Forsøg med rotter viste påvirkning af
           skjoldbruskkirtlens hormon. EFSA har lagt en ekstra sikkerhedsmargen ind, fordi der mangler
           langtidsforsøg. Det er en vurdering, ikke en ny lov.</p></details>
         <details><summary><b>RAC</b>, ECHA's eksperter i kemikaliers farlighed · 2026: Anbefaler, at TFA mærkes
           »kan skade det ufødte barn«.</summary><p>Anbefalingen bygger på dyreforsøg ved høje doser
-          (misdannelser hos kaninfostre). RAC anbefaler også mærket »meget persistent og meget mobil«.
-          EU-Kommissionen har ikke vedtaget det endnu (oktober 2026).</p></details>
-        <details><summary><b>FN's miljøpanel</b> (UNEP EEAP) · 2024: Kalder risikoen ved TFA i vandmiljøet
-          ubetydelig ved de mængder, der er i dag.</summary><p>EU og Norge har bedt om en mere forsigtig tilgang,
+          (misdannelser hos kaninfostre). RAC anbefaler også mærket »mistænkt for at skade forplantningsevnen«
+          og to mærker for stoffer, der bliver i naturen og følger vandet: »persistent, mobil og giftig« (PMT)
+          og »meget persistent og meget mobil« (vPvM). EU-Kommissionen har ikke vedtaget det endnu (oktober
+          2026).</p></details>
+        <details><summary><b>FN's miljøpanel</b> (UNEP EEAP) · 2024: Kalder risikoen ved TFA for mennesker og
+          miljø »de minimis« – ubetydelig – ved de mængder, der er i dag.</summary><p>EU og Norge har bedt om en mere forsigtig tilgang,
           fordi mængden stiger.</p></details>
         <details><summary><b>Studier af mennesker</b> · gennemgang 2025: Ingen sygdom hos mennesker, der kan føres
           tilbage til TFA.</summary><p>En gennemgang af 17 studier. Der er for få data om, hvad små mængder gør
@@ -5452,12 +5461,12 @@
       <div class="ol-kerne" style="margin-bottom:14px"><b>KERNEN I DET:</b> Det, du får fra vandet i dag, er en lille
         brøkdel af ADI. Det, der bekymrer forskerne, er noget andet: TFA forsvinder ikke fra naturen, mængden
         stiger hvert år, og den del kan ikke gøres om. Undgå både »det er farligt« og »det er ligegyldigt«.</div>
-      <div class="ig-kilde"><b>Kilder:</b> EFSA (2026), <i>EFSA Journal</i> 24:e10227 (ADI for TFA). ECHA RAC,
+      <details class="pfas-mere pfas-kilde"><summary>Kilder</summary><div class="ig-kilde">EFSA (2026), <i>EFSA Journal</i> 24:e10227 (ADI for TFA). ECHA RAC,
         udtalelse om klassificering af TFA (vedtaget juni 2026, offentliggjort 6. oktober 2026). UNEP EEAP,
         <i>Update Assessment</i> 2024. Wipplinger m.fl. (2025), <i>Life</i> 15:1825. Halveringstid i kroppen:
         TURI-gennemgang (Moscato 2025); PFOS: Olsen m.fl. (2007). Gravide: Københavns Universitet, omtalt i
         Ingeniøren. Boringer: GEUS 2024–25. Tysk værdi: Umweltbundesamt. Vin: PAN Europe (2025). Status oktober
-        2026 – vurderingerne ændrer sig, så tjek den nyeste version.</div>
+        2026 – vurderingerne ændrer sig, så tjek den nyeste version.</div></details>
       </div>
     </div>
 
@@ -5465,7 +5474,8 @@
     <div class="card">
       <h2><span class="opg-mrk" id="opgmrk-pfas">OPGAVER</span>Giv påstandene et stempel</h2>
       <p class="sub">Ti påstande, du kunne møde på pladsen, i en reklame eller på nettet. Tryk først på en
-        påstand og så på et stempel. Spørg hver gang: »Hvor godt holder det?«</p>
+        påstand og så på et stempel. Spørg hver gang: »Hvor godt holder det?« Står der <i>fagfællebedømt</i>,
+        har uafhængige forskere tjekket arbejdet, før det blev udgivet.</p>
       <div class="qz-sorter">
         <div class="qs-pulje pfas-pulje" id="pfasDomPulje" role="group" aria-label="Påstande, der mangler et stempel"></div>
         <div class="qs-kasser pfas-kasser" id="pfasDomKasser"></div>
@@ -5485,6 +5495,17 @@
         ikke om målinger.<br>
         Næste gang du hører en diskussion om HFO'er, så spørg: Er vi uenige om fakta – eller om holdninger?</p></div>
       </div>
+      <details class="pfas-mere pfas-kilde" style="margin-top:14px"><summary>Kilder</summary><div class="ig-kilde"><b>Alexander
+        Cohr Pachai</b>, ACP Global Consultancy ApS, dansk konsulent i kølebranchen: artiklen »The message challenge
+        telling the story about PFAS and the impact on human health«, <i>KGH</i> 4/2026 (serbisk fagblad for køl,
+        varme og ventilation), og to arbejdspapirer, der ikke er fagfællebedømt: »When Did Global TFA Accumulation
+        Begin?« (2026) og »The Anthropogenic Fluorine Cycle« (ver. 5.1). Hans tekster gav ideen til fanen, og
+        meget i dem holder: definitionen af PFAS, at mange kølemidler er PFAS, at TFA i ferskvand er menneskeskabt
+        og stiger, at ophobningen begyndte før HFO'erne, og at TFA kommer fra flere kilder. Hvor kilderne siger
+        noget andet, står det ved påstanden. Desuden: OECD (2021); EEAP 2022 og WMO 2022 (udbytter); Hart m.fl.
+        (2026); Albers &amp; Sültenfuss (2024); Frank m.fl. (2002) og Joudan m.fl. (2021) om naturlig TFA i havet;
+        EFCTC (2021); EFSA (2026); ECHA RAC (2026); UNEP EEAP, <i>Update Assessment</i> 2024; Wipplinger m.fl.
+        (2025); ECHA's PFAS-forslag (2023, opdateret 2025). Status oktober 2026.</div></details>
     </div>
 
     <!-- [8] tjek: Hvad er besluttet? -->
@@ -5495,9 +5516,10 @@
         <div id="pfasMyte"></div>
         <p class="pfas-tael" id="pfasMyteTal" aria-live="polite"></p>
       </div>
-      <div class="ig-kilde" style="margin-top:14px"><b>Kilder:</b> ECHA: PFAS-begrænsningen (RAC marts 2026;
-        SEAC-udkast marts 2026). Forordning (EU) 2024/573, bilag II. Direktiv 2006/40/EF (MAC). ECHA RAC om TFA
-        (2026). A. C. Pachai, KGH 4/2026. Status oktober 2026 – reglerne ændrer sig, så tjek den nyeste version.</div>
+      <details class="pfas-mere pfas-kilde" style="margin-top:14px"><summary>Kilder</summary><div class="ig-kilde">ECHA:
+        PFAS-begrænsningen (RAC marts 2026; SEAC-udkast marts 2026). Forordning (EU) 2024/573, art. 5 og bilag II
+        og IV. Direktiv 2006/40/EF (MAC). ECHA RAC om TFA
+        (2026). A. C. Pachai, KGH 4/2026. Status oktober 2026 – reglerne ændrer sig, så tjek den nyeste version.</div></details>
     </div>
   </section>
 
@@ -21044,8 +21066,8 @@ function gaetInit(id){ if(document.getElementById('gaet-'+id)) gaetTegn(id); }
    Mange af de kølemidler, eleverne arbejder med, er PFAS — også
    de nye HFO'er. Fanen viser, hvordan man ser det på molekylet,
    hvad de bliver til, når de slipper ud (TFA), og hvordan man
-   tjekker en påstand — både
-   dem, der advarer, og dem, der beroliger.
+   tjekker påstande — både fra dem, der advarer, og fra dem,
+   der beroliger.
 
    Fanen står ligesom Ellære og Fasediagrammer uden for
    læringssystemet. Den logger intet og gemmer intet: elevens valg
@@ -21063,8 +21085,8 @@ function gaetInit(id){ if(document.getElementById('gaet-'+id)) gaetTegn(id); }
 /* ---------- regneren: molært udbytte af TFA ---------- */
 const PFAS_TFA_M = 114.02;
 const PFAS_UDB = {   // molært udbytte [lav, bedste, høj]; bedste=null: kun interval; null: ukendt, regn ikke
-  'R1234yf':[1,1,1], 'R1234ze(E)':[0.02,0.02,0.02], 'R134a':[0.07,0.09,0.20],
-  'R125':[0.01,null,0.10], 'R143a':null, 'R32':[0,0,0], 'R744':[0,0,0], 'R290':[0,0,0]
+  'R1234yf':[1,1,1], 'R1234ze(E)':[0.02,0.02,0.30], 'R134a':[0.07,0.09,0.20],   // ze og 143a: 30 % er en teoretisk grænse
+  'R125':[0.01,null,0.10], 'R143a':[0.02,0.02,0.30], 'R32':[0,0,0], 'R744':[0,0,0], 'R290':[0,0,0]
 };
 const PFAS_NUL = {'R32':'R32 har kun ét carbonatom. TFA har to (CF₃–COOH), så der kan ikke blive TFA.',
                   'R290':'Intet fluor, så ingen TFA.', 'R744':'Intet fluor, så ingen TFA.'};
@@ -21074,11 +21096,11 @@ const PFAS_REGN_BLAND = ['R454B','R455A','R513A','R449A','R410A','R404A'];
 /* ---------- PFAS-tjekket ---------- */
 const PFAS_TJEK = [   // {gwp} indsættes fra REFR i pfasTegnTjek (AR4, appens tal)
  {r:'R134a', formel:'CF₃–CH₂F', hvor:'Aircon i ældre biler og mange anlæg', pfas:true,
-  grund:'Carbonet til venstre har tre F og ellers kun det andet carbon som nabo: en <b>CF₃-gruppe</b>. Det andet carbon har H, men det er nok, at ét carbon er fuldt fluoreret.'},
+  grund:'Carbonet til venstre har tre F og intet H: en <b>CF₃-gruppe</b>. Det andet carbon har H, men det er nok, at ét carbon følger reglen.'},
  {r:'R32', formel:'CH₂F₂', hvor:'Mange nye varmepumper og aircon', pfas:false,
-  grund:'Kun ét carbonatom, og det har to H. Så er det ikke fuldt fluoreret, og R32 er ikke PFAS. Men den er stadig en F-gas med GWP {gwp}, og den er svagt brandbar (A2L).'},
+  grund:'Carbonet har to F, men også to H. Så følger det ikke reglen, og R32 er ikke PFAS. Men den er stadig en F-gas med GWP {gwp}, og den er svagt brandbar (A2L).'},
  {r:'R1234yf', formel:'CF₃–CF=CH₂', hvor:'Aircon i nye biler', pfas:true,
-  grund:'CF₃ for enden. Det midterste carbon har kun ét F og sidder i en dobbeltbinding, så det tæller ikke. Men CF₃-gruppen er nok.'},
+  grund:'CF₃ for enden. Det midterste carbon har kun ét F, så det tæller ikke. Men CF₃-gruppen er nok.'},
  {r:'R1234ze(E)', formel:'CF₃–CH=CHF', hvor:'Store chillere og varmepumper', pfas:true,
   grund:'Samme atomer som R1234yf, bare placeret anderledes. CF₃-gruppen er der stadig. Begge de almindelige HFO\'er er altså PFAS.'},
  {r:'R23', formel:'CHF₃', hvor:'Lavtrinnet i kaskadeanlæg', pfas:false,
@@ -21092,7 +21114,7 @@ const PFAS_TJEK = [   // {gwp} indsættes fra REFR i pfasTegnTjek (AR4, appens t
  {r:'R454B', formel:'R32 68,9&nbsp;% + R1234yf 31,1&nbsp;%', hvor:'Nye varmepumper, afløser for R410A', pfas:true, blanding:true,
   grund:'68,9&nbsp;% R32 (ikke PFAS) og 31,1&nbsp;% R1234yf (PFAS). Også en mindre del PFAS tæller.'},
  {r:'TFA', formel:'CF₃–COOH', hvor:'Det, mange kølemidler bliver til i luften', pfas:true,
-  grund:'TFA har selv en CF₃-gruppe. Det er det PFAS, der findes mest af i vand – og det, R1234yf bliver til. Mere om det i næste fane.'}
+  grund:'TFA har selv en CF₃-gruppe. Det er det PFAS, der findes mest af i vand – og det, R1234yf bliver til. Mere om det i næste afsnit.'}
 ];
 
 /* ---------- Følg molekylet ---------- */
@@ -21105,16 +21127,16 @@ const PFAS_VEJ = {
   {t:'Molekylet klippes over', s:['m:yf','→','m:acylF','+','HCHO'],
    x:'Med ilt fra luften bliver molekylet klippet over ved dobbeltbindingen. Der er flere mellemtrin; her ser du start og slut. CF₃-gruppen overlever og sidder nu i <b>CF₃C(O)F</b>. F\'et i den blå ring er med.'},
   {t:'Skyerne laver syre', s:['m:acylF','+','H₂O','→','m:tfa','+','HF'], chip:'Udbytte: ca. 100 %',
-   x:'I skydråberne reagerer CF₃C(O)F med vand:<br><span class="pfas-ligning">CF₃C(O)F + H₂O → CF₃COOH + HF</span><br>Ud kommer <b>TFA</b>, trifluoreddikesyre. Den falder ned med regnen inden for få dage, i samme del af verden, som den slap ud i. <b>Næsten hvert R1234yf-molekyle bliver til ét TFA-molekyle.</b>'}],
+   x:'I skydråberne bytter vandet F\'et i den blå ring ud med OH, og F\'et ryger af som HF:<br><span class="pfas-ligning">CF₃C(O)F + H₂O → CF₃COOH + HF</span><br>Ud kommer <b>TFA</b>. Den falder ned med regnen inden for få dage – meget af den i samme del af verden, som den slap ud i, men en del når længere væk. <b>Næsten hvert R1234yf-molekyle bliver til ét TFA-molekyle.</b>'}],
  'R1234ze(E)':[
   {t:'Det slipper ud', s:['m:ze'],
    x:'Et R1234ze(E)-molekyle siver ud af en chiller. Samme atomer som R1234yf, C₃H₂F₄. Men se den blå ring: på carbonet ved siden af CF₃ sidder der et <b>H</b>.'},
   {t:'Luften angriber', s:['OH·','+','m:ze'], chip:'Levetid: ca. 19 dage',
    x:'Samme angreb på dobbeltbindingen. R1234ze(E) holder ca. 19 dage i luften, så GWP er også her meget lav.'},
   {t:'Molekylet klippes over', s:['m:ze','→','m:ald','+','resten'],
-   x:'Nu havner CF₃-gruppen i <b>CF₃CHO</b> (trifluoracetaldehyd). Den blå ring sidder på et H. Det er et aldehyd – ikke et syrefluorid som fra R1234yf.'},
-  {t:'Sollyset kommer først', s:['m:ald','+','☀ sollys','→','brudstykker'], chip:'Udbytte: ca. 2 %',
-   x:'Vand gør ikke et aldehyd til en syre. Inden det sker, knækker sollyset det meste af CF₃CHO. Kun ca. 2&nbsp;% ender som TFA (bedste skøn; tallet er usikkert opad). Samme atomer som R1234yf – men ca. 50 gange mindre TFA.'}],
+   x:'Nu havner CF₃-gruppen i <b>CF₃CHO</b> (trifluoracetaldehyd). Den blå ring sidder på et H. Det er et aldehyd (C=O med et H på) – ikke et syrefluorid (C=O med et F på) som fra R1234yf.'},
+  {t:'Sollyset kommer først', s:['m:ald','+','☀ sollys','→','brudstykker'], chip:'Udbytte: ca. 2 % (usikkert)',
+   x:'Et aldehyd bliver ikke bare til syre, når det møder vand, sådan som CF₃C(O)F fra R1234yf gør. Som regel når sollyset at knække CF₃CHO først. Bedste skøn: ca. 2&nbsp;% ender som TFA. Men tallet er usikkert: Vasker regnen meget CF₃CHO ud, kan en del alligevel ende som TFA – i teorien op til ca. 30&nbsp;%. Samme atomer som R1234yf, men efter bedste skøn ca. 50 gange mindre TFA.'}],
  'R134a':[
   {t:'Det slipper ud', s:['m:r134a'],
    x:'R134a var bilgassen før R1234yf og sidder stadig i ældre biler og mange anlæg. Den har ingen dobbeltbinding.'},
@@ -21122,8 +21144,8 @@ const PFAS_VEJ = {
    x:'Uden dobbeltbinding er der intet let mål. OH skal rive et H løs, og det går langsomt. R134a holder ca. 14 år i luften. Derfor er GWP 1.430.'},
   {t:'Flere veje', s:['m:r134a','→','flere veje'],
    x:'Når molekylet endelig brydes ned, kan det gå flere veje. Kun nogle af dem ender som TFA.'},
-  {t:'Regnen, over hele kloden', s:['→','m:tfa','+','☁ hele kloden'], chip:'Udbytte: 7–20 %',
-   x:'7–20&nbsp;% bliver til TFA; forskerne er ikke helt enige om, hvor meget. Fordi R134a lever så længe, lander TFA\'en over hele kloden – også i Arktis, hvor isen viser mere og mere TFA siden omkring 1990.'}]
+  {t:'Regnen, over hele kloden', s:['→','m:tfa0','+','☁ hele kloden'], chip:'Udbytte: 7–20 %',
+   x:'7–20&nbsp;% bliver til TFA; forskerne er ikke helt enige om, hvor meget. Regneren bruger ca. 9&nbsp;% som bedste bud. Det tal giver en ny modelberegning (Hart m.fl. 2026). Fordi R134a lever så længe, lander TFA\'en over hele kloden – også i Arktis, hvor isen viser mere og mere TFA siden omkring 1990.'}]
 };
 const PFAS_VEJ_KM = [['R1234yf','R1234yf · bilens aircon'], ['R1234ze(E)','R1234ze(E) · chillere'], ['R134a','R134a · den gamle bilgas']];
 const PFAS_VEJ_MOL = {   // tegningerne i scenen: kode = kølemiddel fra REFR, spec = rnrSpec-tekst
@@ -21132,12 +21154,13 @@ const PFAS_VEJ_MOL = {   // tegningerne i scenen: kode = kølemiddel fra REFR, s
   r134a:{navn:'R134a', formel:'CF₃–CH₂F', kode:'R134a', nabo:false},
   acylF:{navn:'Syrefluorid', formel:'CF₃C(O)F', spec:'CF3-C(=O)F', nabo:true},
   ald:{navn:'Aldehyd', formel:'CF₃CHO', spec:'CF3-CH=O', nabo:true},
-  tfa:{navn:'TFA', formel:'CF₃COOH', spec:'CF3-C(=O)-OH', nabo:true}
+  tfa:{navn:'TFA', formel:'CF₃COOH', spec:'CF3-C(=O)-OH', nabo:true},
+  tfa0:{navn:'TFA', formel:'CF₃COOH', spec:'CF3-C(=O)-OH', nabo:false}   // R134a: ingen blå ring
 };
 const PFAS_VEJ_LEVETID = {'R1234yf':'ca. 12 dage', 'R1234ze(E)':'ca. 19 dage', 'R134a':'ca. 14 år'};
 const PFAS_FORUDSIG = [
  {t:'R1233zd(E) er CF₃–CH=CHCl.', ret:'lidt',
-  f:'Naboen har et H, så det går via CF₃CHO. Bedste skøn: ca. 2&nbsp;% (EEAP 2022).'},
+  f:'Naboen har et H, så det går via CF₃CHO. Bedste skøn: ca. 2&nbsp;% (EEAP 2022) – usikkert opad, ligesom for R1234ze(E).'},
  {t:'R1224yd(Z) er CF₃–CF=CHCl.', ret:'meget',
   f:'Naboen har et F, så reglen siger: meget. <b>Men</b> vi har ikke fundet et målt tal i en kilde, vi har kunnet tjekke. En forudsigelse er ikke en måling.'}
 ];
@@ -21156,17 +21179,17 @@ const PFAS_HVEM = [
  {t:'Den klart største kilde til TFA er kølemidlerne.', ret:'land',
   x:'<b>Bæredygtigt Landbrug</b>, i et debatindlæg i Landbrugsavisen. Miljøstyrelsen forbød i 2025 over 30 sprøjtemidler, fordi de danner TFA, der siver ned i grundvandet. Organisationen er imod forbuddet.'},
  {t:'TFA i vin hænger sammen med sprøjtemidler.', ret:'ngo',
-  x:'<b>PAN Europe</b>, en organisation, der arbejder mod sprøjtemidler. I deres vinmåling (2025) havde de vine, der havde mest sprøjtemiddel, også mest TFA. Rapporten er ikke fagfællebedømt.'},
+  x:'<b>PAN Europe</b>, en organisation, der arbejder mod sprøjtemidler. I deres vinmåling (2025) havde de vine, der havde mest sprøjtemiddel, også mest TFA. Rapporten er ikke fagfællebedømt – altså ikke tjekket af uafhængige forskere, før den blev udgivet.'},
  {t:'Der er stærke argumenter for, at der findes naturlig TFA i havet.', ret:'ind',
   x:'<b>EFCTC</b>, de europæiske fluorkemi-producenters tekniske komité (positionspapir, 2021). Hvis TFA er naturlig, fylder kølemidlerne mindre i regnskabet.'}
 ];
-const PFAS_AFSENDER = {land:'Landbruget', ngo:'En miljøorganisation', ind:'Fluorkemi-industrien'};
+const PFAS_AFSENDER = {land:'En landbrugsorganisation', ngo:'En miljøorganisation', ind:'Fluorkemi-industrien'};
 const PFAS_ADI_VAEGT = [50, 60, 70, 80, 90, 100];
 const PFAS_ADI_DRIK = [   // {k, label, µg pr. dag, µg/l i vandet (null = ikke vand)}
- {k:'g1',  t:'2&nbsp;l vand med 1&nbsp;µg/l (højt for ungt dansk grundvand)', ug:2,    c:1},
- {k:'dk',  t:'2&nbsp;l vand ved den danske grænse (9&nbsp;µg/l)',             ug:18,   c:9},
- {k:'de',  t:'2&nbsp;l vand ved den tyske sundhedsværdi (60&nbsp;µg/l)',      ug:120,  c:60},
- {k:'vin', t:'1 glas vin (15&nbsp;cl, 110&nbsp;µg/l)',                        ug:16.5, c:null}
+ {k:'g1',  t:'1&nbsp;µg/l (højt for ungt dansk grundvand)', ug:2,    c:1},
+ {k:'dk',  t:'9&nbsp;µg/l (dansk grænse)',                   ug:18,   c:9},
+ {k:'de',  t:'60&nbsp;µg/l (tysk sundhedsværdi)',            ug:120,  c:60},
+ {k:'vin', t:'Eller 1 glas vin (15&nbsp;cl, 110&nbsp;µg/l)', ug:16.5, c:null}
 ];
 
 /* ---------- tjek påstanden ---------- */
@@ -21182,44 +21205,44 @@ const PFAS_DOM = [   // visningsrækkefølge i puljen: PFAS_DOM_RK
   x:'Den har en CF₃-gruppe. Efter OECD\'s definition, som EU\'s forslag også bruger, er den PFAS. Det er ikke det samme som, at den er farlig.'},
  {id:'d2', b:'d', hvem:'Regnet ud fra FN-panelets tal', t:'1&nbsp;kg R1234yf, der slipper ud, bliver til ca. 1&nbsp;kg TFA.', tip:'Udbytte og molmasse.', link:'luft',
   x:'Udbyttet er ca. 100&nbsp;% (EEAP 2022, WMO 2022), og molmasserne er næsten ens: 114,04 og 114,02&nbsp;g/mol.'},
- {id:'d3', b:'d', hvem:'Forskere fra GEUS (fagfællebedømt, 2024)', t:'Dansk grundvand, der faldt som regn før 1960, har ingen TFA.', tip:'Husk naturens arkiv.', link:'vand',
-  x:'Målt i 113 danske boringer, hvor vandets alder er bestemt med tritium og helium.'},
- {id:'u1', b:'u', hvem:'Hørt i debatten', t:'TFA skader menneskers helbred ved de mængder, vi får i dag.', tip:'Fare eller risiko?', link:'vand',
-  x:'Det ved man ikke. EFSA og RAC har strammet vurderingen ud fra dyreforsøg. FN-panelet kalder risikoen i dag ubetydelig. Der mangler data om små mængder over mange år.'},
- {id:'u3', b:'u', hvem:'Fagbladsartikel (Pachai, KGH 4/2026). På engelsk: »TFA is 100% a human made product …«', t:'»TFA er 100&nbsp;% menneskeskabt.«', tip:'Ferskvand og havvand er ikke det samme.', link:'vand',
-  x:'Halvt rigtigt – og den halvdel er vigtig. I ferskvand passer det: gammelt grundvand og gammel is har ingen TFA. Om havet har en naturlig pulje, er forskerne uenige om (Frank m.fl. 2002 mod Joudan m.fl. 2021). »100&nbsp;%« er sagt skarpere, end kilderne kan bære.'},
+ {id:'d3', b:'d', hvem:'Forskere fra GEUS og Bremens Universitet (fagfællebedømt, 2024)', t:'Dansk grundvand, der faldt som regn før 1960, har ingen målbar TFA.', tip:'Husk naturens arkiv.', link:'vand',
+  x:'Målt i 113 danske boringer, hvor vandets alder er bestemt med tritium og helium. I vand fra før 1960 kunne der ikke påvises TFA.'},
+ {id:'u1', b:'u', hvem:'Hørt i debatten', t:'TFA er ufarligt ved de mængder, vi får i dag.', tip:'Fare eller risiko?', link:'vand',
+  x:'Det ved man ikke. FN-panelet kalder risikoen i dag ubetydelig, og man har ikke fundet sygdom hos mennesker, der kan føres tilbage til TFA. Men EFSA og RAC har strammet vurderingen ud fra dyreforsøg, og der mangler data om små mængder over mange år.'},
+ {id:'u3', b:'u', hvem:'Fagbladsartikel (Pachai, KGH 4/2026)', t:'»TFA er 100&nbsp;% menneskeskabt.«', tip:'Ferskvand og havvand er ikke det samme.', link:'vand',
+  x:'Halvdelen holder – og den er vigtig. I ferskvand passer det: gammelt grundvand og is, der er flere tusind år gammel, har ingen målbar TFA. Men om havet har en naturlig pulje, er forskerne uenige om (Frank m.fl. 2002 mod Joudan m.fl. 2021). Så »TFA is 100% a human made product« er sagt skarpere, end kilderne kan bære. I samme afsnit skriver Pachai selv mere forsigtigt, at den nyeste viden peger på, at den største kilde er menneskeskabt (»the dominant global source of TFA is anthropogenic«). For regn og ferskvand passer det med målingerne.'},
  {id:'n1', b:'n', hvem:'Hørt i branchen', t:'Lav GWP betyder, at et kølemiddel er grønt.', tip:'Hvad måler GWP egentlig?', link:'luft',
   x:'GWP måler kun klimaeffekten. R1234yf har GWP 4 og bliver alligevel til ca. 1&nbsp;kg TFA pr. kg. Om noget er »grønt«, afhænger af, hvilket miljøproblem du ser på.'},
  {id:'n2', b:'n', hvem:'Hørt i debatten', t:'TFA findes også naturligt, så det er ligegyldigt.', tip:'Der er to fejl i én sætning.', link:'vand',
   x:'To fejl. TFA i regn og grundvand er menneskeskabt og stiger. Og selv om noget findes naturligt, siger det intet om, om mere er ufarligt. Det er især fluorkemi-industriens komité EFCTC, der fremhæver naturlig TFA i havet.'},
- {id:'n3', b:'n', hvem:'Arbejdspapir om TFA (Pachai 2026, ikke fagfællebedømt). På engelsk: »… HFO-1234yf and HFO-1234ze(E), both of which exhibit near-quantitative conversion to TFA …«',
+ {id:'n3', b:'n', hvem:'Arbejdspapir om TFA (Pachai 2026, ikke fagfællebedømt)',
   t:'R1234ze(E) bliver lige så meget til TFA som R1234yf.', tip:'Husk den blå ring i »Følg molekylet«.', link:'luft',
-  x:'R1234ze(E) giver ca. 2&nbsp;%, R1234yf ca. 100&nbsp;% (EEAP 2022). Sætningen står i et arbejdspapir, hvor den beskriver en hypotese, som papiret selv afprøver – men tallet for R1234ze(E) er forkert. De to er nemme at blande sammen, fordi de har samme formel. Derfor tjekker man tallet ved kilden.'},
+  x:'R1234ze(E) giver ca. 2&nbsp;% (bedste skøn; i teorien op til ca. 30&nbsp;%), R1234yf ca. 100&nbsp;% (EEAP 2022). Papiret skriver »HFO-1234yf and HFO-1234ze(E), both of which exhibit near-quantitative conversion to TFA«. Sætningen er en del af én af tre hypoteser, som papiret afvejer. For R1234yf passer den – for R1234ze(E) gør den ikke. De to er nemme at blande sammen, fordi de har samme formel. Derfor tjekker man tallet ved kilden. Papirets hovedpointe holder til gengæld: TFA begyndte at hobe sig op længe før HFO\'erne, og den kommer fra flere kilder – før HFO\'erne især fra R134a, HCFC-123 og HCFC-124 (Hart m.fl. 2026).'},
  {id:'h1', b:'h', hvem:'Hørt i branchen', t:'Vi burde gå over til naturlige kølemidler så hurtigt som muligt.', tip:'Kan man måle det?',
   x:'En holdning. Den kan begrundes – med TFA, med klimaet eller med begge – men den kan ikke »eftervises« som et tal. Og de naturlige har også en pris: propan er meget brandbart, ammoniak er giftigt, og CO₂ kræver højt tryk.'},
  {id:'h2', b:'h', hvem:'Hørt i branchen', t:'Et PFAS-forbud mod kølemidler er en dårlig idé. F-gasreglerne er nok.', tip:'Er det noget, man kan måle?', link:null,
-  x:'Hvordan man bedst laver regler, er en afvejning, ikke et måleresultat. Der er argumenter begge veje. EU\'s eget PFAS-forslag skriver, at F-gasreglerne mest ser på klimaet og ikke på TFA.'}
+  x:'Hvordan man bedst laver regler, er en afvejning, ikke et måleresultat. Der er argumenter begge veje. EU\'s eget PFAS-forslag skriver, at F-gasreglerne mest ser på klimaet og ikke på TFA. Omvendt kunne et bredt PFAS-forbud også ramme kølemidler, der giver langt mindre TFA end R1234yf, fx R1234ze(E).'}
 ];
 const PFAS_DOM_RK = ['n1','d1','u3','n3','h1','d2','d3','h2','n2','u1'];
 const PFAS_MYTE = [
  {t:'EU har forbudt PFAS-kølemidler.', fakta:false,
-  x:'Intet er besluttet. EU\'s forslag om at begrænse PFAS kom fra Danmark, Tyskland, Holland, Norge og Sverige i 2023 og blev opdateret i 2025. ECHA\'s udvalg SEAC ventes færdigt ved udgangen af 2026. Derefter skal EU-Kommissionen lave et forslag, og landene skal stemme. Om kølemidler bliver omfattet – og med hvilke undtagelser – er åbent.'},
+  x:'Intet er besluttet. Danmark, Tyskland, Holland, Norge og Sverige foreslog i 2023 at begrænse PFAS i EU (opdateret i 2025). ECHA\'s eksperter er ved at vurdere forslaget og ventes færdige ved udgangen af 2026. Derefter skal EU-Kommissionen lave et lovforslag, og landene skal stemme. Om kølemidler bliver omfattet – og med hvilke undtagelser – er åbent.'},
  {t:'F-gasforordningen gælder ikke for HFO\'er.', fakta:false,
-  x:'Sætningen har fat i noget rigtigt: HFO\'er er ikke med i HFC-kvoterne og udfasningen. Men forordningen gælder også for dem: HFO\'er står i bilag II og er dermed F-gasser, som bl.a. skal indberettes. Påstanden står i fagbladet KGH 4/2026: »this regulation does not handle the unsaturated HFC, often referred to as HFO«.'},
- {t:'Alle nye biler i EU skal have et kølemiddel med GWP under 150.', fakta:true,
-  x:'Det har gældt alle nye personbiler siden 2017 (MAC-direktivet). Derfor kører næsten alle nye biler med R1234yf.'},
+  x:'Sætningen har fat i noget rigtigt: HFO\'er er ikke med i HFC-kvoterne og udfasningen. Men forordningen gælder også for dem. HFO\'er står i bilag II og er dermed F-gasser. Et anlæg med 1&nbsp;kg HFO eller mere skal fx lækagekontrolleres. Og nogle forbud gælder alle F-gasser, også HFO\'erne: nye køleskabe til husholdninger fra 2026 og nye split-anlæg op til 12&nbsp;kW fra 2035 (med undtagelser, hvis sikkerheden kræver det). Påstanden står i fagbladet KGH 4/2026: »this regulation does not handle the unsaturated HFC, often referred to as HFO«.'},
+ {t:'Har en ny personbil i EU aircon, skal kølemidlet have GWP på højst 150.', fakta:true,
+  x:'Det har gældt alle nye personbiler og små varebiler siden 2017 (MAC-direktivet). Lastbiler og busser er ikke omfattet. Derfor kører næsten alle nye personbiler med R1234yf.'},
  {t:'TFA er allerede officielt mærket »kan skade det ufødte barn«.', fakta:false,
   x:'Ikke endnu. EU\'s eksperter i RAC anbefaler det (offentliggjort 6. oktober 2026), men EU-Kommissionen har ikke vedtaget det.'}
 ];
 /* ---------- GÆT FØRST: to nye spørgsmål til det fælles modul ---------- */
 Object.assign(GAET, {
   pfasyf:{
-    spm:'R1234yf og R1234ze(E) har præcis de samme atomer: C₃H₂F₄. Begge er væk fra luften på få uger. Hvad tror du om, hvor meget <b>TFA</b> (trifluoreddikesyre) de bliver til?',
+    spm:'R1234yf og R1234ze(E) har præcis de samme atomer: C₃H₂F₄. Begge er væk fra luften på få uger. Hvor meget <b>TFA</b> (trifluoreddikesyre – et PFAS, som naturen ikke kan nedbryde) tror du, de bliver til?',
     svar:[
      {t:'Lige meget. Samme atomer giver samme resultat', ok:false,
       f:'Det lyder logisk, men nej. Atomerne er de samme, men de sidder forskellige steder – og det ændrer hele vejen.'},
      {t:'R1234yf giver ca. 50 gange mere end R1234ze(E)', ok:true,
-      f:'Rigtigt. R1234yf bliver næsten 100&nbsp;% til TFA, R1234ze(E) kun ca. 2&nbsp;% (FN\'s miljøpanel, EEAP 2022).'},
+      f:'Rigtigt – efter forskernes bedste skøn. R1234yf bliver næsten 100&nbsp;% til TFA, R1234ze(E) ca. 2&nbsp;% (FN\'s miljøpanel, EEAP 2022). Tallet for R1234ze(E) er usikkert – i teorien kan det være op til ca. 30&nbsp;%. Men R1234yf giver under alle omstændigheder mest.'},
      {t:'Ingen af dem. De er jo nedbrudt på få uger', ok:false,
       f:'Nedbrudt er ikke det samme som forsvundet. Atomerne bliver til nye stoffer, og ét af dem kan være TFA.'},
      {t:'R1234ze(E) giver mest, fordi den lever længst', ok:false,
@@ -21233,7 +21256,7 @@ Object.assign(GAET, {
      {t:'Et par måneder', ok:false, f:'Kortere. TFA ryger ud med urinen på få dage.'},
      {t:'Omkring 5 år, som PFOS', ok:false, f:'Det gælder PFOS, et af de »gamle« PFAS, der binder sig i kroppen. TFA gør ikke. Den er ude igen på få dage.'},
      {t:'Resten af livet', ok:false, f:'Nej. TFA er »evig« i naturen, ikke i kroppen.'}],
-    efter:'Se forskellen nedenfor.'
+    efter:'Men hvorfor kaldes TFA så »evig«? Se nedenfor.'
   }
 });
 
@@ -21300,9 +21323,17 @@ function pfasNabo(el, bind, c){
   const o = rest.find(x => el[x[0]] === 'O' && x[1] === 1);
   return o ? o[0] : -1;
 }
+/* de tre CF₃–C-stoffer har faste koordinater: afspændingen lagde CF₃-rammen hen over
+   carboxyl-C'et i TFA. Samme mål for alle tre, så den blå ring står samme sted i hele vejen */
+const PFAS_FLAD_FAST = {   /* [x, y] i rnrSpec's atomrækkefølge. CF₃ til venstre; C–F/C=O 50, C–C 66, C–O 56, O–H 46 */
+  'CF3-C(=O)-OH':[[114,110],[114,60],[114,160],[64,110],[180,110],[180,60],[236,110],[236,156]],
+  'CF3-C(=O)F':  [[114,110],[114,60],[114,160],[64,110],[180,110],[180,60],[236,110]],
+  'CF3-CH=O':    [[114,110],[114,60],[114,160],[64,110],[180,110],[236,110],[180,60]]
+};
 /* et stof skrevet som tekst ('CF3-C(=O)-OH') lagt fladt ud — som structFlat */
 function pfasFlad(spec){
-  const m = rnrSpec(spec);
+  const m = rnrSpec(spec), f = PFAS_FLAD_FAST[spec];
+  if(f) return {atoms:m.el.map((e, i) => ({el:e, x:f[i][0], y:f[i][1]})), bonds:m.bind.map(b => [b[0], b[1], b[2]||1])};
   const p = mbRelax(m.el.map(e => ({el:e})), m.bind, 2);
   let mx = 0.6; p.forEach(q => mx = Math.max(mx, Math.hypot(q[0], q[1])));
   const k = Math.min(46, 92/mx);
@@ -21364,6 +21395,21 @@ function pfasG(x){
   if(x < 10000) return mbNum(Math.round(x/10)*10, 0);
   return mbNum(Math.round(x/100)*100, 0);
 }
+/* i regnelinjerne skal gangestykket gå op: hele gram (under 1 g: to betydende cifre),
+   mol med to decimaler (under 1 mol: tre betydende cifre), kg uden »0 kg« og »6.890,000 kg« */
+function pfasGl(x){
+  if(x === 0) return '0';
+  if(x < 1) return x.toLocaleString('da-DK', {maximumSignificantDigits:2});
+  return mbNum(Math.round(x), 0);
+}
+const pfasMol = x => x >= 1 ? mbNum(x, 2) : x.toLocaleString('da-DK', {minimumSignificantDigits:3, maximumSignificantDigits:3});
+const pfasKg = x => x >= 1 ? pfasTrim(x, 3) : x.toLocaleString('da-DK', {maximumSignificantDigits:3});
+/* et interval: »0–5«, aldrig »under 1–5« */
+function pfasSpan(lo, hi, f){
+  f = f || pfasG;
+  const a = f(lo), b = f(hi);
+  return a === b ? a : (a === 'under 1' ? '0' : a) + '–' + b;
+}
 function pfasSig2(x){
   if(!x) return 0;
   const f = Math.pow(10, Math.floor(Math.log10(Math.abs(x))) - 1);
@@ -21371,12 +21417,13 @@ function pfasSig2(x){
 }
 function pfasM3(v){
   const v2 = pfasSig2(v);
+  if(v2 >= 1e9){ const m = v2 / 1e9; return mbNum(m, m < 10 ? 1 : 0) + '&nbsp;mia. m³'; }
   if(v2 >= 1e6){ const m = v2 / 1e6; return mbNum(m, m < 10 ? 1 : 0) + '&nbsp;mio. m³'; }
   if(v2 >= 10) return mbNum(v2, 0) + '&nbsp;m³';
   return v2.toLocaleString('da-DK', {maximumSignificantDigits:2}) + '&nbsp;m³';
 }
 function pfasBassin(n, mindst){
-  if(n < 0.5) return 'mindre end ét olympisk svømmebassin';
+  if(n < 0.5) return mindst ? 'mindst en del af et olympisk svømmebassin' : 'mindre end ét olympisk svømmebassin';
   const v = n < 10 ? Math.max(1, Math.round(n)) : pfasSig2(n);
   return (mindst ? 'mindst ' : '') + 'ca. <b>' + mbNum(v, 0) + '</b> ' + (v === 1 ? 'olympisk svømmebassin' : 'olympiske svømmebassiner');
 }
@@ -21391,18 +21438,18 @@ function pfasTFA(kode, kg){
   const linjer = [];
   komp.forEach(k => {
     const kgK = kg * k.w, m = kgK * 1000, y = PFAS_UDB[k.r];
-    const foer = bl ? `${pfasTrim(kg, 3)}&nbsp;kg × ${pfasPct(k.pct)} = ${mbNum(kgK, 3)}&nbsp;kg ${k.r} → ` : '';
+    const foer = bl ? `${pfasKg(kg)}&nbsp;kg × ${pfasPct(k.pct)} = ${pfasKg(kgK)}&nbsp;kg ${k.r} → ` : '';
     if(!y){ ukendt = k; linjer.push(foer + 'ukendt – vi gætter ikke'); return; }
     if(y[2] === 0){ linjer.push(foer + '0 – ' + (k.r === 'R32' ? 'kun ét carbon' : 'intet fluor')); return; }
     const M = rnrMolmasse(k.atoms), n = m / M, gT = n * PFAS_TFA_M;
     lo += gT * y[0]; hi += gT * y[2];
     const iv = `${pfasTrim(y[0]*100, 1)}–${pfasTrim(y[2]*100, 1)}&nbsp;%`;
-    if(y[1] === null){ harBest = false; linjer.push(foer + `udbytte ${iv} → ${pfasG(gT*y[0])}–${pfasG(gT*y[2])}&nbsp;g`); return; }
+    if(y[1] === null){ harBest = false; linjer.push(foer + `udbytte ${iv} → ${pfasSpan(gT*y[0], gT*y[2], pfasGl)}&nbsp;g`); return; }
     best += gT * y[1];
-    const mTxt = pfasTrim(m, m >= 100 ? 0 : m >= 10 ? 1 : 2), nT = n * y[1];
-    let s = (bl ? foer : `${pfasTrim(kg, 3)}&nbsp;kg = ${mTxt}&nbsp;g → `) +
-      `${mTxt} / ${mbNum(M, 2)}&nbsp;g/mol = ${mbNum(n, 2)}&nbsp;mol → × ${mbNum(y[1], 2)} = ${mbNum(nT, nT < 1 ? 3 : 2)}&nbsp;mol TFA → × ${mbNum(PFAS_TFA_M, 2)}&nbsp;g/mol = ${pfasG(gT*y[1])}&nbsp;g`;
-    if(y[0] !== y[2]) s += ` (udbytte ${iv}: ${pfasG(gT*y[0])}–${pfasG(gT*y[2])}&nbsp;g)`;
+    const mTxt = m >= 100 ? pfasTrim(m, 0) : m.toLocaleString('da-DK', {maximumSignificantDigits:3}), nT = n * y[1];
+    let s = (bl ? foer : `${pfasKg(kg)}&nbsp;kg = ${mTxt}&nbsp;g → `) +
+      `${mTxt} / ${mbNum(M, 2)}&nbsp;g/mol = ${pfasMol(n)}&nbsp;mol → × ${mbNum(y[1], 2)} = ${pfasMol(nT)}&nbsp;mol TFA → × ${mbNum(PFAS_TFA_M, 2)}&nbsp;g/mol = ${pfasGl(gT*y[1])}&nbsp;g`;
+    if(y[0] !== y[2]) s += ` (udbytte ${iv}: ${pfasSpan(gT*y[0], gT*y[2], pfasGl)}&nbsp;g)`;
     linjer.push(s);
   });
   const nul = !ukendt && hi === 0;
@@ -21412,8 +21459,7 @@ function pfasTFA(kode, kg){
 }
 /* kort tekst til fliserne: »ca. 1.000 g« / »ca. 78–220 g« */
 function pfasTFAkort(res){
-  const lo = pfasG(res.lo), hi = pfasG(res.hi);
-  return 'ca. ' + (lo === hi ? lo : lo + '–' + hi) + '&nbsp;g';
+  return 'ca. ' + pfasSpan(res.lo, res.hi) + '&nbsp;g';
 }
 /* GÆT FØRST bygger sin boks om, når man svarer — så sættes fokus tilbage i boksen */
 function pfasGaetFokus(id){
@@ -21442,6 +21488,9 @@ function pfasBygTjek(){
   if(!rk || !ud) return;
   rk.innerHTML = PFAS_TJEK.map(s => `<button type="button" class="mb-task" data-kode="${s.r}" aria-pressed="false"></button>`).join('');
   ud.innerHTML = `
+    <!-- »Næste stof« står over tegningen: en blanding fylder over 200 px mere end et enkelt molekyle,
+         så under tegningen ville knappen flytte sig under fingeren på en telefon -->
+    <div class="row" style="margin:0 0 12px"><button type="button" class="btn" id="pfasTjekNaeste">Næste stof →</button></div>
     <p class="pfas-hoved" id="pfasTjekHoved"></p>
     <div class="pfas-tjek">
       <div id="pfasTjekMol"></div>
@@ -21451,7 +21500,6 @@ function pfasBygTjek(){
           <button type="button" data-svar="ja" aria-pressed="false">Ja</button>
           <button type="button" data-svar="nej" aria-pressed="false">Nej</button></div>
         <div class="row">
-          <button type="button" class="btn" id="pfasTjekNaeste">Næste stof →</button>
           <button type="button" class="btn" id="pfasTjekIgen">Prøv igen</button>
           <button type="button" class="btn" id="pfasTjek3d">Se molekylet i 3D under Kølemidler →</button>
         </div>
@@ -21511,8 +21559,8 @@ function pfasTegnTjek(){
   const sv = pfasTjekSvar.get(s.r), svaret = !!(sv && sv.valgt !== null);
   [...rk.children].forEach(b => {
     const k = b.dataset.kode, x = pfasTjekSvar.get(k);
-    const html = (x && x.foersteOk ? '✓ ' : '') + k +
-      (x && !x.foersteOk ? '<span class="pfas-prik" aria-hidden="true"></span><span class="pfas-sr"> (besvaret)</span>' : '');
+    const html = `<span class="pfas-mk" aria-hidden="true">${x ? (x.foersteOk ? '✓' : '•') : ''}</span>` + k +
+      (x ? `<span class="pfas-sr">${x.foersteOk ? ' (rigtigt i første forsøg)' : ' (besvaret)'}</span>` : '');
     if(b.innerHTML !== html) b.innerHTML = html;
     b.classList.toggle('done', !!(x && x.foersteOk));
     pfasTryk(b, k === s.r);
@@ -21523,7 +21571,7 @@ function pfasTegnTjek(){
   const mol = document.getElementById('pfasTjekMol'), noegle = s.r + '|' + (svaret ? 1 : 0);
   if(mol.dataset.vist !== noegle){ mol.innerHTML = pfasTjekTegning(s, svaret); mol.dataset.vist = noegle; }
   const ja = ud.querySelector('button[data-svar="ja"]'), nej = ud.querySelector('button[data-svar="nej"]');
-  ja.textContent = s.blanding ? 'Ja, der er PFAS i' : 'Ja';
+  ja.textContent = s.blanding ? 'Ja, der er PFAS\u00a0i' : 'Ja';
   nej.textContent = s.blanding ? 'Nej, intet PFAS' : 'Nej';
   [[ja, true], [nej, false]].forEach(([b, v]) => {
     b.classList.toggle('god', svaret && v === s.pfas);
@@ -21536,7 +21584,7 @@ function pfasTegnTjek(){
   if(svaret){
     const ok = sv.valgt === s.pfas;
     fb.className = 'sik-svar ' + (ok ? 'god' : 'skidt');
-    fb.innerHTML = (ok ? '<b>Rigtigt.</b> ' : '<b>Ikke helt.</b> ') + grund;
+    fb.innerHTML = (ok ? '<b>Rigtigt.</b> ' : `<b>Ikke helt – svaret er ${s.pfas ? 'ja' : 'nej'}.</b> `) + grund;
   } else { fb.className = 'sik-svar'; fb.innerHTML = ''; }
   const igen = document.getElementById('pfasTjekIgen');
   if(svaret) igen.removeAttribute('aria-disabled'); else igen.setAttribute('aria-disabled', 'true');
@@ -21654,14 +21702,30 @@ function pfasBygRegn(){
   rk2.innerHTML = PFAS_REGN_BLAND.map(chip).join('');
   [rk1, rk2].forEach(rk => rk.addEventListener('click', e => {
     const b = e.target.closest('button[data-km]');
-    if(b){ pfasRegnKm = b.dataset.km; pfasTegnRegn(); }
+    if(b){ pfasRegnKm = b.dataset.km; pfasTegnRegn(); pfasRegnSig(300); }
   }));
   /* feltet bygges aldrig om — tastningen retter kun resultatet */
-  felt.addEventListener('input', pfasRegnUd);
+  felt.addEventListener('input', () => { pfasRegnUd(); pfasRegnSig(900); });
   if(hurtig) hurtig.addEventListener('click', e => {
     const b = e.target.closest('button[data-kg]');
-    if(b){ felt.value = b.dataset.kg; pfasRegnUd(); }
+    if(b){ felt.value = b.dataset.kg; pfasRegnUd(); pfasRegnSig(300); }
   });
+}
+/* Skærmlæseren får ét kort svar, når eleven holder pause – ikke hele regnestykket ved hvert tastetryk.
+   Det sker kun efter elevens eget valg, så intet læses op, når fanen eller afsnittet åbnes. */
+let pfasRegnTimer = 0;
+function pfasRegnSig(ms){
+  clearTimeout(pfasRegnTimer);
+  pfasRegnTimer = setTimeout(() => {
+    const ud = document.getElementById('pfasRegnUd'), st = document.getElementById('pfasRegnSt'),
+          felt = document.getElementById('pfasRegnKg');
+    if(!ud || !st || !felt) return;
+    const tal = ud.querySelector('.pfas-regn-tal'), stp = ud.querySelector('.pfas-regn-hoved .pfas-stempel'),
+          note = ud.querySelector('.pfas-regn-tolk');
+    st.textContent = (tal ? `${note ? note.textContent + ' ' : ''}${pfasRegnKm}, ${pfasKg(talTolkninger(felt.value)[0])} kg: ` +
+                            `${tal.textContent}${stp ? ' (' + stp.textContent + ')' : ''}`
+                          : ud.textContent).replace(/\s+/g, ' ').trim();
+  }, ms);
 }
 function pfasTegnRegn(){
   document.querySelectorAll('#pfasRegnRk1 button, #pfasRegnRk2 button').forEach(b => pfasTryk(b, b.dataset.km === pfasRegnKm));
@@ -21670,26 +21734,30 @@ function pfasTegnRegn(){
 function pfasRegnUd(){
   const ud = document.getElementById('pfasRegnUd'), felt = document.getElementById('pfasRegnKg');
   if(!ud || !felt) return;
-  const kg = talTolkninger(felt.value)[0];
+  const tolk = talTolkninger(felt.value), kg = tolk[0];
   if(kg === undefined || !isFinite(kg) || kg <= 0 || kg > 10000){
-    ud.innerHTML = '<p style="margin:0">Skriv et tal større end 0, fx 0,65.</p>';
+    ud.innerHTML = '<p style="margin:0">' + (kg > 10000 ? 'Højst 10.000&nbsp;kg – skriv et mindre tal.' : 'Skriv et tal større end 0, fx 0,65.') + '</p>';
     return;
   }
-  const res = pfasTFA(pfasRegnKm, kg), lo = pfasG(res.lo), hi = pfasG(res.hi), span = lo === hi ? lo : lo + '–' + hi;
+  /* »10.000« kan være 10 kg og 10.000 kg (talTolkninger). Vi regner med det første og siger det. */
+  const alt = tolk.find(v => v !== kg && v > 0 && v <= 10000);
+  const res = pfasTFA(pfasRegnKm, kg), lo = pfasG(res.lo), hi = pfasG(res.hi), span = pfasSpan(res.lo, res.hi);
   let hoved;
   if(res.nul) hoved = `<b>0&nbsp;g TFA</b> – ${PFAS_NUL[pfasRegnKm] || ''}`;
-  else if(res.ukendt) hoved = `mindst ca. <b>${span}&nbsp;g TFA</b> + et ukendt bidrag fra ${res.ukendt.r} (${pfasPct(res.ukendt.pct)} af blandingen)`;
-  else if(lo === hi) hoved = `≈ <b>${lo}&nbsp;g TFA</b>`;
-  else if(res.best !== null) hoved = `ca. <b>${span}&nbsp;g TFA</b> (bedste bud ca. ${pfasG(res.best)}&nbsp;g)`;
+  else if(res.ukendt) hoved = `${span === 'under 1' ? '' : 'mindst ca. '}<b>${span}&nbsp;g TFA</b> + et ukendt bidrag fra ${res.ukendt.r} (${pfasPct(res.ukendt.pct)} af blandingen)`;
+  else if(lo === hi) hoved = `${lo === 'under 1' ? '' : '≈ '}<b>${lo}&nbsp;g TFA</b>`;
+  else if(res.best !== null) hoved = `ca. <b>${span}&nbsp;g TFA</b> (bedste bud ${res.best < 0.5 ? '' : 'ca. '}${pfasG(res.best)}&nbsp;g)`;
   else hoved = `ca. <b>${span}&nbsp;g TFA</b>`;
-  let html = `<div class="pfas-regn-hoved"><span class="pfas-regn-tal">${hoved}</span>` +
+  let html = (alt === undefined ? '' : `<p class="pfas-note pfas-regn-tolk" style="margin:0 0 9px">Læst som <b>${pfasKg(kg)}&nbsp;kg</b>. ` +
+      `Mente du ${mbNum(alt, 0)}&nbsp;kg, så skriv ${alt}.</p>`) +
+    `<div class="pfas-regn-hoved"><span class="pfas-regn-tal">${hoved}</span>` +
     `<span class="pfas-stempel ${res.stempel[0]}">${res.stempel[1]}</span></div>` +
     `<div class="pfas-regn-h">Sådan regnes det:</div><ul class="pfas-regn-linjer">${res.linjer.map(l => '<li>' + l + '</li>').join('')}</ul>`;
   const g = res.best !== null ? res.best : res.lo, mindst = res.best === null || !!res.ukendt;
   if(g > 0){
     const V = g * 1000 / 0.6;
-    html += `<p class="pfas-tanke"><b>Tankeeksperiment:</b> Det er nok TFA til at give ${mindst ? 'mindst ' : ''}ca. <b>${pfasM3(V)}</b> ` +
-      `vand samme indhold som dansk regnvand i dag (ca. 0,6&nbsp;µg/l) – ${pfasBassin(V / 2500, mindst)}.</p>`;
+    html += `<p class="pfas-tanke"><b>Tankeeksperiment:</b> Med så meget TFA kunne ${mindst ? 'mindst ' : ''}ca. <b>${pfasM3(V)}</b> vand ` +
+      `– ${pfasBassin(V / 2500, mindst)} – få lige så meget TFA pr. liter som dansk regnvand i dag (ca. 0,6&nbsp;µg/l).</p>`;
   }
   ud.innerHTML = html;
 }
@@ -21773,7 +21841,7 @@ function pfasTegnHvem(){
       b.classList.toggle('skidt', !!sv && sv.forkert.has(b.dataset.afs));
       if(ok) b.setAttribute('aria-disabled', 'true'); else b.removeAttribute('aria-disabled');
     });
-    rk.querySelector('.pfas-raekke-x').innerHTML = ok ? h.x : (sv && sv.forkert.size ? 'Nej – prøv igen.' : '');
+    rk.querySelector('.pfas-raekke-x').innerHTML = ok ? h.x : (sv && sv.forkert.size ? 'Nej – prøv igen. Spørg: Hvem ville have gavn af, at netop det her er sandt?' : '');
   });
   const slut = document.getElementById('pfasHvemSlut');
   if(slut) slut.hidden = !alle;
@@ -21822,10 +21890,11 @@ function pfasBygDom(){
     pfasDomForkert = null;
     pfasTegnDom();
   });
-  /* hele bunken kan trykkes med musen; overskriften er knappen til tastaturet */
+  /* hele bunken kan trykkes med musen; overskriften er knappen til tastaturet.
+     Et tryk med Enter eller mellemrum har e.detail 0 — så sendes ingen knap med */
   kasser.addEventListener('click', e => {
     const k = e.target.closest('[data-bunke]');
-    if(k) pfasDomLaeg(k.dataset.bunke);
+    if(k) pfasDomLaeg(k.dataset.bunke, e.detail === 0 ? null : k);
   });
   const forfra = document.getElementById('pfasDomForfra');
   if(forfra) forfra.addEventListener('click', () => {
@@ -21834,25 +21903,37 @@ function pfasBygDom(){
     pfasTegnDom();
   });
 }
-function pfasDomLaeg(bunke){
-  const fb = document.getElementById('pfasDomFb');
-  if(!pfasDomValgt){ fb.innerHTML = 'Tryk først på en påstand – og så på et stempel.'; return; }
+/* Med mus og finger hopper siden ikke: stemplet bliver under fingeren, selv om puljen er blevet
+   kortere, og forklaringen rulles lige netop frem, hvis den står uden for skærmen. Med tastaturet
+   (knap = null) flytter fokus som før, og skærmlæseren får svaret fra aria-live. */
+function pfasDomVis(knap, y0){
+  if(!knap) return;
+  window.scrollBy(0, knap.getBoundingClientRect().top - y0);
+  /* når alle er placeret, står slutteksten lige under forklaringen — så rulles den med frem */
+  const slut = document.getElementById('pfasDomSlut');
+  (slut.hidden ? document.getElementById('pfasDomFb') : slut).scrollIntoView({block:'nearest', behavior:pfasRoligt() ? 'auto' : 'smooth'});
+}
+function pfasDomLaeg(bunke, knap){
+  const fb = document.getElementById('pfasDomFb'), y0 = knap ? knap.getBoundingClientRect().top : 0;
+  if(!pfasDomValgt){ fb.innerHTML = 'Tryk først på en påstand – og så på et stempel.'; pfasDomVis(knap, y0); return; }
   const d = pfasDomFind(pfasDomValgt);
   if(d.b === bunke){
     pfasDomPlac.add(d.id); pfasDomValgt = null; pfasDomForkert = null;
     fb.innerHTML = `<b>Rigtigt – ${PFAS_STEMPEL[bunke].toLowerCase()}.</b> ${d.x} ` +
-      (d.link ? `<button type="button" class="btn" onclick="visUnderfane('pfas','${d.link}', true)">Se mere →</button>` : '');
+      (d.link ? `<button type="button" class="btn" onclick="pfasSeMere('${d.link}')">Se mere →</button>` : '');
     pfasTegnDom();
     /* fokus videre til den næste brik i puljen, eller til svaret, hvis puljen er tom */
     const rest = [...document.querySelectorAll('#pfasDomPulje button[data-dom]')].filter(x => !x.hidden);
     const efter = rest.find(x => PFAS_DOM_RK.indexOf(x.dataset.dom) > PFAS_DOM_RK.indexOf(d.id)) || rest[0];
-    (efter || fb).focus();
+    if(knap){ (efter || fb).focus({preventScroll:true}); pfasDomVis(knap, y0); }
+    else (efter || fb).focus();
   } else {
     pfasDomForsoeg.set(d.id, (pfasDomForsoeg.get(d.id) || 0) + 1);
     fb.innerHTML = 'Ikke det stempel. Tip: ' + d.tip;
     const f = {id:d.id};
     pfasBlink(() => { pfasDomForkert = f; }, () => { if(pfasDomForkert === f){ pfasDomForkert = null; pfasTegnDom(); } });
     pfasTegnDom();
+    pfasDomVis(knap, y0);
   }
 }
 function pfasTegnDom(){
@@ -21871,7 +21952,7 @@ function pfasTegnDom(){
   opgMrk('pfas', PFAS_DOM.length, pfasDomPlac.size);
 }
 
-/* ============ kort 10: myte eller fakta ============ */
+/* ============ kort 8: myte eller fakta ============ */
 function pfasBygMyte(){
   const host = document.getElementById('pfasMyte');
   if(!host) return;
@@ -21908,6 +21989,12 @@ function pfasTegnMyte(){
   if(t) t.innerHTML = `<b>${rigtige}</b> af ${PFAS_MYTE.length} rigtige`;
 }
 
+/* »Se mere →« skjuler sit eget afsnit — fokus flyttes til afsnittets knap, så det ikke falder til <body> */
+function pfasSeMere(k){
+  visUnderfane('pfas', k, true);
+  const b = document.getElementById('ufk-pfas-' + k);
+  if(b) b.focus({preventScroll:true});
+}
 /* ============ fanen ============ */
 function initPfas(){
   if(!pfasKlar){
@@ -34249,12 +34336,13 @@ const UNDERFANER = {
     ['opg',     'Regn selv',    [4]]
   ],
   /* PFAS og HFO: [0] er introteksten, [1]–[8] kortene i HTML'ens rækkefølge.
-     Kommer der et kort til eller fra, skal numrene rykke med. */
+     Kommer der et kort til eller fra, skal numrene rykke med. I »Tjek påstanden«
+     står [8] før [7], så »fakta eller holdninger?« bliver fanens sidste ord. */
   pfas: [
     ['hvad',   'Er det PFAS?',        [1]],
     ['luft',   'Fra lækage til regn', [2, 3]],
     ['vand',   'TFA i vand og krop',  [4, 5, 6]],
-    ['tjek',   'Tjek påstanden',      [7, 8]]
+    ['tjek',   'Tjek påstanden',      [8, 7]]
   ],
   fridge: [
     /* [6] er forklaringen på GWP, ODP, sikkerhedsgruppe og PED — den hører
