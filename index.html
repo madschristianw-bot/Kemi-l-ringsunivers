@@ -15050,21 +15050,32 @@ const RX_MODEL = {
              q:{0:'3+', 1:'2−', 2:'3+', 3:'2−', 4:'2−'}},
   Al2O3    :{el:['Al','O','Al','O','O'],          b:[],                          ion:true,
              q:{0:'3+', 1:'2−', 2:'3+', 3:'2−', 4:'2−'}},
+  /* Saltene med en sammensat ion har faste pladser (pos, i ångström, y op): metalionen
+     sidder op ad det iltatom, der bærer minusset, så plus og minus står sammen.
+     qa er retningen (grader, 0 = højre, 90 = op), ladningstegnet sidder i, uden for kuglen. */
   NaOH     :{el:['Na','O','H'],                   b:[[1,2]],                     ion:true,
-             q:{0:'+', 1:'−'}},
+             q:{0:'+', 1:'−'},
+             pos:[[-1.05,0],[0,0],[0.95,0]], qa:{0:90, 1:90}},
   "Ca(OH)2":{el:['Ca','O','H','O','H'],           b:[[1,2],[3,4]],               ion:true,
-             q:{0:'2+', 1:'−', 3:'−'}},
-  /* carbonat: én C=O og to C–O⁻ */
+             q:{0:'2+', 1:'−', 3:'−'},
+             pos:[[0,0],[-1.05,0],[-1.75,-0.62],[1.05,0],[1.75,-0.62]], qa:{0:90, 1:90, 3:90}},
+  /* carbonat: én C=O og to C–O⁻ — calciumionen sidder mellem de to O⁻ */
   CaCO3    :{el:['Ca','C','O','O','O'],           b:[[1,2,2],[1,3],[1,4]],       ion:true,
-             q:{0:'2+', 3:'−', 4:'−'}},
+             q:{0:'2+', 3:'−', 4:'−'},
+             pos:[[0,-1.25],[0,0.25],[0,1.5],[-1.08,-0.37],[1.08,-0.37]], qa:{0:270, 3:165, 4:15}},
   Na2CO3   :{el:['Na','Na','C','O','O','O'],      b:[[2,3,2],[2,4],[2,5]],       ion:true,
-             q:{0:'+', 1:'+', 4:'−', 5:'−'}},
-  /* hydrogencarbonat: C=O, C–O–H og C–O⁻ */
+             q:{0:'+', 1:'+', 4:'−', 5:'−'},
+             pos:[[-1.85,-1.05],[1.85,-1.05],[0,0.25],[0,1.5],[-1.08,-0.37],[1.08,-0.37]],
+             qa:{0:225, 1:315, 4:150, 5:30}},
+  /* hydrogencarbonat: C=O, C–O–H og C–O⁻ — natriumionen ved O⁻ */
   NaHCO3   :{el:['Na','C','O','O','O','H'],       b:[[1,2],[1,3,2],[1,4],[2,5]], ion:true,
-             q:{0:'+', 4:'−'}},
-  /* sulfat: to S=O og to S–O⁻ */
+             q:{0:'+', 4:'−'},
+             pos:[[1.85,-1.05],[0,0.25],[-1.08,-0.37],[0,1.5],[1.08,-0.37],[-1.9,0.12]], qa:{0:315, 4:30}},
+  /* sulfat: to S=O og to S–O⁻ — en natriumion ved hver O⁻ */
   Na2SO4   :{el:['Na','Na','S','O','O','O','O'],  b:[[2,3,2],[2,4,2],[2,5],[2,6]], ion:true,
-             q:{0:'+', 1:'+', 5:'−', 6:'−'}}
+             q:{0:'+', 1:'+', 5:'−', 6:'−'},
+             pos:[[-2.3,-0.62],[2.3,-0.62],[0,0],[0,1.45],[0,-1.45],[-1.45,0],[1.45,0]],
+             qa:{0:225, 1:315, 5:135, 6:45}}
 };
 
 const rxLayoutCache = {};
@@ -15077,7 +15088,9 @@ function rxLayout(f){
      atomerne endte i en klump, hvor ladningstegnene laa oven paa
      nabokuglen. De laegges i stedet paa en ring med luft imellem, saa
      baade symbol og ladning kan laeses. */
-  const p = m.el.length===1 ? [[0,0]]
+  const ring = m.b.length===0 && m.el.length>1;
+  const p = m.pos ? m.pos
+          : m.el.length===1 ? [[0,0]]
           : m.b.length===0
             ? m.el.map((e,i)=>{
                 const a = -Math.PI/2 + i*2*Math.PI/m.el.length;
@@ -15097,10 +15110,20 @@ function rxLayout(f){
   const K=23;                                   // px pr. ångström
   const q0=m.q||{};
   const pts=p.map((q,i)=>({x:q[0]*K, y:-q[1]*K, r:r[i], el:m.el[i], q:q0[i]||''}));
-  /* et ladningstegn stikker op til hoejre for kuglen og skal med i rammen */
-  pts.forEach(q=>{ const ex=q.q?q.r*0.55+4:0, ey=q.q?q.r*0.55+4:0;
-                   x0=Math.min(x0,q.x-q.r); x1=Math.max(x1,q.x+q.r+ex);
-                   y0=Math.min(y0,q.y-q.r-ey); y1=Math.max(y1,q.y+q.r); });
+  /* ladningstegnet sidder lige uden for kuglen: i retningen qa, i ringen udad fra midten,
+     ellers oppe til højre. Så ligger det hverken oven på bogstavet eller på nabokuglen */
+  pts.forEach((q,i)=>{
+    if(!q.q) return;
+    const g = (m.qa && m.qa[i]!=null) ? m.qa[i]
+            : ring ? Math.atan2(p[i][1], p[i][0])*180/Math.PI : 45;
+    const a = g*Math.PI/180, d = q.r + 5 + (q.q.length>1 ? 3.5*Math.abs(Math.cos(a)) : 0);
+    q.lx = q.x + d*Math.cos(a); q.ly = q.y - d*Math.sin(a);
+  });
+  pts.forEach(q=>{ x0=Math.min(x0,q.x-q.r); x1=Math.max(x1,q.x+q.r);
+                   y0=Math.min(y0,q.y-q.r); y1=Math.max(y1,q.y+q.r);
+                   if(q.q){ const hw=3.5*q.q.length+1;   /* tegnet skal med i rammen */
+                            x0=Math.min(x0,q.lx-hw); x1=Math.max(x1,q.lx+hw);
+                            y0=Math.min(y0,q.ly-6); y1=Math.max(y1,q.ly+6); } });
   const pad=3;
   const ud={pts, bonds:m.b, ion:!!m.ion,
             vb:[x0-pad, y0-pad, (x1-x0)+2*pad, (y1-y0)+2*pad]};
@@ -15129,10 +15152,9 @@ function rxModelSVG(f, ny){
     s+=`<text x="${q.x.toFixed(1)}" y="${q.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central"
           font-family="Georgia,serif" font-weight="700" font-size="${(q.r*0.98).toFixed(1)}"
           fill="${atomInk(q.el)}">${q.el}</text>`;
-    /* ionladningen oppe til hoejre. Med moerk kontur, saa den kan laeses,
-       ogsaa naar den lander oven paa en anden kugle. */
+    /* ionladningen lige uden for kuglen (se rxLayout). Med moerk kontur, saa den kan laeses. */
     if(q.q){
-      s+=`<text x="${(q.x+q.r*0.80).toFixed(1)}" y="${(q.y-q.r*0.80).toFixed(1)}"
+      s+=`<text x="${q.lx.toFixed(1)}" y="${q.ly.toFixed(1)}"
             text-anchor="middle" dominant-baseline="central"
             font-family="Georgia,serif" font-weight="700" font-size="11"
             fill="#ffe08a" stroke="rgba(6,14,24,.92)" stroke-width="3"
