@@ -2998,6 +2998,9 @@
   .rnr-god{margin-top:11px;font-size:13.5px;line-height:1.55;color:var(--ok)}
   .rnr-god b{color:var(--ok)}
   .rnr-skidt{margin-top:11px;font-size:13.5px;line-height:1.55;color:var(--muted)}
+  .rnr-raekke{margin-top:8px;font-size:13px;line-height:1.55;color:var(--muted)}
+  .rnr-raekke b{color:var(--ink);font-family:var(--mono)}   /* mono: Cl må ikke ligne CI */
+  .rnr-tip{margin-top:6px;font-size:12px;color:var(--muted)}
   .rnr-skidt b{color:var(--ink)}
   /* byg-opgaver i syre-base-skemaet */
   .sb-opg{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;
@@ -20854,21 +20857,37 @@ function rnrTegnBoks(){
   boks.innerHTML = `<b>${rnrEsc(o.sp)}</b>
     <div class="row" style="margin-top:10px">
       <input id="rnrOpgFelt" class="rnr-svarfelt" type="text" autocomplete="off"
-             placeholder="dit svar" onkeydown="if(event.key==='Enter')rnrTjekOpg()">
+             placeholder="dit svar" oninput="rnrSaenk(this)" onkeydown="if(event.key==='Enter')rnrTjekOpg()">
       <button class="btn primary" onclick="rnrTjekOpg()">Svar</button>
     </div>
+    ${rnrErFormel(o) ? '<div class="rnr-tip">Tip: skriv _ foran et tal for at sænke det – F_2 bliver til F₂.</div>' : ''}
     <div id="rnrOpgSvar"></div>`;
+}
+/* spørger opgaven efter en formel (og ikke efter et tal eller et ja/nej)? */
+function rnrErFormel(o){ return !!o.f && rnrAtomTal(o.svar) !== null; }
+/* _2 bliver til ₂, mens man skriver — og et tal lige efter et sænket tal sænkes med (F_10 → F₁₀).
+   Kun værdien rettes; feltet bygges ikke om, og markøren bliver stående */
+function rnrSaenk(felt){
+  const v = felt.value, pos = felt.selectionStart;
+  const sub = d => '₀₁₂₃₄₅₆₇₈₉'[+d];
+  const saenk = t => { let u = t.replace(/_(\d)/g, (m, d) => sub(d)), f;
+    do { f = u; u = u.replace(/([₀-₉])(\d)/g, (m, a, d) => a + sub(d)); } while(u !== f);
+    return u; };
+  const ny = saenk(v);
+  if(ny === v) return;
+  felt.value = ny;
+  if(pos !== null){ const p = saenk(v.slice(0, pos)).length; felt.setSelectionRange(p, p); }
 }
 function rnrNormaliser(s){
   return String(s).toLowerCase()
     .replace(/[₀-₉]/g, c => '₀₁₂₃₄₅₆₇₈₉'.indexOf(c))
-    .replace(/[\s.,\-–]/g, '');
+    .replace(/[\s.,\-–_]/g, '');
 }
 /* Formlen talt op atom for atom: CF2Cl2 og CCl2F2 giver begge c1cl2f2.
    Store og små bogstaver er ligegyldige, ligesom i rnrNormaliser.
    Kan teksten ikke læses som en formel, gives null. */
 function rnrAtomTal(s){
-  const t = String(s).replace(/[₀-₉]/g, c => '₀₁₂₃₄₅₆₇₈₉'.indexOf(c)).replace(/\s/g, '').toLowerCase();
+  const t = String(s).replace(/[₀-₉]/g, c => '₀₁₂₃₄₅₆₇₈₉'.indexOf(c)).replace(/[\s_]/g, '').toLowerCase();
   if(!/^((cl|br|c|h|f|n|o|s)\d*)+$/.test(t)) return null;
   const o = {};
   t.match(/(cl|br|c|h|f|n|o|s)\d*/g).forEach(x => {
@@ -20891,7 +20910,15 @@ function rnrTjekOpg(){
   const ok = givet === rigtig || (o.f && givet === rnrNormaliser(o.f)) || (!!tal && tal === rnrAtomTal(o.f));
   if(ok){
     if(!rnrLoest.has(rnrOpg)) rnrLoest.add(rnrOpg);
-    svar.innerHTML = '<div class="rnr-god"><b>Rigtigt ✓</b> ' + o.e + '</div>';
+    /* rigtige atomer i en anden rækkefølge end den vante (C, H og så resten alfabetisk) */
+    let note = '';
+    if(rnrErFormel(o) && givet !== rigtig){
+      const rest = (o.svar.match(/Cl|Br|C|H|F|N|O|S/g) || []).filter(e => e !== 'C' && e !== 'H');
+      note = '<div class="rnr-raekke">Atomerne passer, men formlen skrives normalt i en fast rækkefølge: ' +
+        'C først, så H og derefter de andre grundstoffer i alfabetisk rækkefølge' +
+        (rest.length > 1 ? ' (' + rest.join(' før ') + ')' : '') + ' – altså <b>' + mbFmt(o.svar) + '</b>.</div>';
+    }
+    svar.innerHTML = '<div class="rnr-god"><b>Rigtigt ✓</b> ' + o.e + '</div>' + note;
     rnrOpgBrikker();                       /* kun brikkerne — boksen skal blive stående */
     const bx = document.getElementById('rnrOpgBoks');
     if(bx) bx.className = 'mb-taskbox ok';
