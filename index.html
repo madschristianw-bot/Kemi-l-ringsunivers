@@ -15527,8 +15527,8 @@ QZ.push(
 
 /* ---------- SÆT I RÆKKEFØLGE ---------- */
 {t:'koel',d:2,k:'koel-miljoe',type:'orden',q:"Sæt kølemidlerne i rækkefølge efter GWP — det laveste først.",
- o:["R744 (GWP 1)","R290 (GWP 3)","R32 (GWP 675)","R134a (GWP 1.430)","R404A (GWP 3.922)"],
- e:"De naturlige kølemidler ligger helt i bund. R404A er et af de højeste i brug og bliver derfor udfaset først."},
+ o:["R744","R290","R32","R134a","R404A"],
+ e:"GWP: R744 1 · R290 3 · R32 675 · R134a 1.430 · R404A 3.922. De naturlige kølemidler ligger helt i bund. R404A er et af de højeste i brug og bliver derfor udfaset først."},
 {t:'koel',d:3,k:'koel-egenskaber',type:'orden',q:"Sæt kølemidlerne i rækkefølge efter normalt kogepunkt — det laveste først.",
  o:["R290, propan (−42 °C)","R717, ammoniak (−33 °C)","R600a, isobutan (−12 °C)","R600, butan (0 °C)"],
  e:"Jo lavere kogepunkt, jo lavere temperatur kan kølemidlet arbejde ved. Kogepunktet stiger med molekylets størrelse for kulbrinterne."},
@@ -31169,11 +31169,6 @@ QZ.push(
  huller:[['syre','syren','syrer'],['vand','vandet']],
  hint:"Det handler om varme — og om, hvad der ligger øverst.",
  e:"Syren i vandet. Der udvikles varme ved fortyndingen, og vandet kan optage den. Hælder man vand i syre, lægger vandet sig øverst og kan sprutkoge, så varm syre sprøjter ud."},
-{t:'syre',d:3,k:'syre-praksis',type:'udfyld',q:"Udfyld: syre i køleanlægget og i brinen.",
- tekst:"I et brændt anlæg fjernes syren med et burnout-filter, hvis kerne af ___ er amfotert og binder syren. I brine holdes pH med inhibitor på cirka ___.",
- huller:[['aluminiumoxid','aluminiumsoxid','al2o3','al₂o₃','alumina','aluminium oxid','aluminiumoxyd','aluoxid','aluminiumoxidet','aktiveret aluminiumoxid'],['8-9','8–9','8 til 9','8til9','8','9','85','8,5-9','ca 8-9','omkring 8-9']],
- hint:"Filteret binder syren på en fast overflade — samme syre-base-kemi som i bægerglasset.",
- e:"Aktiveret aluminiumoxid, Al₂O₃ — det er amfotert og binder syren, ligesom en base gør i vand. Og brinen holdes let basisk, pH 8–9, for når glykolen nedbrydes til syrer og pH falder under 7, begynder stål og lodninger at korrodere."},
 {t:'syre',d:2,k:'syre-praksis',type:'par',q:"Sæt situationen sammen med det rigtige at gøre.",
  par:[["Syre i øjet","Skyl med vand i mindst 15 minutter — ring imens"],["Koncentreret syre skal fortyndes","Syren i vandet, aldrig omvendt"],["Syretesten af olien slår ud","Burnout-filter i anlægget — og ny syretest efter drift"],["pH i brinen falder under 7","Tag en brineprøve — efterdosér inhibitor eller skift brinen, ellers korroderer stål og lodninger"]],
  e:"Skyl længe, fortynd den rigtige vej, fjern syren fra anlægget, og hold brinen basisk. Fire steder, hvor syre-base-kemien er forskellen på et anlæg, der holder, og et, der brænder af igen."},
@@ -31342,8 +31337,8 @@ QZ.push(
  par:[["R7xx — R717, R744","Uorganiske stoffer, tallet er molmassen"],["R6xx — R600a","Organiske med fire carbon eller flere"],["R4xx — R404A, R410A","Zeotrope blandinger"],["R5xx — R507A, R513A","Azeotrope blandinger"],["R12xx — R1234yf","Umættede — HFO med dobbeltbinding"]],
  e:"Første ciffer fortæller, hvilken slags stof det er. Kan du serierne, kan du læse en flaske uden mærkat: 7 er naturligt og uorganisk, 4 har glid, 5 har ikke, og 12 er den nye generation."},
 {t:'koel',d:3,k:'koel-miljoe',type:'orden',q:"Sæt de fem kølemidler i rækkefølge efter GWP — det laveste først.",
- o:["R717 ammoniak (GWP 0)","R1234yf (GWP 4)","R513A (GWP 631)","R410A (GWP 2.088)","R507A (GWP 3.985)"],
- e:"Ammoniak og HFO'erne ligger i bund. R513A er R1234yf blandet med R134a. R507A ligger over 2.500 og rammes af servicestoppet allerede nu. Fra 2032 rammes også GWP over 750 i stationære køleanlæg — så et R410A-køleanlæg ville også blive ramt, mens AC og varmepumper foreløbig går fri."},
+ o:["R717 ammoniak","R1234yf","R513A","R410A","R507A"],
+ e:"GWP: R717 0 · R1234yf 4 · R513A 631 · R410A 2.088 · R507A 3.985. Ammoniak og HFO'erne ligger i bund. R513A er R1234yf blandet med R134a. R507A ligger over 2.500 og rammes af servicestoppet allerede nu. Fra 2032 rammes også GWP over 750 i stationære køleanlæg — så et R410A-køleanlæg ville også blive ramt, mens AC og varmepumper foreløbig går fri."},
 
 /* ---------- FLASKER OG FYLDNING ---------- */
 {t:'flaske',d:2,k:'fla-fyldning',type:'tal',q:"En returflaske på 40 liter. Efter AT-vejledning B.4.4 må flasker på 30 L og derover fyldes med højst 0,75 kg pr. liter. Hvor mange kg må der højst i?",
